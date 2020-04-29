@@ -2,10 +2,43 @@
 ; This disassembly is a work in progress.
 
 
+;PCB Registers
+
+PALETTE_ENTRY_0x0                        = 0xC000
+PALETTE_ENTRY_0x1                        = 0xC001
+PALETTE_ENTRY_0x2                        = 0xC002
+PALETTE_ENTRY_0x3                        = 0xC003
+PALETTE_ENTRY_0x4                        = 0xC004
+PALETTE_ENTRY_0x5                        = 0xC005
+PALETTE_ENTRY_0x6                        = 0xC006
+PALETTE_ENTRY_0x7                        = 0xC007
+PALETTE_ENTRY_0x8                        = 0xC008
+PALETTE_ENTRY_0x9                        = 0xC009
+PALETTE_ENTRY_0xA                        = 0xC00A
+PALETTE_ENTRY_0xB                        = 0xC00B
+PALETTE_ENTRY_0xC                        = 0xC00C
+PALETTE_ENTRY_0xD                        = 0xC00D
+PALETTE_ENTRY_0xE                        = 0xC00E
+PALETTE_ENTRY_0xF                        = 0xC00F
+SCREEN_CONTROL                           = 0xC010
+WATCHDOG                                 = 0xC3FC ;to 0xC3FF
+VIDEO_COUNTER_BITS                       = 0xC800 ;to 0xCBFF
+PIA_ROM_DATA_A                           = 0xCC00
+PIA_ROM_CTRL_A                           = 0xCC01
+PIA_ROM_DATA_B                           = 0xCC02
+PIA_ROM_CTRL_B                           = 0xCC03
+PIA_WGT_DATA_A                           = 0xCC04
+PIA_WGT_CTRL_A                           = 0xCC05
+PIA_WGT_DATA_B                           = 0xCC06
+PIA_WGT_CTRL_B                           = 0xCC07
+BANKSWITCH                               = 0xD000
+
+
 ;RAM Variables
 
 
 ;Program ROM code
+
 ;Laid out as:
 ;	0xD000-0xFFFF
 ;	0xC000 Bank 1
@@ -455,9 +488,9 @@
     PSHS  A
     LDA   #$02
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     LDA   U+
-    LDY   $C000
+    LDY   PALETTE_ENTRY_0x0
     BITB  #$01
     BNE   $D40D
     LEAU  [-1,U]
@@ -486,7 +519,7 @@
     BNE   $D3FD
     PULS  A
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     PULS  A,PC
     LDA   $BA
     BPL   $D46B
@@ -497,10 +530,10 @@
     LDA   $BA
     BPL   $D46B
     ORCC  #$90
-    CLR   $D000
+    CLR   BANKSWITCH
     LDA   #$04
-    STA   $CC03
-    LDA   $CC02
+    STA   PIA_ROM_CTRL_B
+    LDA   PIA_ROM_DATA_B
     JSR   $F507
     LDA   $79
     LSRA  
@@ -678,12 +711,12 @@
     .db $00
     PSHS  B,A,CC
     ORCC  #$FF
-    CLR   $D000
+    CLR   BANKSWITCH
     LDA   #$3F
-    STA   $CC02
+    STA   PIA_ROM_DATA_B
     COMB  
     ANDB  #$3F
-    STB   $CC02
+    STB   PIA_ROM_DATA_B
     PULS  CC,A,B,PC
     PSHS  X,B,A,CC
     CLR   $AD
@@ -730,7 +763,7 @@
     LDD   1,X
     STA   $B3
     BSR   $D539
-    LDA   $CC01
+    LDA   PIA_ROM_CTRL_A
     BITA  #$40
     BEQ   $D5B3
     LDA   #$3C
@@ -752,9 +785,9 @@
     COMA  
     LDB   $7B
     STB   $7C
-    LDB   $CC04
+    LDB   PIA_WGT_DATA_A
     STB   $7B
-    LDB   $CC06
+    LDB   PIA_WGT_DATA_B
     STB   $7D
     ANDA  $7B
     BEQ   $D5FD
@@ -778,7 +811,7 @@
     COMA  
     LDB   $79
     STB   $7A
-    LDB   $CC00
+    LDB   PIA_ROM_DATA_A
     ANDB  #$3F
     STB   $79
     BITA  $79
@@ -786,7 +819,7 @@
     LDX   #$0078
     LEAX  [-1,X]
     BNE   $D614
-    LDB   $CC00
+    LDB   PIA_ROM_DATA_A
     ANDB  $79
     STB   $79
     ANDA  $79
@@ -922,7 +955,7 @@ L_000738: ; 0x000738, $D738
     LDS   #$BFFF
     LDA   #$A0
     TFR   A>DP
-    CLR   $D000
+    CLR   BANKSWITCH
     LDB   #$04
     LDU   #$CC00
     LDX   #$D730
@@ -937,11 +970,11 @@ L_000738: ; 0x000738, $D738
     LDX   #$9C00
     CLR   X+
     LDB   #$38
-    STB   $C3FC
+    STB   WATCHDOG
     CMPX  #$C000
     BNE   $D760
-    CLR   $CC00
-    CLR   $CC02
+    CLR   PIA_ROM_DATA_A
+    CLR   PIA_ROM_DATA_B
     LDX   #$C47D
     JSR   $F83A
     TFR   B>A
@@ -1022,7 +1055,7 @@ L_000738: ; 0x000738, $D738
     STD   $6D
     PULS  CC,A,B,X,PC
     JSR   $F50B
-    JMP   $C000
+    JMP   PALETTE_ENTRY_0x0
     LDX   #$C495
     JSR   $F822
     DECA  
@@ -1112,20 +1145,20 @@ L_000738: ; 0x000738, $D738
     PSHS  A
     CLRA  
     JSR   $F50D
-    LDA   $CC06
+    LDA   PIA_WGT_DATA_B
     BPL   $D8E2
     LDX   #$DFC3
     LDD   #$3934
     STX   $90
     CLR   $36
-    CLR   $D000
-    STB   $CC07
-    STA   $C3FC
+    CLR   BANKSWITCH
+    STB   PIA_WGT_CTRL_B
+    STA   WATCHDOG
     LDA   #$7E
     STA   $8F
     PULS  A
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     PULS  A,X,PC
     LDB   #$07
     JSR   $F51C
@@ -1152,7 +1185,7 @@ L_000738: ; 0x000738, $D738
     JMP   $E7BE
     CLRA  
     JSR   $F50D
-    LDA   $CC06
+    LDA   PIA_WGT_DATA_B
     BPL   $D96E
     JSR   $F5D1
     LDA   $8B
@@ -1169,8 +1202,8 @@ L_000738: ; 0x000738, $D738
     STD   $20
     STD   $22
     JSR   $F4FF
-    JSR   $C006
-    JSR   $C000
+    JSR   PALETTE_ENTRY_0x6
+    JSR   PALETTE_ENTRY_0x0
     JSR   $F5F1
     LDD   #$0300
     STD   $BD
@@ -1309,7 +1342,7 @@ L_000738: ; 0x000738, $D738
     LDX   $C1
     LEAX  1027,X
     JSR   $F4FF
-    JSR   $C00E
+    JSR   PALETTE_ENTRY_0xE
     JSR   $D3D9
     CLR   $B3
     LDB   #$13
@@ -1367,7 +1400,7 @@ L_000738: ; 0x000738, $D738
     ASR   $07
     ASR   $0F
     SWI1  
-    CLR   $FFFF
+    CLR   BANKSWITCH
     NEG   $81
     BVC   $DB5E
     LBRA  $0ADE
@@ -1696,7 +1729,7 @@ L_000738: ; 0x000738, $D738
     TFR   A>B
     CLRA  
     LDX   $50
-    JSR   $C00E
+    JSR   PALETTE_ENTRY_0xE
     LDX   #$3D60
     LDU   #$C0FB
     JSR   $F513
@@ -1710,7 +1743,7 @@ L_000738: ; 0x000738, $D738
     BLS   $DE2B
     LDA   #$05
     LDX   $50
-    JSR   $C00E
+    JSR   PALETTE_ENTRY_0xE
     LDU   $63
     LDX   #$3CA0
     LDA   $FA
@@ -1816,13 +1849,13 @@ L_000738: ; 0x000738, $D738
     CMPX  $C013
     BNE   $DEF4
     PULS  A,X,Y,PC
-    CLR   $D000
+    CLR   BANKSWITCH
     LDA   #$A0
     TFR   A>DP
     LDA   #$04
-    STA   $CC03
-    LDA   $CC02
-    LDA   $C800
+    STA   PIA_ROM_CTRL_B
+    LDA   PIA_ROM_DATA_B
+    LDA   VIDEO_COUNTER_BITS
     CMPA  #$80
     BLO   $DF5D
     LDA   $92
@@ -1831,14 +1864,14 @@ L_000738: ; 0x000738, $D738
     JSR   $D568
     JSR   $E263
     JSR   $E07E
-    LDA   $C800
+    LDA   VIDEO_COUNTER_BITS
     SUBA  #$08
     CMPA  #$A8
     BLS   $DF47
     LDA   #$A8
     STA   $A2
     LDA   #$02
-    STA   $D000
+    STA   BANKSWITCH
     LDD   $A2
     JSR   $E39F
     LDD   $A2
@@ -1850,7 +1883,7 @@ L_000738: ; 0x000738, $D738
     CLR   $92
     INC   $5D
     LDB   #$38
-    STB   $C3FC
+    STB   WATCHDOG
     CMPA  #$08
     BHI   $DF89
     LDU   #$C010
@@ -1867,35 +1900,35 @@ L_000738: ; 0x000738, $D738
     PSHU  X,B,A
     JSR   $D5FD
     LDA   #$07
-    STA   $D000
+    STA   BANKSWITCH
     LDA   $BA
     BITA  #$02
     BNE   $DF9A
-    JSR   $C003
+    JSR   PALETTE_ENTRY_0x3
     LDA   #$02
-    STA   $D000
+    STA   BANKSWITCH
     LDD   $A1
     JSR   $E213
     LDD   $A1
     JSR   $E39F
     JSR   $E376
     ORCC  #$FF
-    CLR   $D000
+    CLR   BANKSWITCH
     LDA   #$05
-    STA   $CC03
+    STA   PIA_ROM_CTRL_B
     LDA   $36
-    STA   $D000
+    STA   BANKSWITCH
     LDA   S
     ANDA  #$6F
     STA   S
     PULS  CC,A,B,DP,X,Y,U,PC
-    CLR   $D000
+    CLR   BANKSWITCH
     LDA   #$A0
     TFR   A>DP
     LDA   #$04
-    STA   $CC03
-    LDA   $CC02
-    LDA   $C800
+    STA   PIA_ROM_CTRL_B
+    LDA   PIA_ROM_DATA_B
+    LDA   VIDEO_COUNTER_BITS
     CMPA  #$58
     BLO   $E005
     LDB   $92
@@ -1906,13 +1939,13 @@ L_000738: ; 0x000738, $D738
     STA   $A2
     JSR   $D5FD
     LDA   #$07
-    STA   $D000
+    STA   BANKSWITCH
     LDA   $BA
     BITA  #$02
     BNE   $DFF4
-    JSR   $C003
+    JSR   PALETTE_ENTRY_0x3
     LDA   #$02
-    STA   $D000
+    STA   BANKSWITCH
     LDD   $A1
     JSR   $E213
     LDD   $A1
@@ -1923,7 +1956,7 @@ L_000738: ; 0x000738, $D738
     CLR   $92
     INC   $5D
     LDB   #$39
-    STB   $C3FC
+    STB   WATCHDOG
     CMPA  #$04
     BHI   $E031
     LDU   #$C010
@@ -1942,7 +1975,7 @@ L_000738: ; 0x000738, $D738
     JSR   $E263
     JSR   $E07E
     LDA   #$02
-    STA   $D000
+    STA   BANKSWITCH
     LDD   $A2
     JSR   $E213
     LDD   $A2
@@ -2577,7 +2610,7 @@ L_000738: ; 0x000738, $D738
     PSHS  U,B,A
     LDA   #$02
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     PULS  A,B
     NOP    ; Removed something?
     NOP   
@@ -2879,7 +2912,7 @@ L_000738: ; 0x000738, $D738
     STU   X
     LDA   #$02
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     BSR   $E861
     JSR   $FC66
     JSR   $D711
@@ -3088,7 +3121,7 @@ L_000738: ; 0x000738, $D738
     LDX   #$E9FC
     JMP   $D001
     JSR   $F50B
-    JSR   $C003
+    JSR   PALETTE_ENTRY_0x3
     LDA   #$04
     LDX   #$E9E3
     JMP   $D001
@@ -3242,7 +3275,7 @@ L_000738: ; 0x000738, $D738
     STD   $3997
     COM   $BDD0
     BITA  $F8
-    STB   $EB74
+    STB   BANKSWITCH
     LDD   #$CCBD
     STB   $11
     LDD   $E0
@@ -3576,7 +3609,7 @@ L_000738: ; 0x000738, $D738
     STA   $BA
     CLR   7,U
     JSR   $F4FF
-    JSR   $C009
+    JSR   PALETTE_ENTRY_0x9
     LDX   #$B125
     LDU   #$0000
     LDA   #$40
@@ -4393,7 +4426,7 @@ L_000738: ; 0x000738, $D738
     LEAS  3,S
     RTS   
     BSR   $F4FF
-    JMP   $C000
+    JMP   PALETTE_ENTRY_0x0
     LDA   #$07
     BRA   $F50D
     LDA   #$02
@@ -4402,14 +4435,14 @@ L_000738: ; 0x000738, $D738
     BRA   $F50D
     LDA   #$01
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     RTS   
     PSHS  U,Y,X,DP,B,A,CC
     BSR   $F503
-    JSR   $C002
+    JSR   PALETTE_ENTRY_0x2
     PULS  CC,A,B,DP,X,Y,U,PC
     BSR   $F507
-    JMP   $C00F
+    JMP   PALETTE_ENTRY_0xF
     RTS   
     PSHS  U,Y,X,B,A
     TFR   D>X
@@ -4417,7 +4450,7 @@ L_000738: ; 0x000738, $D738
     PSHS  A
     LDA   #$02
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     LDD   Y
     LDY   2,Y
     PSHS  B,A
@@ -4451,7 +4484,7 @@ L_000738: ; 0x000738, $D738
     LEAS  2,S
     PULS  A
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     PULS  A,B,X,Y,U,PC
     PSHS  U,X,B,A
     TFR   D>X
@@ -4459,7 +4492,7 @@ L_000738: ; 0x000738, $D738
     PSHS  A
     LDA   #$02
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     LDD   Y
     LDU   #$0000
     PSHS  B
@@ -4487,7 +4520,7 @@ L_000738: ; 0x000738, $D738
     BNE   $F5A8
     PULS  A,B
     STB   $36
-    STB   $D000
+    STB   BANKSWITCH
     PULS  A,B,X,U,PC
     PSHS  U,X,B,A
     LDA   $36
@@ -4530,7 +4563,7 @@ L_000738: ; 0x000738, $D738
     BNE   $F5FF
     PULS  A,B,DP,X,Y,U,PC
 DEFENDER_START: ; 0x00261F, $F61F
-    CLR   $D000
+    CLR   BANKSWITCH
     LDX   #$CC00
     CLR   1,X
     CLR   3,X
@@ -4584,12 +4617,12 @@ DEFENDER_START: ; 0x00261F, $F61F
     TSTB  
     BNE   $F69A
     LDB   #$38
-    STB   $C3FC
+    STB   WATCHDOG
     TFR   CC>B
     BITB  #$10
     BEQ   $F699
-    CLR   $D000
-    LDB   $CC00
+    CLR   BANKSWITCH
+    LDB   PIA_ROM_DATA_A
     COMB  
     BITB  #$03
     BEQ   $F6EA
@@ -4622,7 +4655,7 @@ DEFENDER_START: ; 0x00261F, $F61F
     BEQ   $F6D2
     LDA   #$03
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     JMP   $C02A
     CLRA  
     EXG   Y-D
@@ -4633,13 +4666,13 @@ DEFENDER_START: ; 0x00261F, $F61F
     TFR   CC>B
     BITB  #$10
     BEQ   $F6F4
-    LDB   $CC00
+    LDB   PIA_ROM_DATA_A
     COMB  
     BITB  #$03
     BNE   $F718
     LDA   #$03
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     JMP   $C02D
     TFR   CC>B
     BITB  #$40
@@ -4661,7 +4694,7 @@ DEFENDER_START: ; 0x00261F, $F61F
     TFR   DP>A
     TFR   B>DP
     LDB   #$38
-    STB   $C3FC
+    STB   WATCHDOG
     CLRB  
     EXG   X-D
     CMPX  #$C000
@@ -4672,7 +4705,7 @@ DEFENDER_START: ; 0x00261F, $F61F
     TSTB  
     BMI   $F73D
     LDB   #$03
-    STB   $D000
+    STB   BANKSWITCH
     JSR   $F800
     JMP   $C030
     BITB  #$10
@@ -4690,14 +4723,14 @@ DEFENDER_START: ; 0x00261F, $F61F
     TFR   D>S
     JSR   $F800
     LDU   #$F86E
-    CLR   $D000
+    CLR   BANKSWITCH
     LDA   #$38
-    STA   $C3FC
+    STA   WATCHDOG
     LDA   U
     LDB   U
     BEQ   $F793
     ANDB  #$0F
-    STB   $D000
+    STB   BANKSWITCH
     ANDA  #$70
     LSRA  
     ADDA  #$C0
@@ -4727,41 +4760,41 @@ DEFENDER_START: ; 0x00261F, $F61F
     CMPA  #$9E
     BNE   $F7AF
     JSR   $F507
-    JSR   $C000
+    JSR   PALETTE_ENTRY_0x0
     BRA   $F7D5
     LDB   #$40
     BSR   $F7B8
-    JSR   $C003
+    JSR   PALETTE_ENTRY_0x3
     BRA   $F7D5
     LDX   #$CC00
     STB   X
     STB   2,X
-    CLR   $D000
+    CLR   BANKSWITCH
     LDA   #$38
-    STA   $C3FC
+    STA   WATCHDOG
     LEAX  [-1,X]
     BNE   $F7C2
     JMP   $F507
     LDB   #$80
     BSR   $F7B8
-    JSR   $C006
-    JSR   $C009
+    JSR   PALETTE_ENTRY_0x6
+    JSR   PALETTE_ENTRY_0x9
     JMP   L_000738
     PSHS  A,CC
     LDA   $36
     PSHS  A
     CLR   $36
-    CLR   $D000
+    CLR   BANKSWITCH
     STB   X
     PULS  A
     STA   $36
-    STA   $D000
+    STA   BANKSWITCH
     PULS  CC,A,PC
     PSHS  A,CC
     LDA   $36
     PSHS  A
     CLR   $36
-    CLR   $D000
+    CLR   BANKSWITCH
     LDB   X
     BRA   $F7E8
     PSHS  B,A
@@ -4787,11 +4820,11 @@ DEFENDER_START: ; 0x00261F, $F61F
     LDB   $36
     PSHS  B
     CLR   $36
-    CLR   $D000
+    CLR   BANKSWITCH
     BSR   $F813
     PULS  B
     STB   $36
-    STB   $D000
+    STB   BANKSWITCH
     PULS  B,PC
     BSR   $F822
     PSHS  A
@@ -4810,11 +4843,11 @@ DEFENDER_START: ; 0x00261F, $F61F
     LDB   $36
     PSHS  B
     CLR   $36
-    CLR   $D000
+    CLR   BANKSWITCH
     BSR   $F842
     PULS  B
     STB   $36
-    STB   $D000
+    STB   BANKSWITCH
     PULS  B,PC
     BSR   $F84E
     PSHS  A
