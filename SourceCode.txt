@@ -730,7 +730,7 @@ L_000396: ; 0x000396, $D396
     LDD   #$D4B0
     JSR   L_00054D
     LDB   #$05
-    JSR   L_00251C
+    JSR   GOTO_B3-C00F
 L_0003C5: ; 0x0003C5, $D3C5
     BSR   L_0003D9
     PULS  A,B,X,Y,U
@@ -802,7 +802,7 @@ L_00042B: ; 0x00042B, $D42B
     PULS  A,PC
     LDA   $BA
     BPL   L_00046B
-    JSR   L_002507
+    JSR   BANKSWITCH_TO_3
     JSR   $C033
     INC   R_A162
     BRA   L_00046B
@@ -813,7 +813,7 @@ L_00042B: ; 0x00042B, $D42B
     LDA   #$04
     STA   PIA_ROM_CTRL_B
     LDA   PIA_ROM_DATA_B
-    JSR   L_002507
+    JSR   BANKSWITCH_TO_3
     LDA   $79
     LSRA
     BLO   L_000468
@@ -846,7 +846,7 @@ L_000481: ; 0x000481, $D481
     BNE   L_00046B
     LDD   #$D4AB
     JSR   L_00054D
-    JSR   L_002507
+    JSR   BANKSWITCH_TO_3
     JSR   [9,U]
     BRA   L_00046B
     .db $FF
@@ -1150,7 +1150,7 @@ L_000642: ; 0x000642, $D642
 L_000648: ; 0x000648, $D648
     PSHS  A
     LDD   #$2006
-    JSR   L_0025C7
+    JSR   SAVE_UXBA+BANK_UNK
     LDA   S
     BEQ   L_000663
     LDY   #$F9D5
@@ -1166,7 +1166,7 @@ L_000665: ; 0x000665, $D665
     PSHS  U,Y,X,B,A
     LDD   #$4020
     LDX   #$3008
-    JSR   L_0025C7
+    JSR   SAVE_UXBA+BANK_UNK
     BSR   L_0006BC
     BSR   L_000629
     BSR   L_000680
@@ -1196,7 +1196,7 @@ L_000699: ; 0x000699, $D699
 L_00069F: ; 0x00069F, $D69F
     PSHS  A
     LDD   #$030B
-    JSR   L_0025C7
+    JSR   SAVE_UXBA+BANK_UNK
     LDA   S
     BEQ   L_0006BA
     LDY   #$F9D9
@@ -1294,7 +1294,7 @@ L_00074D: ; 0x00074D, $D74D
     STA   -1,U
     DECB
     BNE   L_00074D
-    JSR   L_0025D1
+    JSR   CLEAR_ALL_SCREEN
     LDX   #$9C00
 L_000760: ; 0x000760, $D760
     CLR   X+
@@ -1324,11 +1324,11 @@ L_000785: ; 0x000785, $D785
     LDB   #$FF
     STD   $79
     JSR   L_0008DC
-    JSR   L_002507
+    JSR   BANKSWITCH_TO_3
     JSR   $C033
     BSR   L_0007C6
     BSR   L_0007B6
-    JSR   L_002800
+    JSR   SETUP_DP_52_49_36_48_59
     LDX   #$D825
     LDA   #$01
     JSR   L_000055
@@ -1394,7 +1394,7 @@ L_00080E: ; 0x00080E, $D80E
     STD   $6D
     PULS  CC,A,B,X,PC
 L_000825: ; 0x000825, $D825
-    JSR   L_00250B
+    JSR   BANKSWITCH_TO_1
     JMP   PALETTE_ENTRY_0x0
 L_00082B: ; 0x00082B, $D82B
     LDX   #$C495
@@ -1433,7 +1433,7 @@ L_000861: ; 0x000861, $D861
     LDA   $BA
     BPL   L_0008C4
     JSR   L_00007C
-    JSR   L_0025D1
+    JSR   CLEAR_ALL_SCREEN
     LDA   #$7F
     STA   $BA
     LDA   #$01
@@ -1496,7 +1496,7 @@ L_0008EA: ; 0x0008EA, $D8EA
     LDA   $36
     PSHS  A
     CLRA
-    JSR   L_00250D
+    JSR   BANKSWITCH_TO_A
     LDA   PIA_WGT_DATA_B
     BPL   L_0008E2
     LDX   #$DFC3
@@ -1515,7 +1515,7 @@ L_0008FF: ; 0x0008FF, $D8FF
     PULS  A,X,PC
 L_000919: ; 0x000919, $D919
     LDB   #$07
-    JSR   L_00251C
+    JSR   GOTO_B3-C00F
 L_00091E: ; 0x00091E, $D91E
     JSR   L_0007B6
     JSR   L_00007C
@@ -1541,10 +1541,10 @@ L_000942: ; 0x000942, $D942
     JSR   L_000055
     JMP   L_0017BE
     CLRA
-    JSR   L_00250D
+    JSR   BANKSWITCH_TO_A
     LDA   PIA_WGT_DATA_B
     BPL   L_00096E
-    JSR   L_0025D1
+    JSR   CLEAR_ALL_SCREEN
     LDA   $8B
     DECA
     BNE   L_000966
@@ -1561,10 +1561,10 @@ L_00096E: ; 0x00096E, $D96E
     CLRB
     STD   $20
     STD   $22
-    JSR   L_0024FF
+    JSR   BANKSWITCH_TO_7
     JSR   PALETTE_ENTRY_0x6
     JSR   PALETTE_ENTRY_0x0
-    JSR   L_0025F1
+    JSR   CLEAR_GAME_SCREEN
     LDD   #$0300
     STD   $BD
     STD   $BB
@@ -1630,12 +1630,12 @@ L_00096E: ; 0x00096E, $D96E
     LDU   #$C0F1
 L_000A11: ; 0x000A11, $DA11
     LDX   #$3C80
-    JSR   L_002513
+    JSR   PSH_ALL_GOTO_B2-C002
     LDA   #$80
     LDX   #$DA1F
     JMP   L_000001
 L_000A1F: ; 0x000A1F, $DA1F
-    JSR   L_0025F1
+    JSR   CLEAR_GAME_SCREEN
     LDB   #$05
     LDX   $8D
     LDA   10,X
@@ -1664,7 +1664,7 @@ L_000A46: ; 0x000A46, $DA46
     STD   $22
     LDX   $BF
     LDD   #$0806
-    JSR   L_0025C7
+    JSR   SAVE_UXBA+BANK_UNK
     JSR   L_000BB6
     LDD   #$D4B5
     JSR   L_00054D
@@ -1710,7 +1710,7 @@ L_000AA8: ; 0x000AA8, $DAA8
     JSR   L_00007C
     LDX   $C1
     LEAX  1027,X
-    JSR   L_0024FF
+    JSR   BANKSWITCH_TO_7
     JSR   PALETTE_ENTRY_0xE
     JSR   L_0003D9
     CLR   $B3
@@ -1719,7 +1719,7 @@ L_000AA8: ; 0x000AA8, $DAA8
     JSR   L_000DAE
     BNE   L_000ADE
     JSR   L_000DEC
-    JSR   L_0025F1
+    JSR   CLEAR_GAME_SCREEN
 L_000ADE: ; 0x000ADE, $DADE
     LDA   $8B
     LDX   $8D
@@ -1738,10 +1738,10 @@ L_000ADE: ; 0x000ADE, $DADE
     LDU   #$C0F1
 L_000AFE: ; 0x000AFE, $DAFE
     LDX   #$3C78
-    JSR   L_002513
+    JSR   PSH_ALL_GOTO_B2-C002
     LDU   #$C075
     LDX   #$3E88
-    JSR   L_002513
+    JSR   PSH_ALL_GOTO_B2-C002
     LDA   #$60
     LDX   #$DB15
     JMP   L_000001
@@ -1764,7 +1764,7 @@ L_000B2C: ; 0x000B2C, $DB2C
     LDX   #$3E80
     LDA   #$FF
     STA   $BA
-    JSR   L_002513
+    JSR   PSH_ALL_GOTO_B2-C002
     CLR   $B3
     LDB   #$13
     JSR   L_000539
@@ -1784,7 +1784,7 @@ L_000B2C: ; 0x000B2C, $DB2C
 L_000B5C: ; 0x000B5C, $DB5C
     PSHS  U,X,B,A
 L_000B5E: ; 0x000B5E, $DB5E
-    JSR   L_002503
+    JSR   BANKSWITCH_TO_2
     LDD   Y
     STD   U
     MUL
@@ -2075,7 +2075,7 @@ L_000D74: ; 0x000D74, $DD74
     CMPA  #$F0
     BLS   L_000D81
     LDB   #$06
-    JSR   L_00251C
+    JSR   GOTO_B3-C00F
     CLRA
 L_000D81: ; 0x000D81, $DD81
     STA   $24
@@ -2146,10 +2146,10 @@ L_000DEC: ; 0x000DEC, $DDEC
     LDU   $63
     PULS  X
     STX   13,U
-    JSR   L_0025F1
+    JSR   CLEAR_GAME_SCREEN
     LDU   #$C0F9
     LDX   #$3850
-    JSR   L_002513
+    JSR   PSH_ALL_GOTO_B2-C002
     LDX   $8D
     LDA   8,X
     BSR   L_000DD5
@@ -2159,10 +2159,10 @@ L_000DEC: ; 0x000DEC, $DDEC
     JSR   PALETTE_ENTRY_0xE
     LDX   #$3D60
     LDU   #$C0FB
-    JSR   L_002513
+    JSR   PSH_ALL_GOTO_B2-C002
     LDU   #$C0F3
     LDX   #$3C90
-    JSR   L_002513
+    JSR   PSH_ALL_GOTO_B2-C002
     LDX   $8D
     CLRB
     LDA   8,X
@@ -2225,7 +2225,7 @@ L_000E8F: ; 0x000E8F, $DE8F
     LDA   #$0A
     STA   10,X
 L_000E99: ; 0x000E99, $DE99
-    JSR   L_0024FF
+    JSR   BANKSWITCH_TO_7
     LDA   8,X
     PSHS  A
     CMPA  #$04
@@ -2271,7 +2271,7 @@ L_000EEA: ; 0x000EEA, $DEEA
     PULS  A,B,X,U,PC
 L_000EEC: ; 0x000EEC, $DEEC
     PSHS  Y,X,A
-    JSR   L_0024FF
+    JSR   BANKSWITCH_TO_7
     LDX   $C011
 L_000EF4: ; 0x000EF4, $DEF4
     LDA   B,X
@@ -3635,7 +3635,7 @@ L_00191C: ; 0x00191C, $E91C
     LBNE  L_0019BC
     LDA   #$77
     STA   $BA
-    JSR   L_0025F1
+    JSR   CLEAR_GAME_SCREEN
     LDA   #$0F
     LDX   #$E936
     JMP   L_000001
@@ -3670,7 +3670,7 @@ L_001958: ; 0x001958, $E958
     STA   $C9
     STD   $C7
     STD   $CA
-    JSR   L_0024FA
+    JSR   GOTO_B7-C000
     LDB   #$50
     JSR   L_000A3D
     JSR   L_000095
@@ -3733,7 +3733,7 @@ L_0019D9: ; 0x0019D9, $E9D9
     LDA   #$02
     LDX   #$E9FC
     JMP   L_000001
-    JSR   L_00250B
+    JSR   BANKSWITCH_TO_1
     JSR   PALETTE_ENTRY_0x3
     LDA   #$04
     LDX   #$E9E3
@@ -4282,7 +4282,7 @@ L_001DE8: ; 0x001DE8, $EDE8
     ORA   #$02
     STA   $BA
     CLR   7,U
-    JSR   L_0024FF
+    JSR   BANKSWITCH_TO_7
     JSR   PALETTE_ENTRY_0x9
     LDX   #$B125
     LDU   #$0000
@@ -5072,7 +5072,7 @@ L_0023FB: ; 0x0023FB, $F3FB
     JSR   L_0000C7
 L_0023FE: ; 0x0023FE, $F3FE
     PSHS  U,Y,X,B,A
-    JSR   L_002503
+    JSR   BANKSWITCH_TO_2
     LDD   4,X
     LDY   2,X
     JSR   [8,Y]
@@ -5152,7 +5152,7 @@ L_002489: ; 0x002489, $F489
     LDX   #$711C
 L_0024A2: ; 0x0024A2, $F4A2
     LDD   #$1808
-    JSR   L_0025C7
+    JSR   SAVE_UXBA+BANK_UNK
     LDA   #$08
     LDX   #$F4B0
     JMP   L_000001
@@ -5170,7 +5170,7 @@ L_0024BE: ; 0x0024BE, $F4BE
     LDX   #$F4CC
     JMP   L_000001
     LDA   12,U
-    BSR   L_00250D
+    BSR   BANKSWITCH_TO_A
     JMP   [13,U]
 L_0024D3: ; 0x0024D3, $F4D3
     LEAS  -3,S
@@ -5181,44 +5181,44 @@ L_0024D3: ; 0x0024D3, $F4D3
     LDA   2,U
     LDU   U
     STU   3,S
-    BSR   L_00250D
+    BSR   BANKSWITCH_TO_A
     PULS  A,U
     JSR   [S]
     PSHS  U,A
     LDA   5,S
-    BSR   L_00250D
+    BSR   BANKSWITCH_TO_A
     LDU   6,S
     LEAU  3,U
     STU   6,S
     PULS  A,U
     LEAS  3,S
     RTS
-L_0024FA: ; 0x0024FA, $F4FA
-    BSR   L_0024FF
-    JMP   PALETTE_ENTRY_0x0
-L_0024FF: ; 0x0024FF, $F4FF
+GOTO_B7-C000: ; 0x0024FA, $F4FA
+    BSR   BANKSWITCH_TO_7
+    JMP   $C000
+BANKSWITCH_TO_7: ; 0x0024FF, $F4FF
     LDA   #$07
-    BRA   L_00250D
-L_002503: ; 0x002503, $F503
+    BRA   BANKSWITCH_TO_A
+BANKSWITCH_TO_2: ; 0x002503, $F503
     LDA   #$02
-    BRA   L_00250D
-L_002507: ; 0x002507, $F507
+    BRA   BANKSWITCH_TO_A
+BANKSWITCH_TO_3: ; 0x002507, $F507
     LDA   #$03
-    BRA   L_00250D
-L_00250B: ; 0x00250B, $F50B
+    BRA   BANKSWITCH_TO_A
+BANKSWITCH_TO_1: ; 0x00250B, $F50B
     LDA   #$01
-L_00250D: ; 0x00250D, $F50D
+BANKSWITCH_TO_A: ; 0x00250D, $F50D
     STA   $36
     STA   BANKSWITCH
     RTS
-L_002513: ; 0x002513, $F513
+PSH_ALL_GOTO_B2-C002: ; 0x002513, $F513
     PSHS  U,Y,X,DP,B,A,CC
-    BSR   L_002503
-    JSR   PALETTE_ENTRY_0x2
+    BSR   BANKSWITCH_TO_2
+    JSR   $C002
     PULS  CC,A,B,DP,X,Y,U,PC
-L_00251C: ; 0x00251C, $F51C
-    BSR   L_002507
-    JMP   PALETTE_ENTRY_0xF
+GOTO_B3-C00F: ; 0x00251C, $F51C
+    BSR   BANKSWITCH_TO_3
+    JMP   $C00F
     RTS
 L_002522: ; 0x002522, $F522
     PSHS  U,Y,X,B,A
@@ -5313,19 +5313,19 @@ L_0025BE: ; 0x0025BE, $F5BE
     STB   $36
     STB   BANKSWITCH
     PULS  A,B,X,U,PC
-L_0025C7: ; 0x0025C7, $F5C7
+SAVE_UXBA+BANK_UNK: ; 0x0025C7, $F5C7
     PSHS  U,X,B,A
     LDA   $36
     PSHS  A
-    LDA   1,S
+    LDA   1,S ; Get value up stack.
     BRA   L_00258C
-L_0025D1: ; 0x0025D1, $F5D1
+CLEAR_ALL_SCREEN: ; 0x0025D1, $F5D1
     PSHS  U,Y,X,B,A
     LDU   #$9C00
     LDX   #$0000
     TFR   X>Y
     TFR   X>D
-L_0025DD: ; 0x0025DD, $F5DD
+CLEAR_SCREEN_ALL_LOOP: ; 0x0025DD, $F5DD
     PSHU  Y,X,B,A
     PSHU  Y,X,B,A
     PSHU  Y,X,B,A
@@ -5333,31 +5333,31 @@ L_0025DD: ; 0x0025DD, $F5DD
     PSHU  Y,X,B,A
     PSHU  X
     CMPU  #$0000
-    BNE   L_0025DD
-    PULS  A,B,X,Y,U,PC
-L_0025F1: ; 0x0025F1, $F5F1
+    BNE   CLEAR_SCREEN_ALL_LOOP
+    PULS  A,B,X,Y,U,PC ; restore, RTS
+CLEAR_GAME_SCREEN: ; 0x0025F1, $F5F1
     PSHS  U,Y,X,DP,B,A
     LDU   #$9C00
     LDX   #$0000
     TFR   X>Y
     TFR   X>D
     TFR   A>DP
-L_0025FF: ; 0x0025FF, $F5FF
-    LDB   #$08
-L_002601: ; 0x002601, $F601
+CLEAR_GAME_SCREEN_COL_LOOP: ; 0x0025FF, $F5FF
+    LDB   #$08 ; loop count
+CLEAR_COUNT_LOOP: ; 0x002601, $F601
+    PSHU  Y,X,DP,A ; 6 rows.
     PSHU  Y,X,DP,A
     PSHU  Y,X,DP,A
-    PSHU  Y,X,DP,A
-    PSHU  Y,X,DP,A
+    PSHU  Y,X,DP,A ; 24 rows.
     DECB
-    BNE   L_002601
+    BNE   CLEAR_COUNT_LOOP ; 192 rows.
+    PSHU  Y,X,DP,A ; 198
     PSHU  Y,X,DP,A
-    PSHU  Y,X,DP,A
-    PSHU  Y,X,DP,A
-    PSHU  Y,X
-    LEAU  -42,U
-    CMPU  #$0000
-    BNE   L_0025FF
+    PSHU  Y,X,DP,A ; 210
+    PSHU  Y,X ; 214
+    LEAU  -42,U ; 256. Adjust to miss scanner.
+    CMPU  #$0000 ; Is end?
+    BNE   CLEAR_GAME_SCREEN_COL_LOOP ; No, keep looping.
     PULS  A,B,DP,X,Y,U,PC
 DEFENDER_START: ; 0x00261F, $F61F
     CLR   BANKSWITCH ; Set bankswitch to 0.
@@ -5525,7 +5525,7 @@ NOT_COLUMN_RUG_MATCH: ; 0x00271E, $F71E
     BMI   RUG_POST_ENTIRE_SET ; If bit 7 set
     LDB   #$03
     STB   BANKSWITCH
-    JSR   L_002800
+    JSR   SETUP_DP_52_49_36_48_59
     JMP   RUG_MATCH_SUCCESS
 RUG_POST_ENTIRE_SET: ; 0x00273D, $F73D
     BITB  #$10 ; Test for IRQ mask.
@@ -5543,40 +5543,40 @@ RUG_POST_ENT_DP_Z: ; 0x00274E, $F74E
     ADDA  #$01 ; ++
     CLRB ; D=##00
     TFR   D>S ; Put S stack there.
-    JSR   L_002800
+    JSR   SETUP_DP_52_49_36_48_59
 L_002758: ; 0x002758, $F758
-    LDU   #$F86E
+    LDU   #$F86E ; Load U stack.
 L_00275B: ; 0x00275B, $F75B
-    CLR   BANKSWITCH
-    LDA   #$38
+    CLR   BANKSWITCH ; Set to IO
+    LDA   #$38 ; Set watchdog.
     STA   WATCHDOG
-    LDA   U
+    LDA   U ; Load F68E into A and B
     LDB   U
-    BEQ   L_002793
-    ANDB  #$0F
-    STB   BANKSWITCH
-    ANDA  #$70
-    LSRA
-    ADDA  #$C0
-    CLRB
-    TFR   D>X
-    LDY   #$0800
+    BEQ   B_ENDS_UP_#$80 ; If is 0
+    ANDB  #$0F ; Get lower bits.
+    STB   BANKSWITCH ; Goto bank.
+    ANDA  #$70 ; Get upper bits.
+    LSRA ; Shift
+    ADDA  #$C0 ; Add value to get offset.
+    CLRB ; Clear bottom byte of D.
+    TFR   D>X ; X=Ptr
+    LDY   #$0800 ; Set Y
     TFR   U>D
-    SUBB  #$6C
-    LSRB
+    SUBB  #$6C ; -=
+    LSRB ; Shift
     CLRA
-L_002780: ; 0x002780, $F780
-    ADCB  X+
-    LEAY  -1,Y
-    BNE   L_002780
-    CMPB  #$80
-    BEQ   L_002793
+LOOP_0X800: ; 0x002780, $F780
+    ADCB  X+ ; +=, w/ carry
+    LEAY  -1,Y ; --
+    BNE   LOOP_0X800
+    CMPB  #$80 ; If B ends up being #$80...
+    BEQ   B_ENDS_UP_#$80
     TFR   CC>A
-    BITA  #$10
-    BEQ   L_0027CE
+    BITA  #$10 ; Test IRQ mask
+    BEQ   L_0027CE ; No IRQ Mask.
 L_002790: ; 0x002790, $F790
-    JMP   L_002507
-L_002793: ; 0x002793, $F793
+    JMP   BANKSWITCH_TO_3
+B_ENDS_UP_#$80: ; 0x002793, $F793
     LEAU  1,U
     CMPU  #$F886
     BNE   L_00275B
@@ -5586,7 +5586,7 @@ L_002793: ; 0x002793, $F793
     TFR   DP>A
     CMPA  #$9E
     BNE   L_0027AF
-    JSR   L_002507
+    JSR   BANKSWITCH_TO_3
     JSR   PALETTE_ENTRY_0x0
     BRA   L_0027D5
 L_0027AF: ; 0x0027AF, $F7AF
@@ -5604,7 +5604,7 @@ L_0027C2: ; 0x0027C2, $F7C2
     STA   WATCHDOG
     LEAX  -1,X
     BNE   L_0027C2
-    JMP   L_002507
+    JMP   BANKSWITCH_TO_3
 L_0027CE: ; 0x0027CE, $F7CE
     LDB   #$80
     BSR   L_0027B8
@@ -5632,16 +5632,16 @@ L_0027F1: ; 0x0027F1, $F7F1
     CLR   BANKSWITCH
     LDB   X
     BRA   L_0027E8
-L_002800: ; 0x002800, $F800
-    PSHS  B,A
-    CLR   $52
-    CLR   $49
+SETUP_DP_52_49_36_48_59: ; 0x002800, $F800
+    PSHS  B,A ; Save B,A
+    CLR   $52 ; Clear
+    CLR   $49 ; Set
     LDA   #$03
-    STA   $36
-    STA   $48
+    STA   $36 ; Bank info, usually.
+    STA   $48 ; Set
     LDD   #$FFFF
-    STD   $59
-    PULS  A,B,PC
+    STD   $59 ; Set
+    PULS  A,B,PC ; Get reg, RTS.
 L_002813: ; 0x002813, $F813
     LDA   1,X
     ANDA  #$0F
@@ -7202,18 +7202,18 @@ L_002FB0: ; 0x002FB0, $FFB0
     JMP   L_002522
     JMP   L_00257B
 L_002FB9: ; 0x002FB9, $FFB9
-    JMP   L_0025C7
+    JMP   SAVE_UXBA+BANK_UNK
 L_002FBC: ; 0x002FBC, $FFBC
-    JMP   L_0025D1
+    JMP   CLEAR_ALL_SCREEN
 L_002FBF: ; 0x002FBF, $FFBF
     JMP   L_002758
 L_002FC2: ; 0x002FC2, $FFC2
-    JMP   L_002793
+    JMP   B_ENDS_UP_#$80
 L_002FC5: ; 0x002FC5, $FFC5
     JMP   RUG_PATTERN_SETUP
 L_002FC8: ; 0x002FC8, $FFC8
     JMP   L_0027D5
-    JMP   L_0024FA
+    JMP   GOTO_B7-C000
 L_002FCE: ; 0x002FCE, $FFCE
     JMP   L_0024D3
 L_002FD1: ; 0x002FD1, $FFD1
@@ -7290,7 +7290,7 @@ L_003030: ; 0x003030, $C030
     JSR   L_003147
     LBHS  L_00312A
     INC   R_A178
-    JSR   L_0025D1
+    JSR   CLEAR_ALL_SCREEN
     LDA   $06
     DECA
     BNE   L_003050
@@ -7419,7 +7419,7 @@ L_003156: ; 0x003156, $C156
 L_003158: ; 0x003158, $C158
     LDX   #$46AC
     LDD   #$1408
-    JSR   L_0025C7
+    JSR   SAVE_UXBA+BANK_UNK
     LDU   #$C0FF
     JSR   L_002FCE
     .db $C0
@@ -7555,7 +7555,7 @@ L_003263: ; 0x003263, $C263
     CLR   R_A162
     JSR   L_00007C
     JSR   L_00386F
-    JSR   L_0025D1
+    JSR   CLEAR_ALL_SCREEN
     JSR   L_0008DC
     CLR   $27
     LDX   #$C8F4
@@ -7751,7 +7751,7 @@ L_00343C: ; 0x00343C, $C43C
     LDA   #$FF
     STA   $BA
     JSR   L_000805
-    JSR   L_0025D1
+    JSR   CLEAR_ALL_SCREEN
     LDD   #$0000
     STD   $20
     STD   $22
@@ -7977,7 +7977,7 @@ L_003677: ; 0x003677, $C677
     CLR   R_A184
     LDA   #$FB
     STA   $BA
-    JSR   L_0025D1
+    JSR   CLEAR_ALL_SCREEN
     CLR   $52
     LDD   #$FFFF
     STD   $59
