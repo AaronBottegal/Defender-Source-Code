@@ -39,6 +39,9 @@ BANKSWITCH                               = 0xD000
 	.org $0000
 R_0000:                                  .rs 0x01 ;0x0000
 
+	.org $0036
+BANK_VAL_DP:                             .rs 0x01 ;0x0036
+
 	.org $01ED
 R_01ED:                                  .rs 0x01 ;0x01ED
 
@@ -264,7 +267,7 @@ R_BDD0:                                  .rs 0x01 ;0xBDD0
 
 	.org $D000
 
-    DECA  
+    DECA
 L_000001: ; 0x000001, $D001
     LDU   $63
     STA   4,U
@@ -301,7 +304,7 @@ L_000036: ; 0x000036, $D036
     LDU   U
     BNE   L_00001A
 L_00003A: ; 0x00003A, $D03A
-    NOP   
+    NOP
     JMP   L_000738
 L_00003E: ; 0x00003E, $D03E
     PSHS  U,Y,A
@@ -370,8 +373,8 @@ L_0000B6: ; 0x0000B6, $D0B6
     STD   $67
     LDD   $65
     STD   X
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   4,X
     STA   20,X
     PULS  A,B,U,PC
@@ -501,7 +504,7 @@ L_0001B1: ; 0x0001B1, $D1B1
     STD   512,U
     LDD   10,Y
     STD   514,U
-    RTS   
+    RTS
     TFR   D>U
     LDD   #$0000
     STD   U
@@ -510,7 +513,7 @@ L_0001B1: ; 0x0001B1, $D1B1
     STD   258,U
     STD   512,U
     STD   514,U
-    RTS   
+    RTS
     BHS   L_0001F5
     LEAY  2,Y
 L_0001F5: ; 0x0001F5, $D1F5
@@ -523,14 +526,14 @@ L_0001F5: ; 0x0001F5, $D1F5
     STB   256,U
     LDD   4,Y
     STD   257,U
-    RTS   
+    RTS
     TFR   D>U
     LDD   #$0000
     STD   U
     STA   2,U
     STD   256,U
     STA   258,U
-    RTS   
+    RTS
     PSHS  U,X,B,A
     STS   $77
     BHS   L_000228
@@ -673,18 +676,18 @@ L_000360: ; 0x000360, $D360
     PSHS  U,Y,X,B,A
     ORCC  #$01
     ROL   $8A
-    LSRA  
+    LSRA
     PSHS  A
     LDA   #$00
     BHS   L_000375
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
+    ASLB
+    ROLA
+    ASLB
+    ROLA
 L_000375: ; 0x000375, $D375
     JSR   L_0006FE
     STD   $73
@@ -692,18 +695,18 @@ L_000375: ; 0x000375, $D375
     SUBB  S+
     LDA   B,X
     ADDA  $74
-    DAA   
+    DAA
     STA   B,X
-    DECB  
+    DECB
     BMI   L_000396
 L_000388: ; 0x000388, $D388
     LDA   B,X
     ADCA  $73
-    DAA   
+    DAA
     STA   B,X
     LDA   #$00
     STA   $73
-    DECB  
+    DECB
     BPL   L_000388
 L_000396: ; 0x000396, $D396
     LDD   $AB
@@ -714,11 +717,11 @@ L_000396: ; 0x000396, $D396
     BLO   L_0003C5
     LDA   1,Y
     ADDA  $AC
-    DAA   
+    DAA
     STA   1,Y
     LDA   Y
     ADCA  $AB
-    DAA   
+    DAA
     STA   Y
     INC   6,X
     INC   8,X
@@ -731,7 +734,7 @@ L_000396: ; 0x000396, $D396
 L_0003C5: ; 0x0003C5, $D3C5
     BSR   L_0003D9
     PULS  A,B,X,Y,U
-    RTS   
+    RTS
 L_0003CA: ; 0x0003CA, $D3CA
     PSHS  B,A
     LDD   X
@@ -745,7 +748,7 @@ L_0003D9: ; 0x0003D9, $D3D9
     LDA   $8B
 L_0003DB: ; 0x0003DB, $D3DB
     PSHS  A
-    DECA  
+    DECA
     BNE   L_0003E8
     LDX   #$0F1C
     LDU   #$A1C3
@@ -766,11 +769,11 @@ L_0003FD: ; 0x0003FD, $D3FD
     LDY   PALETTE_ENTRY_0x0
     BITB  #$01
     BNE   L_00040D
-    LEAU  [-1,U]
-    LSRA  
-    LSRA  
-    LSRA  
-    LSRA  
+    LEAU  -1,U
+    LSRA
+    LSRA
+    LSRA
+    LSRA
 L_00040D: ; 0x00040D, $D40D
     ANDA  #$0F
     BNE   L_000420
@@ -783,15 +786,15 @@ L_00040D: ; 0x00040D, $D40D
     BRA   L_00042B
 L_000420: ; 0x000420, $D420
     INC   $73
-    ASLA  
-    ASLA  
+    ASLA
+    ASLA
     LEAY  A,Y
     EXG   X-D
     JSR   L_002522
 L_00042B: ; 0x00042B, $D42B
     EXG   X-D
     LEAX  1024,X
-    DECB  
+    DECB
     BNE   L_0003FD
     PULS  A
     STA   $36
@@ -812,7 +815,7 @@ L_00042B: ; 0x00042B, $D42B
     LDA   PIA_ROM_DATA_B
     JSR   L_002507
     LDA   $79
-    LSRA  
+    LSRA
     BLO   L_000468
     JMP   $C027
 L_000468: ; 0x000468, $D468
@@ -994,7 +997,7 @@ L_000539: ; 0x000539, $D539
     CLR   BANKSWITCH
     LDA   #$3F
     STA   PIA_ROM_DATA_B
-    COMB  
+    COMB
     ANDB  #$3F
     STB   PIA_ROM_DATA_B
     PULS  CC,A,B,PC
@@ -1006,7 +1009,7 @@ L_00054D: ; 0x00054D, $D54D
     CMPA  $B2
     BLO   L_000566
     STA   $B2
-    LEAX  [-2,X]
+    LEAX  -2,X
     ORCC  #$10
     STX   $B0
     LDD   #$0101
@@ -1076,7 +1079,7 @@ L_0005C5: ; 0x0005C5, $D5C5
 L_0005CB: ; 0x0005CB, $D5CB
     LDA   $7B
     ORA   $7C
-    COMA  
+    COMA
     LDB   $7B
     STB   $7C
     LDB   PIA_WGT_DATA_A
@@ -1087,10 +1090,10 @@ L_0005CB: ; 0x0005CB, $D5CB
     BEQ   L_0005FD
     LDU   #$F882
 L_0005E5: ; 0x0005E5, $D5E5
-    CLRB  
+    CLRB
 L_0005E6: ; 0x0005E6, $D5E6
     ADDB  #$04
-    LSRA  
+    LSRA
     BHS   L_0005E6
     LEAU  B,U
     PULU  A,B,X
@@ -1098,15 +1101,15 @@ L_0005E6: ; 0x0005E6, $D5E6
     BNE   L_0005F8
     STD   $82
     STX   $84
-    RTS   
+    RTS
 L_0005F8: ; 0x0005F8, $D5F8
     STD   $86
     STX   $88
-    RTS   
+    RTS
 L_0005FD: ; 0x0005FD, $D5FD
     LDA   $79
     ORA   $7A
-    COMA  
+    COMA
     LDB   $79
     STB   $7A
     LDB   PIA_ROM_DATA_A
@@ -1116,7 +1119,7 @@ L_0005FD: ; 0x0005FD, $D5FD
     BEQ   L_000628
     LDX   #$0078
 L_000614: ; 0x000614, $D614
-    LEAX  [-1,X]
+    LEAX  -1,X
     BNE   L_000614
     LDB   PIA_ROM_DATA_A
     ANDB  $79
@@ -1126,14 +1129,14 @@ L_000614: ; 0x000614, $D614
     LDU   #$F8A2
     BSR   L_0005E5
 L_000628: ; 0x000628, $D628
-    RTS   
+    RTS
 L_000629: ; 0x000629, $D629
     PSHS  U,Y,X,B,A
     LDX   #$0F14
     LDA   R_A1C9
     BSR   L_000642
     LDA   $8C
-    DECA  
+    DECA
     BEQ   L_000640
     LDX   #$7114
     LDA   R_A206
@@ -1170,7 +1173,7 @@ L_000665: ; 0x000665, $D665
     LDA   $8C
 L_000678: ; 0x000678, $D678
     JSR   L_0003DB
-    DECA  
+    DECA
     BNE   L_000678
     PULS  A,B,X,Y,U,PC
 L_000680: ; 0x000680, $D680
@@ -1179,7 +1182,7 @@ L_000680: ; 0x000680, $D680
     LDA   R_A1CB
     BSR   L_000699
     LDA   $8C
-    DECA  
+    DECA
     BEQ   L_000697
     LDX   #$8B1B
     LDA   R_A208
@@ -1233,13 +1236,13 @@ L_0006EF: ; 0x0006EF, $D6EF
     LEAX  256,X
     CMPX  #$5407
     BNE   L_0006EF
-    RTS   
+    RTS
 L_0006FE: ; 0x0006FE, $D6FE
     PSHS  A
     LDA   $8B
 L_000702: ; 0x000702, $D702
     LDX   #$A1C2
-    DECA  
+    DECA
     BEQ   L_00070B
     LDX   #$A1FF
 L_00070B: ; 0x00070B, $D70B
@@ -1251,14 +1254,14 @@ L_000711: ; 0x000711, $D711
     PSHS  B
     LDB   $DF
     LDA   #$03
-    MUL   
+    MUL
     ADDB  #$11
     LDA   $E1
-    LSRA  
-    LSRA  
-    LSRA  
+    LSRA
+    LSRA
+    LSRA
     EORA  $E1
-    LSRA  
+    LSRA
     ROR   $E0
     ROR   $E1
     ADDB  $E1
@@ -1288,8 +1291,8 @@ L_00074D: ; 0x00074D, $D74D
     LDA   X+
     STA   U++
     LDA   3,X
-    STA   [-1,U]
-    DECB  
+    STA   -1,U
+    DECB
     BNE   L_00074D
     JSR   L_0025D1
     LDX   #$9C00
@@ -1310,7 +1313,7 @@ L_000760: ; 0x000760, $D760
     CMPA  #$09
     BLS   L_000785
 L_000784: ; 0x000784, $D784
-    CLRB  
+    CLRB
 L_000785: ; 0x000785, $D785
     STB   $37
     LDD   #$A55A
@@ -1341,13 +1344,13 @@ L_0007B6: ; 0x0007B6, $D7B6
     JMP   L_001149
 L_0007C6: ; 0x0007C6, $D7C6
     PSHS  X,B,A
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     LDX   #$AAC5
     STX   $61
 L_0007CF: ; 0x0007CF, $D7CF
     LEAX  15,X
-    STX   [-15,X]
+    STX   -15,X
     CMPX  #$AF1B
     BNE   L_0007CF
     STD   X
@@ -1370,9 +1373,9 @@ L_0007F5: ; 0x0007F5, $D7F5
 L_0007FD: ; 0x0007FD, $D7FD
     LDA   X+
     STA   U+
-    DECB  
+    DECB
     BNE   L_0007FD
-    RTS   
+    RTS
 L_000805: ; 0x000805, $D805
     PSHS  X,B,A,CC
     ORCC  #$FF
@@ -1383,8 +1386,8 @@ L_00080E: ; 0x00080E, $D80E
     STX   -23,X
     CMPX  #$AAAE
     BNE   L_00080E
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   X
     STD   $6B
     STD   $65
@@ -1396,12 +1399,12 @@ L_000825: ; 0x000825, $D825
 L_00082B: ; 0x00082B, $D82B
     LDX   #$C495
     JSR   L_002822
-    DECA  
+    DECA
     BNE   L_000838
     LDA   #$02
     STA   $37
 L_000838: ; 0x000838, $D838
-    RTS   
+    RTS
     LDA   $BA
     BPL   L_00084B
     BSR   L_00082B
@@ -1424,7 +1427,7 @@ L_00084B: ; 0x00084B, $D84B
     BRA   L_000846
 L_000861: ; 0x000861, $D861
     CLR   $38
-    NOP   
+    NOP
     LDA   $B7
     BEQ   L_0008DB
     LDA   $BA
@@ -1449,7 +1452,7 @@ L_000881: ; 0x000881, $D881
     LDB   #$0A
     STD   R_A1CB
     CLR   $39
-    NOP   
+    NOP
     LDX   #$A1C2
     JSR   L_000E7C
     LDX   #$C481
@@ -1470,16 +1473,16 @@ L_0008C4: ; 0x0008C4, $D8C4
     INC   $8C
     LDA   $37
     ADDA  #$99
-    DAA   
+    DAA
     STA   $37
     LDX   #$C47D
     JSR   L_00284E
     LDA   $8C
-    DECA  
+    DECA
     BEQ   L_0008DB
     JSR   L_000665
 L_0008DB: ; 0x0008DB, $D8DB
-    RTS   
+    RTS
 L_0008DC: ; 0x0008DC, $D8DC
     PSHS  X,A
     LDA   $36
@@ -1492,7 +1495,7 @@ L_0008EA: ; 0x0008EA, $D8EA
     PSHS  X,A
     LDA   $36
     PSHS  A
-    CLRA  
+    CLRA
     JSR   L_00250D
     LDA   PIA_WGT_DATA_B
     BPL   L_0008E2
@@ -1537,13 +1540,13 @@ L_000942: ; 0x000942, $D942
     LDA   #$00
     JSR   L_000055
     JMP   L_0017BE
-    CLRA  
+    CLRA
     JSR   L_00250D
     LDA   PIA_WGT_DATA_B
     BPL   L_00096E
     JSR   L_0025D1
     LDA   $8B
-    DECA  
+    DECA
     BNE   L_000966
     JSR   L_0008DC
     BRA   L_000968
@@ -1554,8 +1557,8 @@ L_000968: ; 0x000968, $D968
     STA   $7B
     STA   $7C
 L_00096E: ; 0x00096E, $D96E
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   $20
     STD   $22
     JSR   L_0024FF
@@ -1592,8 +1595,8 @@ L_00096E: ; 0x00096E, $D96E
     STD   $CC
     LDD   #$8000
     STD   $C5
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   $C7
     STA   $C9
     STD   $CA
@@ -1618,11 +1621,11 @@ L_00096E: ; 0x00096E, $D96E
     LDA   $25
     BEQ   L_000A1F
     LDB   $8C
-    DECB  
+    DECB
     BEQ   L_000A1F
     LDU   #$C0EF
     LDA   $8B
-    DECA  
+    DECA
     BEQ   L_000A11
     LDU   #$C0F1
 L_000A11: ; 0x000A11, $DA11
@@ -1645,7 +1648,7 @@ L_000A1F: ; 0x000A1F, $DA1F
     CLR   $25
     JMP   L_000CD9
 L_000A3C: ; 0x000A3C, $DA3C
-    CLRB  
+    CLRB
 L_000A3D: ; 0x000A3D, $DA3D
     LDA   $FA
 L_000A3F: ; 0x000A3F, $DA3F
@@ -1653,7 +1656,7 @@ L_000A3F: ; 0x000A3F, $DA3F
     ORB   #$02
 L_000A43: ; 0x000A43, $DA43
     STB   $BA
-    RTS   
+    RTS
 L_000A46: ; 0x000A46, $DA46
     LDB   #$58
     BSR   L_000A3D
@@ -1723,7 +1726,7 @@ L_000ADE: ; 0x000ADE, $DADE
     LDB   7,X
     BNE   L_000B15
     LDB   $8C
-    DECB  
+    DECB
     BEQ   L_000B2C
     EORA  #$03
     JSR   L_00070D
@@ -1745,7 +1748,7 @@ L_000AFE: ; 0x000AFE, $DAFE
 L_000B15: ; 0x000B15, $DB15
     LDA   $8B
 L_000B17: ; 0x000B17, $DB17
-    INCA  
+    INCA
     CMPA  $8C
     BLS   L_000B1E
     LDA   #$01
@@ -1771,7 +1774,7 @@ L_000B2C: ; 0x000B2C, $DB2C
     JMP   L_000825
     ASR   $07
     ASR   $0F
-    SWI1  
+    SWI1
     CLR   BANKSWITCH
     NEG   $81
     BVC   L_000B5E
@@ -1784,7 +1787,7 @@ L_000B5E: ; 0x000B5E, $DB5E
     JSR   L_002503
     LDD   Y
     STD   U
-    MUL   
+    MUL
     LEAX  10,U
     STX   2,U
     LEAX  D,X
@@ -1829,7 +1832,7 @@ L_000BAA: ; 0x000BAA, $DBAA
     STD   U++
     CMPU  4,S
     BLO   L_000B90
-    RTS   
+    RTS
 L_000BB6: ; 0x000BB6, $DBB6
     PSHS  U,X,B,A
     LDU   $8D
@@ -1837,7 +1840,7 @@ L_000BB6: ; 0x000BB6, $DBB6
     LDA   #$33
 L_000BBE: ; 0x000BBE, $DBBE
     CLR   U+
-    DECA  
+    DECA
     BNE   L_000BBE
     LDU   $8D
     LDA   $FA
@@ -1866,7 +1869,7 @@ L_000BE5: ; 0x000BE5, $DBE5
     ANDA  #$1F
     ADDA  1,S
     STD   10,X
-    LSRB  
+    LSRB
     BHS   L_000C01
     LDD   #$F915
     STD   2,X
@@ -1875,8 +1878,8 @@ L_000C01: ; 0x000C01, $DC01
     STA   12,X
     LDA   #$10
     STA   20,X
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   16,X
     STD   14,X
     STD   6,X
@@ -1901,16 +1904,16 @@ L_000C2D: ; 0x000C2D, $DC2D
     BEQ   L_000C5D
     CMPA  #$07
     BLS   L_000C51
-    LSRA  
-    LSRA  
-    CLRB  
+    LSRA
+    LSRA
+    CLRB
 L_000C44: ; 0x000C44, $DC44
     BSR   L_000BE1
     ADDB  #$40
     BNE   L_000C44
-    ASLA  
-    ASLA  
-    NEGA  
+    ASLA
+    ASLA
+    NEGA
     ADDA  10,U
     BEQ   L_000C5D
 L_000C51: ; 0x000C51, $DC51
@@ -1938,7 +1941,7 @@ L_000C70: ; 0x000C70, $DC70
 L_000C77: ; 0x000C77, $DC77
     JSR   L_0000AD
     LDA   $DF
-    LSRA  
+    LSRA
     ADDA  #$2A
     STA   12,X
     JSR   L_000711
@@ -1957,7 +1960,7 @@ L_000C96: ; 0x000C96, $DC96
     LDX   $67
     STX   Y
     STY   $67
-    NEGA  
+    NEGA
     ADDA  $FF
     STA   $FF
     BNE   L_000C77
@@ -1988,7 +1991,7 @@ L_000CCB: ; 0x000CCB, $DCCB
     STA   $FC
     BNE   L_000CC5
 L_000CD8: ; 0x000CD8, $DCD8
-    RTS   
+    RTS
 L_000CD9: ; 0x000CD9, $DCD9
     LDU   $63
     LDA   #$28
@@ -2014,12 +2017,12 @@ L_000D09: ; 0x000D09, $DD09
     CMPA  #$08
     BHI   L_000D1F
     LDB   R_A10F
-    LSRB  
+    LSRB
     CMPA  #$03
     BHI   L_000D16
-    LSRB  
+    LSRB
 L_000D16: ; 0x000D16, $DD16
-    INCB  
+    INCB
     CMPB  R_A118
     BHS   L_000D1F
     STB   R_A118
@@ -2029,8 +2032,8 @@ L_000D1F: ; 0x000D1F, $DD1F
     CMPA  #$04
     LDA   R_A10F
     BHS   L_000D30
-    LSRA  
-    LSRA  
+    LSRA
+    LSRA
     JSR   L_000D9E
 L_000D30: ; 0x000D30, $DD30
     STA   R_A118
@@ -2058,7 +2061,7 @@ L_000D4A: ; 0x000D4A, $DD4A
     LDA   $FB
 L_000D64: ; 0x000D64, $DD64
     JSR   L_001F9C
-    NEGA  
+    NEGA
     ADDA  $FB
     STA   $FB
 L_000D6C: ; 0x000D6C, $DD6C
@@ -2068,12 +2071,12 @@ L_000D6C: ; 0x000D6C, $DD6C
     INC   $AE
 L_000D74: ; 0x000D74, $DD74
     LDA   $24
-    INCA  
+    INCA
     CMPA  #$F0
     BLS   L_000D81
     LDB   #$06
     JSR   L_00251C
-    CLRA  
+    CLRA
 L_000D81: ; 0x000D81, $DD81
     STA   $24
     LDU   $63
@@ -2094,12 +2097,12 @@ L_000D9E: ; 0x000D9E, $DD9E
 L_000DA3: ; 0x000DA3, $DDA3
     CMPA  S
     BLS   L_000DAA
-    LSRA  
+    LSRA
     BRA   L_000DA3
 L_000DAA: ; 0x000DAA, $DDAA
-    INCA  
+    INCA
     LEAS  1,S
-    RTS   
+    RTS
 L_000DAE: ; 0x000DAE, $DDAE
     LDA   R_A112
     ADDA  $FB
@@ -2108,10 +2111,10 @@ L_000DAE: ; 0x000DAE, $DDAE
     ADDA  R_A116
     ADDA  R_A115
     ADDA  $FE
-    RTS   
+    RTS
 L_000DC2: ; 0x000DC2, $DDC2
     PSHS  B
-    CLRB  
+    CLRB
 L_000DC5: ; 0x000DC5, $DDC5
     CMPA  #$10
     BLO   L_000DCF
@@ -2125,18 +2128,18 @@ L_000DCF: ; 0x000DCF, $DDCF
 L_000DD5: ; 0x000DD5, $DDD5
     PSHS  B
     TFR   A>B
-    CLRA  
+    CLRA
 L_000DDA: ; 0x000DDA, $DDDA
     CMPB  #$0A
     BLO   L_000DE5
     ADDA  #$10
-    DAA   
+    DAA
     SUBB  #$0A
     BRA   L_000DDA
 L_000DE5: ; 0x000DE5, $DDE5
     PSHS  B
     ADDA  S+
-    DAA   
+    DAA
     PULS  B,PC
 L_000DEC: ; 0x000DEC, $DDEC
     CLR   $26
@@ -2151,7 +2154,7 @@ L_000DEC: ; 0x000DEC, $DDEC
     LDA   8,X
     BSR   L_000DD5
     TFR   A>B
-    CLRA  
+    CLRA
     LDX   $50
     JSR   PALETTE_ENTRY_0xE
     LDX   #$3D60
@@ -2161,7 +2164,7 @@ L_000DEC: ; 0x000DEC, $DDEC
     LDX   #$3C90
     JSR   L_002513
     LDX   $8D
-    CLRB  
+    CLRB
     LDA   8,X
     CMPA  #$05
     BLS   L_000E2B
@@ -2186,10 +2189,10 @@ L_000E3B: ; 0x000E3B, $DE3B
     BLO   L_000E55
     LDB   #$05
 L_000E55: ; 0x000E55, $DE55
-    ASLB  
-    ASLB  
-    ASLB  
-    ASLB  
+    ASLB
+    ASLB
+    ASLB
+    ASLB
     JSR   L_000360
     STX   7,U
     LDA   #$04
@@ -2212,7 +2215,7 @@ L_000E7C: ; 0x000E7C, $DE7C
     JSR   L_002822
     STA   $73
     LDX   2,S
-    TSTA  
+    TSTA
     BEQ   L_000E99
     LDA   8,X
 L_000E8F: ; 0x000E8F, $DE8F
@@ -2241,7 +2244,7 @@ L_000EAD: ; 0x000EAD, $DEAD
     PULS  A
     SUBA  #$04
     BHS   L_000EC0
-    CLRA  
+    CLRA
 L_000EC0: ; 0x000EC0, $DEC0
     STA   $73
     LDX   #$C497
@@ -2262,7 +2265,7 @@ L_000EDE: ; 0x000EDE, $DEDE
     JSR   L_0006FE
     LEAY  11,X
     BSR   L_000EEC
-    DECA  
+    DECA
     BNE   L_000EDE
 L_000EEA: ; 0x000EEA, $DEEA
     PULS  A,B,X,U,PC
@@ -2381,8 +2384,8 @@ L_000FAC: ; 0x000FAC, $DFAC
     LDB   $92
     BNE   L_000FAC
     INC   $92
-    COMA  
-    NOP   
+    COMA
+    NOP
     STA   $A2
     JSR   L_0005FD
     LDA   #$07
@@ -2437,7 +2440,7 @@ L_001052: ; 0x001052, $E052
     LDX   #$AF9D
     LDB   #$10
     STB   $AE
-    CLRB  
+    CLRB
 L_00105A: ; 0x00105A, $E05A
     JSR   L_000711
     CMPA  #$9C
@@ -2457,7 +2460,7 @@ L_001063: ; 0x001063, $E063
     CMPX  #$AFDD
     BNE   L_00105A
 L_00107D: ; 0x00107D, $E07D
-    RTS   
+    RTS
 L_00107E: ; 0x00107E, $E07E
     LDA   $BA
     BITA  #$20
@@ -2469,17 +2472,17 @@ L_00107E: ; 0x00107E, $E07E
     LDD   $22
     ANDB  #$80
     SUBD  $6F
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
     STA   $6F
     LDB   #$F0
     LDA   $21
     BITA  #$40
     BNE   L_0010A0
-    COMB  
+    COMB
 L_0010A0: ; 0x0010A0, $E0A0
     STB   $71
-    CLRA  
+    CLRA
     STA   [X]
     STA   [4,X]
     STA   [8,X]
@@ -2514,12 +2517,12 @@ L_0010E6: ; 0x0010E6, $E0E6
     ANDA  $71
     STA   [0,X]
     LEAX  4,X
-    DECB  
+    DECB
     BNE   L_0010D4
     LDB   $DF
     ANDB  #$3C
     LDX   #$AF9D
-    ABX   
+    ABX
     LDA   2,X
     ADDA  #$11
     ANDA  #$77
@@ -2555,11 +2558,11 @@ L_001132: ; 0x001132, $E132
     LDA   $E1
     ANDA  #$3F
     LDB   #$03
-    MUL   
+    MUL
     ADDB  #$2A
     STB   1,X
 L_001148: ; 0x001148, $E148
-    RTS   
+    RTS
 L_001149: ; 0x001149, $E149
     LDX   #$A162
     STX   $9F
@@ -2569,7 +2572,7 @@ L_00114E: ; 0x00114E, $E14E
     STA   X+
     CMPX  #$A183
     BNE   L_00114E
-    RTS   
+    RTS
 L_00115C: ; 0x00115C, $E15C
     LDX   $9F
     LDU   $BF
@@ -2597,7 +2600,7 @@ L_00115C: ; 0x00115C, $E15C
     LDA   8,X
     STA   -766,U
 L_00119A: ; 0x00119A, $E19A
-    RTS   
+    RTS
 L_00119B: ; 0x00119B, $E19B
     LDU   $9F
     LDX   $BF
@@ -2617,10 +2620,10 @@ L_00119B: ; 0x00119B, $E19B
     STA   515,X
     STB   770,X
 L_0011CC: ; 0x0011CC, $E1CC
-    RTS   
+    RTS
 L_0011CD: ; 0x0011CD, $E1CD
     LDU   $BF
-    CLRB  
+    CLRB
     LDX   #$0000
     LEAY  X
     LEAU  2054,U
@@ -2630,10 +2633,10 @@ L_0011CD: ; 0x0011CD, $E1CD
     STX   513,U
     STB   515,U
     STB   770,U
-    RTS   
+    RTS
 L_0011F0: ; 0x0011F0, $E1F0
     LDU   $BF
-    CLRB  
+    CLRB
     LDX   #$0000
     LEAY  X
     LEAU  -250,U
@@ -2643,7 +2646,7 @@ L_0011F0: ; 0x0011F0, $E1F0
     STX   -511,U
     STB   -509,U
     STB   -766,U
-    RTS   
+    RTS
 L_001213: ; 0x001213, $E213
     STA   $77
     LDA   $BA
@@ -2669,7 +2672,7 @@ L_001237: ; 0x001237, $E237
     JSR   L_00124A
     JSR   L_00115C
 L_001243: ; 0x001243, $E243
-    RTS   
+    RTS
 L_001244: ; 0x001244, $E244
     JSR   L_001258
     JMP   L_00119B
@@ -2677,7 +2680,7 @@ L_00124A: ; 0x00124A, $E24A
     LDY   #$F9C1
 L_00124E: ; 0x00124E, $E24E
     LDA   $C4
-    ASLA  
+    ASLA
     LDD   $C1
     STD   $BF
     JMP   L_00028E
@@ -2693,16 +2696,16 @@ L_001263: ; 0x001263, $E263
     LBNE  L_001375
     CLR   $6F
     LDD   $C7
-    COMA  
-    COMB  
+    COMA
+    COMB
     ADDD  #$0001
     BPL   L_001278
     COM   $6F
 L_001278: ; 0x001278, $E278
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     ADDD  $C8
     STD   $C8
     LDA   $6F
@@ -2724,24 +2727,24 @@ L_001296: ; 0x001296, $E296
     STA   $C7
 L_0012A0: ; 0x0012A0, $E2A0
     LDD   $C7
-    ASRA  
-    RORB  
-    ASRA  
-    RORB  
-    CLRA  
-    ASRB  
-    RORA  
+    ASRA
+    RORB
+    ASRA
+    RORB
+    CLRA
+    ASRB
+    RORA
     STA   $94
     STB   $93
     LDA   $BD
     BMI   L_0012B8
     LDA   #$20
-    TSTB  
+    TSTB
     BMI   L_0012BD
     BRA   L_0012C1
 L_0012B8: ; 0x0012B8, $E2B8
     LDA   #$70
-    TSTB  
+    TSTB
     BMI   L_0012C1
 L_0012BD: ; 0x0012BD, $E2BD
     CLR   $94
@@ -2769,8 +2772,8 @@ L_0012DF: ; 0x0012DF, $E2DF
     ADDD  $C3
     BRA   L_0012F7
 L_0012F1: ; 0x0012F1, $E2F1
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   $95
     LDD   $93
 L_0012F7: ; 0x0012F7, $E2F7
@@ -2792,16 +2795,16 @@ L_001313: ; 0x001313, $E313
     SUBD  $95
     STD   $20
     LDD   $C3
-    LSRA  
-    RORB  
-    LSRA  
-    RORB  
+    LSRA
+    RORB
+    LSRA
+    RORB
     ANDB  #$E0
     ADDD  $20
     STD   $CC
     LDB   $C5
     LDA   $7D
-    LSRA  
+    LSRA
     BLO   L_001337
     LDA   $7B
     BMI   L_001352
@@ -2839,7 +2842,7 @@ L_00136D: ; 0x00136D, $E36D
     STD   $C5
     STA   $C2
 L_001375: ; 0x001375, $E375
-    RTS   
+    RTS
 L_001376: ; 0x001376, $E376
     LDA   $BA
     BITA  #$20
@@ -2865,7 +2868,7 @@ L_00139A: ; 0x00139A, $E39A
     LDX   X
     BNE   L_001381
 L_00139E: ; 0x00139E, $E39E
-    RTS   
+    RTS
 L_00139F: ; 0x00139F, $E39F
     PSHS  B,A
     LDA   $BA
@@ -2882,8 +2885,8 @@ L_0013AC: ; 0x0013AC, $E3AC
     BLS   L_0013ED
     LDY   2,X
     JSR   [8,Y]
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   4,X
 L_0013C2: ; 0x0013C2, $E3C2
     LDB   12,X
@@ -2896,15 +2899,15 @@ L_0013C2: ; 0x0013C2, $E3C2
     CMPD  #$2580
     BHS   L_0013ED
     LDY   2,X
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     ADDA  Y
     CMPA  #$9C
     BHI   L_0013ED
     SUBA  Y
-    ASLB  
+    ASLB
     LDB   12,X
     STD   4,X
     JSR   [6,Y]
@@ -2922,10 +2925,10 @@ L_0013F3: ; 0x0013F3, $E3F3
     SUBD  $20
     CMPD  #$2580
     BHS   L_00144A
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     LDB   12,X
     CMPB  #$2A
     BLS   L_00144A
@@ -2936,8 +2939,8 @@ L_0013F3: ; 0x0013F3, $E3F3
     EXG   A-B
     STD   12,X
     STU   6,X
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   14,X
     STD   16,X
     LDU   6,S
@@ -2961,7 +2964,7 @@ L_00144A: ; 0x00144A, $E44A
     LDU   6,S
     LEAU  6,U
     STU   6,S
-    CLRA  
+    CLRA
     PULS  A,B,Y,U,PC
 L_001453: ; 0x001453, $E453
     LDA   $BA
@@ -2973,10 +2976,10 @@ L_001453: ; 0x001453, $E453
     LDD   $22
     ANDB  #$E0
     SUBD  $9D
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     STD   $9D
     LDX   #$A06D
     BRA   L_001493
@@ -3001,7 +3004,7 @@ L_001493: ; 0x001493, $E493
     LDX   X
     BNE   L_001470
 L_001497: ; 0x001497, $E497
-    RTS   
+    RTS
     LDU   $A6
     LDB   11,X
     BPL   L_0014A0
@@ -3022,8 +3025,8 @@ L_0014A0: ; 0x0014A0, $E4A0
     STD   257,Y
     BRA   L_001493
 L_0014C6: ; 0x0014C6, $E4C6
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STA   22,X
     STD   Y
     STA   2,Y
@@ -3032,7 +3035,7 @@ L_0014C6: ; 0x0014C6, $E4C6
     BRA   L_001493
     LDU   $A8
     LDB   11,X
-    ASLB  
+    ASLB
     LDD   #$0000
     STD   Y
     STA   2,Y
@@ -3065,10 +3068,10 @@ L_001507: ; 0x001507, $E507
     JSR   L_0000F2
     JSR   L_0023FE
     LDD   10,X
-    LSRA  
-    RORB  
-    LSRA  
-    RORB  
+    LSRA
+    RORB
+    LSRA
+    RORB
     ADDD  $20
     STD   10,X
     LDA   12,X
@@ -3089,7 +3092,7 @@ L_001550: ; 0x001550, $E550
     BMI   L_001559
     LDB   #$09
 L_001559: ; 0x001559, $E559
-    LSRA  
+    LSRA
     BLO   L_001560
     ADDB  #$A0
     BRA   L_001562
@@ -3099,7 +3102,7 @@ L_001562: ; 0x001562, $E562
     STB   X+
     CMPX  #$A1C2
     BNE   L_001550
-    RTS   
+    RTS
 L_00156A: ; 0x00156A, $E56A
     LDX   #$A06D
     BRA   L_00158A
@@ -3121,7 +3124,7 @@ L_00158A: ; 0x00158A, $E58A
     LEAY  X
     LDX   X
     BNE   L_00156F
-    RTS   
+    RTS
     LDA   $B5
     CMPA  #$04
     BHS   L_0015A8
@@ -3140,9 +3143,9 @@ L_0015AB: ; 0x0015AB, $E5AB
     STA   $36
     STA   BANKSWITCH
     PULS  A,B
-    NOP    ; Removed something?
-    NOP   
-    NOP   
+    NOP ; Removed something?
+    NOP
+    NOP
     LDU   #$F96F
     JSR   L_0016BA
     PULS  U,PC
@@ -3162,7 +3165,7 @@ L_0015C1: ; 0x0015C1, $E5C1
 L_0015DC: ; 0x0015DC, $E5DC
     STB   X
     LEAX  256,X
-    DECA  
+    DECA
     BNE   L_0015DC
     LDB   #$99
     STB   X
@@ -3178,7 +3181,7 @@ L_0015FC: ; 0x0015FC, $E5FC
     LDB   Y+
     STB   X
     LEAX  256,X
-    DECA  
+    DECA
     BNE   L_0015FC
     STY   $A4
     STX   9,U
@@ -3193,7 +3196,7 @@ L_0015FC: ; 0x0015FC, $E5FC
     JMP   L_000001
 L_001621: ; 0x001621, $E621
     LDX   11,U
-    CLRA  
+    CLRA
 L_001624: ; 0x001624, $E624
     STA   X
     LEAX  256,X
@@ -3216,7 +3219,7 @@ L_001630: ; 0x001630, $E630
 L_001649: ; 0x001649, $E649
     STB   X
     LEAX  -256,X
-    DECA  
+    DECA
     BNE   L_001649
     LDB   #$99
     STB   X
@@ -3232,7 +3235,7 @@ L_001669: ; 0x001669, $E669
     LDB   Y+
     STB   X
     LEAX  -256,X
-    DECA  
+    DECA
     BNE   L_001669
     STY   $A4
     STX   9,U
@@ -3246,7 +3249,7 @@ L_001669: ; 0x001669, $E669
     JMP   L_000001
 L_00168D: ; 0x00168D, $E68D
     LDX   11,U
-    CLRA  
+    CLRA
 L_001690: ; 0x001690, $E690
     STA   X
     LEAX  -256,X
@@ -3260,19 +3263,19 @@ L_00169F: ; 0x00169F, $E69F
     STX   $A4
 L_0016A4: ; 0x0016A4, $E6A4
     JSR   L_000711
-    CLRB  
-    LSRA  
+    CLRB
+    LSRA
     BHS   L_0016AD
     ADDB  #$01
 L_0016AD: ; 0x0016AD, $E6AD
-    LSRA  
+    LSRA
     BHS   L_0016B2
     ADDB  #$10
 L_0016B2: ; 0x0016B2, $E6B2
     STB   X+
     CMPX  #$A162
     BNE   L_0016A4
-    RTS   
+    RTS
 L_0016BA: ; 0x0016BA, $E6BA
     LDX   #$A065
 L_0016BD: ; 0x0016BD, $E6BD
@@ -3295,20 +3298,20 @@ L_0016C5: ; 0x0016C5, $E6C5
 L_0016DC: ; 0x0016DC, $E6DC
     LDX   X
     BNE   L_0016C5
-    RTS   
+    RTS
 L_0016E1: ; 0x0016E1, $E6E1
     STU   $DC
     LDY   2,X
     SUBD  Y
     STD   $73
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   $D0
     STD   $D2
     LDD   $73
     SUBB  $D7
     BHI   L_0016FB
-    NEGB  
+    NEGB
     STB   $D1
     BRA   L_0016FD
 L_0016FB: ; 0x0016FB, $E6FB
@@ -3316,7 +3319,7 @@ L_0016FB: ; 0x0016FB, $E6FB
 L_0016FD: ; 0x0016FD, $E6FD
     SUBA  $D6
     BHI   L_001706
-    NEGA  
+    NEGA
     STA   $D0
     BRA   L_001708
 L_001706: ; 0x001706, $E706
@@ -3326,11 +3329,11 @@ L_001708: ; 0x001708, $E708
     ADDD  Y
     SUBB  $D9
     BHI   L_001711
-    CLRB  
+    CLRB
 L_001711: ; 0x001711, $E711
     SUBA  $D8
     BHI   L_001716
-    CLRA  
+    CLRA
 L_001716: ; 0x001716, $E716
     STD   $DA
     LDD   Y
@@ -3340,14 +3343,14 @@ L_001716: ; 0x001716, $E716
     LDA   1,U
     STA   $D5
     LDB   $D2
-    MUL   
+    MUL
     LDU   2,U
     LEAU  D,U
     LDA   1,Y
     STA   $D4
     LDY   2,Y
     LDB   $D0
-    MUL   
+    MUL
     LEAY  D,Y
     LDA   $D1
     LEAY  A,Y
@@ -3355,7 +3358,7 @@ L_001716: ; 0x001716, $E716
     LEAU  A,U
 L_00173F: ; 0x00173F, $E73F
     LDB   $CF
-    DECB  
+    DECB
 L_001742: ; 0x001742, $E742
     LDA   B,U
     BEQ   L_001770
@@ -3379,9 +3382,9 @@ L_001761: ; 0x001761, $E761
     STY   $F8
     JSR   [8,X]
     LDA   #$01
-    RTS   
+    RTS
 L_001770: ; 0x001770, $E770
-    DECB  
+    DECB
     BPL   L_001742
     LDD   $D4
     LEAY  A,Y
@@ -3454,11 +3457,11 @@ L_0017C3: ; 0x0017C3, $E7C3
     CLR   $5E
     BRA   L_00181A
 L_0017D3: ; 0x0017D3, $E7D3
-    ASLA  
+    ASLA
     ADDA  $5E
     SUBA  #$04
     BPL   L_0017DB
-    CLRA  
+    CLRA
 L_0017DB: ; 0x0017DB, $E7DB
     STA   $5E
     CMPA  #$02
@@ -3557,13 +3560,13 @@ L_001886: ; 0x001886, $E886
     STA   $BA
 L_001894: ; 0x001894, $E894
     CLR   $DE
-    RTS   
+    RTS
     LDA   $AF
     BNE   L_0018BE
     INC   $AF
     LDD   $BD
-    COMB  
-    COMA  
+    COMB
+    COMA
     ADDD  #$0001
     STD   $BB
 L_0018A6: ; 0x0018A6, $E8A6
@@ -3646,7 +3649,7 @@ L_00193F: ; 0x00193F, $E93F
     LDD   $DF
     STD   $20
     STD   $22
-    LSRB  
+    LSRB
     BHS   L_001952
     LDD   #$2000
     LDX   #$0300
@@ -3658,12 +3661,12 @@ L_001958: ; 0x001958, $E958
     STD   $C3
     STX   $BB
     LDB   $E0
-    LSRB  
+    LSRB
     ADDB  #$2A
     STB   $C5
     STD   $C1
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STA   $C9
     STD   $C7
     STD   $CA
@@ -3679,10 +3682,10 @@ L_001958: ; 0x001958, $E958
     LDD   $C5
     STD   12,X
     LDD   $C3
-    LSRA  
-    RORB  
-    LSRA  
-    RORB  
+    LSRA
+    RORB
+    LSRA
+    RORB
     ADDD  $20
     STD   10,X
     LDA   $BB
@@ -3756,7 +3759,7 @@ L_001A2C: ; 0x001A2C, $EA2C
     LEAY  X
     LDX   X
     BNE   L_001A16
-    RTS   
+    RTS
 L_001A33: ; 0x001A33, $EA33
     LDD   $20
     SUBD  #$0C80
@@ -3765,12 +3768,12 @@ L_001A33: ; 0x001A33, $EA33
     BRA   L_001A78
 L_001A3F: ; 0x001A3F, $EA3F
     LDD   16,X
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     ADDD  12,X
     CMPA  #$2A
     BHS   L_001A50
@@ -3782,12 +3785,12 @@ L_001A50: ; 0x001A50, $EA50
 L_001A56: ; 0x001A56, $EA56
     STD   12,X
     LDD   14,X
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     ADDD  10,X
     STD   10,X
     SUBD  $73
@@ -3803,8 +3806,8 @@ L_001A78: ; 0x001A78, $EA78
     LEAY  X
     LDX   X
     BNE   L_001A3F
-    RTS   
-    NEGA  
+    RTS
+    NEGA
 L_001A80: ; 0x001A80, $EA80
     LDX   #$EAB4
     LDA   #$00
@@ -3823,11 +3826,11 @@ L_001A80: ; 0x001A80, $EA80
     ANDA  #$1F
     ADDD  $20
     STD   10,X
-    LSRB  
+    LSRB
     ADDB  #$2A
     STB   12,X
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   16,X
     STD   14,X
     LDA   #$08
@@ -3876,7 +3879,7 @@ L_001B02: ; 0x001B02, $EB02
     CMPD  #$0500
     BLS   L_001B12
     LDB   $73
-    SEX   
+    SEX
     ADDD  $C7
     STD   14,X
 L_001B12: ; 0x001B12, $EB12
@@ -3888,14 +3891,14 @@ L_001B1A: ; 0x001B1A, $EB1A
     ADDA  #$0A
     CMPA  #$14
     BLS   L_001B2A
-    CLRB  
+    CLRB
     LDA   $74
     ADDD  $CA
-    ASRA  
-    RORB  
+    ASRA
+    RORB
     STD   16,X
 L_001B2A: ; 0x001B2A, $EB2A
-    RTS   
+    RTS
     DEC   R_A119
     JSR   L_002416
     .db $01 ; Illegal instruction. 1 byte.
@@ -3914,18 +3917,18 @@ L_001B38: ; 0x001B38, $EB38
     ANDA  #$3F
     ADDA  #$10
     STD   10,X
-    LSRB  
+    LSRB
     ADDB  #$2A
     STB   12,X
     LDB   $DF
     ANDB  #$3F
     ADDB  #$E0
-    SEX   
+    SEX
     STD   14,X
     LDB   $E1
     ANDB  #$7F
     SUBB  #$40
-    SEX   
+    SEX
     BMI   L_001B67
     ORB   #$20
     BRA   L_001B69
@@ -3936,7 +3939,7 @@ L_001B69: ; 0x001B69, $EB69
     JSR   L_002C60
     DEC   $73
     BNE   L_001B38
-    RTS   
+    RTS
     JSR   L_00241D
     .db $02
     .db $10
@@ -3947,26 +3950,26 @@ L_001B69: ; 0x001B69, $EB69
     LEAY  X
     JSR   L_001B9E
     DEC   R_A114
-    RTS   
+    RTS
 L_001B89: ; 0x001B89, $EB89
     JSR   L_000711
     LDB   $DF
-    SEX   
-    ASLB  
-    ROLA  
+    SEX
+    ASLB
+    ROLA
     STD   16,X
     LDB   $E1
     ANDB  #$3F
     ADDB  #$E0
-    SEX   
+    SEX
     STD   14,X
-    RTS   
+    RTS
 L_001B9E: ; 0x001B9E, $EB9E
     PSHS  U,Y,X,B,A
     STA   $73
 L_001BA2: ; 0x001BA2, $EBA2
     LDA   R_A116
-    INCA  
+    INCA
     CMPA  #$14
     BHI   L_001BE7
     STA   R_A116
@@ -3984,7 +3987,7 @@ L_001BB0: ; 0x001BB0, $EBB0
     DEC   $EC
     BGE   L_001BB4
     INC   $AF
-    ASRA  
+    ASRA
     STU   6,X
     BSR   L_001B89
     LDD   $E0
@@ -4024,9 +4027,9 @@ L_001C17: ; 0x001C17, $EC17
     LDY   $CC
     CMPY  10,X
     BHS   L_001C25
-    NEGB  
+    NEGB
 L_001C25: ; 0x001C25, $EC25
-    SEX   
+    SEX
     STD   14,X
     BRA   L_001C7E
     LDB   9,U
@@ -4034,9 +4037,9 @@ L_001C25: ; 0x001C25, $EC25
     LDA   $C0
     CMPA  12,X
     BHI   L_001C35
-    NEGB  
+    NEGB
 L_001C35: ; 0x001C35, $EC35
-    SEX   
+    SEX
     ADDD  16,X
     CMPD  #$0200
     BLT   L_001C42
@@ -4047,20 +4050,20 @@ L_001C42: ; 0x001C42, $EC42
     LDD   #$FE00
 L_001C4B: ; 0x001C4B, $EC4B
     STD   16,X
-    COMA  
-    COMB  
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    COMA
+    COMB
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     TFR   A>B
-    SEX   
+    SEX
     ADDD  16,X
     STD   16,X
     LDB   $DF
     ANDB  #$1F
     ADDB  #$F0
-    SEX   
+    SEX
     ADDD  16,X
     STD   16,X
     LDD   $CC
@@ -4084,31 +4087,31 @@ L_001C86: ; 0x001C86, $EC86
     LEAY  X
     JSR   L_0013F3
     ANDB  [-1701,U]
-    BITB  [-2,X]
+    BITB  -2,X
     BEQ   L_001CBF
     LDD   14,Y
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     STD   14,X
     LDD   #$D534
     JSR   L_00054D
-    CLRB  
+    CLRB
     LDA   $C0
     SUBA  12,X
-    ASRA  
-    RORB  
-    ASRA  
-    RORB  
-    ASRA  
-    RORB  
-    ASRA  
-    RORB  
-    ASRA  
-    RORB  
+    ASRA
+    RORB
+    ASRA
+    RORB
+    ASRA
+    RORB
+    ASRA
+    RORB
+    ASRA
+    RORB
     STD   16,X
 L_001CBF: ; 0x001CBF, $ECBF
     LDA   R_A10D
@@ -4145,7 +4148,7 @@ L_001D00: ; 0x001D00, $ED00
     CMPA  12,X
     BEQ   L_001D0D
     BHI   L_001D09
-    NEGB  
+    NEGB
 L_001D09: ; 0x001D09, $ED09
     ADDB  12,X
     STB   12,X
@@ -4173,7 +4176,7 @@ L_001D2E: ; 0x001D2E, $ED2E
     CMPA  12,X
     BEQ   L_001D3B
     BHI   L_001D37
-    NEGB  
+    NEGB
 L_001D37: ; 0x001D37, $ED37
     ADDB  12,X
     STB   12,X
@@ -4188,7 +4191,7 @@ L_001D48: ; 0x001D48, $ED48
     LDB   #$20
 L_001D4A: ; 0x001D4A, $ED4A
     STU   2,X
-    SEX   
+    SEX
     ADDD  10,X
     STD   10,X
 L_001D51: ; 0x001D51, $ED51
@@ -4198,25 +4201,25 @@ L_001D51: ; 0x001D51, $ED51
 L_001D59: ; 0x001D59, $ED59
     PSHS  X,B
     LDD   10,X
-    LSRA  
-    RORB  
-    LSRA  
-    RORB  
-    LSRA  
-    RORB  
-    LSRA  
-    RORB  
-    LSRA  
-    RORB  
-    LSRA  
-    RORB  
+    LSRA
+    RORB
+    LSRA
+    RORB
+    LSRA
+    RORB
+    LSRA
+    RORB
+    LSRA
+    RORB
+    LSRA
+    RORB
     LDX   #$B300
     LDA   D,X
     PULS  B,X,PC
 L_001D70: ; 0x001D70, $ED70
     LDA   $DE
     BEQ   L_001D77
-    CLRA  
+    CLRA
     PULS  A,B,PC
 L_001D77: ; 0x001D77, $ED77
     BSR   L_001DC4
@@ -4248,7 +4251,7 @@ L_001D77: ; 0x001D77, $ED77
 L_001DB7: ; 0x001DB7, $EDB7
     LDD   #$F24C
     STD   2,U
-    CLRA  
+    CLRA
     PULS  A,B,PC
 L_001DBF: ; 0x001DBF, $EDBF
     BSR   L_001D77
@@ -4261,13 +4264,13 @@ L_001DC4: ; 0x001DC4, $EDC4
 L_001DCD: ; 0x001DCD, $EDCD
     CMPY  U++
     BEQ   L_001DD8
-    DECA  
+    DECA
     BNE   L_001DCD
     JSR   L_00003A
 L_001DD8: ; 0x001DD8, $EDD8
-    CLRA  
-    CLRB  
-    STD   [-2,U]
+    CLRA
+    CLRB
+    STD   -2,U
     DEC   $FA
     BNE   L_001DE8
     LDX   #$EDEA
@@ -4286,7 +4289,7 @@ L_001DE8: ; 0x001DE8, $EDE8
     LDA   #$40
 L_001E00: ; 0x001E00, $EE00
     STU   [X++]
-    DECA  
+    DECA
     BNE   L_001E00
 L_001E05: ; 0x001E05, $EE05
     LDX   $67
@@ -4320,10 +4323,10 @@ L_001E3D: ; 0x001E3D, $EE3D
     JMP   L_000001
     CLR   $26
     LDA   7,U
-    LSRA  
-    LSRA  
-    LSRA  
-    INCA  
+    LSRA
+    LSRA
+    LSRA
+    INCA
     JSR   L_000D9E
     LDX   #$EE54
     BRA   L_001E3D
@@ -4374,27 +4377,27 @@ L_001EBA: ; 0x001EBA, $EEBA
     PSHS  X
     JSR   L_0013F3
     ANDB  [-1701,U]
-    BITB  [-2,X]
+    BITB  -2,X
     BEQ   L_001EFC
     LDB   $DF
     ANDB  #$1F
     ADDB  #$F0
     ADDB  $BF
     SUBB  4,X
-    SEX   
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    SEX
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     STD   14,X
     LDB   $DF
     CMPB  #$78
     BLS   L_001EE8
     LDD   $C7
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     ADDD  14,X
     STD   14,X
 L_001EE8: ; 0x001EE8, $EEE8
@@ -4403,11 +4406,11 @@ L_001EE8: ; 0x001EE8, $EEE8
     ADDB  #$F0
     ADDB  $C0
     SUBB  5,X
-    SEX   
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    SEX
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     STD   16,X
     LDA   #$01
 L_001EFC: ; 0x001EFC, $EEFC
@@ -4423,7 +4426,7 @@ L_001EFE: ; 0x001EFE, $EEFE
     LDD   #$D525
     JSR   L_00054D
 L_001F14: ; 0x001F14, $EF14
-    RTS   
+    RTS
 L_001F15: ; 0x001F15, $EF15
     PSHS  A
     STA   $73
@@ -4452,11 +4455,11 @@ L_001F43: ; 0x001F43, $EF43
     ADDD  $75
     STD   10,X
     LDA   $DF
-    LSRA  
+    LSRA
     ADDA  #$2A
     STA   12,X
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   16,X
     STD   14,X
     LDA   R_A10B
@@ -4474,7 +4477,7 @@ L_001F43: ; 0x001F43, $EF43
     .db $01 ; illegal instx2, 1 byte each
     .db $15
     ANDB  $F8
-    RTS   
+    RTS
 L_001F78: ; 0x001F78, $EF78
     PSHS  X
     LDA   $FA
@@ -4529,11 +4532,11 @@ L_001FA7: ; 0x001FA7, $EFA7
     LDA   R_A102
     JSR   L_000D9E
     TFR   A>B
-    CLRA  
+    CLRA
     BITB  #$01
     BEQ   L_001FE2
-    COMB  
-    COMA  
+    COMB
+    COMA
 L_001FE2: ; 0x001FE2, $EFE2
     STD   14,X
     STU   6,X
@@ -4572,13 +4575,13 @@ L_002025: ; 0x002025, $F025
     BHI   L_00203D
     CMPA  #$EC
     BLT   L_002036
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     BRA   L_002040
 L_002036: ; 0x002036, $F036
     LDD   R_A103
-    COMA  
-    COMB  
+    COMA
+    COMB
     BRA   L_002040
 L_00203D: ; 0x00203D, $F03D
     LDD   R_A103
@@ -4600,8 +4603,8 @@ L_00205D: ; 0x00205D, $F05D
     LDX   #$EFF6
     JMP   L_000001
 L_002065: ; 0x002065, $F065
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     INC   20,X
     STD   14,X
     STD   16,X
@@ -4627,7 +4630,7 @@ L_002065: ; 0x002065, $F065
 L_002099: ; 0x002099, $F099
     LDB   #$20
 L_00209B: ; 0x00209B, $F09B
-    SEX   
+    SEX
     ADDD  10,X
     STD   10,X
 L_0020A0: ; 0x0020A0, $F0A0
@@ -4637,8 +4640,8 @@ L_0020A0: ; 0x0020A0, $F0A0
     BEQ   L_0020BE
     LDD   R_A103
     BHS   L_0020AF
-    COMA  
-    COMB  
+    COMA
+    COMB
 L_0020AF: ; 0x0020AF, $F0AF
     ADDD  12,X
     STD   12,X
@@ -4656,8 +4659,8 @@ L_0020BE: ; 0x0020BE, $F0BE
     LDD   #$F1E0
     STD   8,X
     LDD   R_A103
-    COMB  
-    COMA  
+    COMB
+    COMA
     STD   16,X
     STD   16,Y
     LDD   #$D50C
@@ -4685,8 +4688,8 @@ L_0020FB: ; 0x0020FB, $F0FB
     INC   $FB
     JMP   L_00000A
 L_002116: ; 0x002116, $F116
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   16,X
     STD   16,Y
     LDA   12,Y
@@ -4722,9 +4725,9 @@ L_00213E: ; 0x00213E, $F13E
     LDY   $CC
     CMPY  10,X
     BGE   L_00216C
-    NEGB  
+    NEGB
 L_00216C: ; 0x00216C, $F16C
-    SEX   
+    SEX
     STD   14,X
     LDD   $CC
     SUBD  10,X
@@ -4737,15 +4740,15 @@ L_00216C: ; 0x00216C, $F16C
     CMPA  #$08
     BHI   L_002191
     LDD   R_A108
-    COMA  
-    COMB  
+    COMA
+    COMB
     BRA   L_002198
 L_00218D: ; 0x00218D, $F18D
     CMPA  #$F8
     BGT   L_002195
 L_002191: ; 0x002191, $F191
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     BRA   L_002198
 L_002195: ; 0x002195, $F195
     LDD   R_A108
@@ -4757,8 +4760,8 @@ L_00219D: ; 0x00219D, $F19D
     CMPA  12,X
     LDD   R_A108
     BHS   L_0021A8
-    COMA  
-    COMB  
+    COMA
+    COMB
 L_0021A8: ; 0x0021A8, $F1A8
     STD   16,X
     LDD   4,X
@@ -4767,7 +4770,7 @@ L_0021AF: ; 0x0021AF, $F1AF
     LDB   R_A107
     LDA   $DF
     BMI   L_0021B7
-    NEGB  
+    NEGB
 L_0021B7: ; 0x0021B7, $F1B7
     ADDB  12,X
     CMPB  #$2A
@@ -4812,7 +4815,7 @@ L_00220B: ; 0x00220B, $F20B
     .db $15
     .db $D5
     .db $07
-    RTS   
+    RTS
     LDX   7,U
     LDD   #$0008
     ADDD  16,X
@@ -4876,7 +4879,7 @@ L_00229D: ; 0x00229D, $F29D
     LDB   R_A106
     COM   $AA
     BMI   L_0022A7
-    NEGB  
+    NEGB
 L_0022A7: ; 0x0022A7, $F2A7
     STB   $74
     LDX   #$F2F7
@@ -4885,8 +4888,8 @@ L_0022A7: ; 0x0022A7, $F2A7
     LEAU  X
     LDA   $73
     STA   15,U
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   7,U
     STD   9,U
     STD   11,U
@@ -4896,14 +4899,14 @@ L_0022C1: ; 0x0022C1, $F2C1
     ADCB  R_29F3
     CMPX  R_8888
     LDB   $74
-    SEX   
+    SEX
     STD   14,X
-    CLRA  
-    CLRB  
+    CLRA
+    CLRB
     STD   16,X
     LDA   $73
-    LSRA  
-    RORB  
+    LSRA
+    RORB
     ADDA  $73
     ADDD  $CC
     ADDA  #$80
@@ -4914,12 +4917,12 @@ L_0022C1: ; 0x0022C1, $F2C1
     STU   6,X
     STX   $65
     LDA   $73
-    ASLA  
+    ASLA
     ADDA  #$05
     STX   A,U
     DEC   $73
     BNE   L_0022C1
-    RTS   
+    RTS
     LDA   $DF
     ANDA  #$06
     ADDA  #$07
@@ -4930,7 +4933,7 @@ L_0022C1: ; 0x0022C1, $F2C1
     ANDB  #$3F
     ADDB  #$E0
     BMI   L_00230E
-    NEGA  
+    NEGA
 L_00230E: ; 0x00230E, $F30E
     LDY   2,X
     LEAY  A,Y
@@ -4943,18 +4946,18 @@ L_00231D: ; 0x00231D, $F31D
     LDY   #$F947
 L_002327: ; 0x002327, $F327
     STY   2,X
-    SEX   
+    SEX
     ADDD  16,X
     STD   16,X
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     TFR   A>B
-    NEGB  
-    SEX   
+    NEGB
+    SEX
     ADDD  16,X
     STD   16,X
     LDA   5,X
@@ -5034,15 +5037,15 @@ L_0023B4: ; 0x0023B4, $F3B4
 L_0023CA: ; 0x0023CA, $F3CA
     CMPX  Y++
     BNE   L_0023CA
-    CLRA  
-    CLRB  
-    STD   [-2,Y]
+    CLRA
+    CLRB
+    STD   -2,Y
     DEC   15,U
     BNE   L_0023DB
     LEAX  U
     JSR   L_000015
 L_0023DB: ; 0x0023DB, $F3DB
-    RTS   
+    RTS
 L_0023DC: ; 0x0023DC, $F3DC
     LDA   $99
     CMPA  #$0A
@@ -5053,18 +5056,18 @@ L_0023E0: ; 0x0023E0, $F3E0
     .db $98
     .db $F9
     .db $5B
-    BITB  [-2,X]
+    BITB  -2,X
     BEQ   L_0023FA
     LDB   $E0
-    SEX   
-    ASLB  
-    ROLA  
+    SEX
+    ASLB
+    ROLA
     LDA   $DF
     ANDA  #$1F
-    INCA  
+    INCA
     STA   21,X
 L_0023FA: ; 0x0023FA, $F3FA
-    RTS   
+    RTS
 L_0023FB: ; 0x0023FB, $F3FB
     JSR   L_0000C7
 L_0023FE: ; 0x0023FE, $F3FE
@@ -5144,7 +5147,7 @@ L_002489: ; 0x002489, $F489
     BNE   L_0024BB
     LDX   #$0F1C
     LDA   $8B
-    DECA  
+    DECA
     BEQ   L_0024A2
     LDX   #$711C
 L_0024A2: ; 0x0024A2, $F4A2
@@ -5170,7 +5173,7 @@ L_0024BE: ; 0x0024BE, $F4BE
     BSR   L_00250D
     JMP   [13,U]
 L_0024D3: ; 0x0024D3, $F4D3
-    LEAS  [-3,S]
+    LEAS  -3,S
     PSHS  U,A
     LDA   $36
     STA   5,S
@@ -5189,7 +5192,7 @@ L_0024D3: ; 0x0024D3, $F4D3
     STU   6,S
     PULS  A,U
     LEAS  3,S
-    RTS   
+    RTS
 L_0024FA: ; 0x0024FA, $F4FA
     BSR   L_0024FF
     JMP   PALETTE_ENTRY_0x0
@@ -5207,7 +5210,7 @@ L_00250B: ; 0x00250B, $F50B
 L_00250D: ; 0x00250D, $F50D
     STA   $36
     STA   BANKSWITCH
-    RTS   
+    RTS
 L_002513: ; 0x002513, $F513
     PSHS  U,Y,X,DP,B,A,CC
     BSR   L_002503
@@ -5216,7 +5219,7 @@ L_002513: ; 0x002513, $F513
 L_00251C: ; 0x00251C, $F51C
     BSR   L_002507
     JMP   PALETTE_ENTRY_0xF
-    RTS   
+    RTS
 L_002522: ; 0x002522, $F522
     PSHS  U,Y,X,B,A
     TFR   D>X
@@ -5240,11 +5243,11 @@ L_00253E: ; 0x00253E, $F53E
     LDB   1,S
     LEAX  256,X
     LEAY  B,Y
-    DECA  
+    DECA
     BNE   L_00253C
     BRA   L_002570
 L_002553: ; 0x002553, $F553
-    DECB  
+    DECB
     LDA   B,Y
     STA   B,X
     SUBB  #$02
@@ -5288,11 +5291,11 @@ L_002597: ; 0x002597, $F597
     BPL   L_002597
     LDB   S
     LEAX  256,X
-    DECA  
+    DECA
     BNE   L_002595
     BRA   L_0025BE
 L_0025A8: ; 0x0025A8, $F5A8
-    DECB  
+    DECB
     CLR   B,X
     SUBB  #$02
     BMI   L_0025B5
@@ -5303,7 +5306,7 @@ L_0025AF: ; 0x0025AF, $F5AF
 L_0025B5: ; 0x0025B5, $F5B5
     LDB   S
     LEAX  256,X
-    DECA  
+    DECA
     BNE   L_0025A8
 L_0025BE: ; 0x0025BE, $F5BE
     PULS  A,B
@@ -5346,7 +5349,7 @@ L_002601: ; 0x002601, $F601
     PSHU  Y,X,DP,A
     PSHU  Y,X,DP,A
     PSHU  Y,X,DP,A
-    DECB  
+    DECB
     BNE   L_002601
     PSHU  Y,X,DP,A
     PSHU  Y,X,DP,A
@@ -5358,188 +5361,188 @@ L_002601: ; 0x002601, $F601
     PULS  A,B,DP,X,Y,U,PC
 DEFENDER_START: ; 0x00261F, $F61F
     CLR   BANKSWITCH ; Set bankswitch to 0.
-    LDX   #$CC00
-    CLR   1,X
+    LDX   #$CC00 ; Set to PIA's.
+    CLR   1,X ; Clear data ctrl registers.
     CLR   3,X
     CLR   5,X
     CLR   7,X
-    LDA   #$C0
-    STA   X
-    LDA   #$FF
-    STA   2,X
-    CLR   4,X
-    CLR   6,X
-    LDA   #$04
-    STA   3,X
-    STA   5,X
-    STA   7,X
-    ORA   #$10
-    STA   1,X
-    LDX   #$C000
-    LDA   #$C0
-L_00264A: ; 0x00264A, $F64A
-    STA   X+
-    LDB   #$B5
-    MUL   
-    CMPX  #$C010
-    BNE   L_00264A
-    ORCC  #$80
-    ANDCC #$EF
-    LDY   #$0002
-    CLRA  
-    TFR   A>DP
-    ANDCC #$BF
-    CLRB  
-L_002662: ; 0x002662, $F662
-    TFR   D>U
-    LDX   #$0000
-L_002667: ; 0x002667, $F667
-    COMB  
-    BITB  #$09
-    BNE   L_002671
-    COMB  
-    RORA  
-    RORB  
-    BRA   L_00267C
-L_002671: ; 0x002671, $F671
-    COMB  
-    BITB  #$09
-    BNE   L_00267A
-    RORA  
-    RORB  
-    BRA   L_00267C
-L_00267A: ; 0x00267A, $F67A
-    LSRA  
-    RORB  
-L_00267C: ; 0x00267C, $F67C
-    STD   X++
-    EXG   X-D
-    TSTB  
-    BNE   L_00269A
+    LDA   #$C0 ; Set top two bits. 1=Input, 0=Output.
+    STA   X ; PIA-ROM-A-DATA
+    LDA   #$FF ; Set all bits to input.
+    STA   2,X ; PIA-ROM-B-DATA
+    CLR   4,X ; PIA-WIG-A-DATA
+    CLR   6,X ; PIA-WIG-B-DATA
+    LDA   #$04 ; Set data to report.
+    STA   3,X ; PIA-ROM-B-CTRL
+    STA   5,X ; PIA-WIG-A-CTRL
+    STA   7,X ; PIA-WIG-B-CTRL
+    ORA   #$10 ; Set CTRL to interrupt on 0->1 transition.
+    STA   1,X ; PIA-ROM-A-CTRL
+    LDX   #$C000 ; Ptr, IO space.
+    LDA   #$C0 ; Seed palette gen.
+INITIAL_PALETTE_LOAD: ; 0x00264A, $F64A
+    STA   X+ ; Store A/D Upper to palette.
+    LDB   #$B5 ; Seed B
+    MUL ; Figure next palette byte.
+    CMPX  #$C010 ; Compare to end.
+    BNE   INITIAL_PALETTE_LOAD
+    ORCC  #$80 ; Set entire flag.
+    ANDCC #$EF ; Enable IRQs, unmask.
+    LDY   #$0002 ; Set number of times to do pattern.
+    CLRA ; Clear A.
+    TFR   A>DP ; Set DP to 0.
+    ANDCC #$BF ; Enable FIRQs, unmask.
+    CLRB
+RUG_PATTERN_SETUP: ; 0x002662, $F662
+    TFR   D>U ; Save D to U
+    LDX   #$0000 ; Set X to screen memory.
+RUG_PATTERN_LOOP: ; 0x002667, $F667
+    COMB ; Invert B
+    BITB  #$09 ; Test bits.
+    BNE   BITS_SET
+    COMB ; Re-invert
+    RORA ; rotate
+    RORB
+    BRA   STR_D_TO_SCR[X]
+BITS_SET: ; 0x002671, $F671
+    COMB ; re-invert
+    BITB  #$09 ; Test bits.
+    BNE   BITS_SET2
+    RORA ; rotate
+    RORB
+    BRA   STR_D_TO_SCR[X]
+BITS_SET2: ; 0x00267A, $F67A
+    LSRA ; rotate in 0.
+    RORB
+STR_D_TO_SCR[X]: ; 0x00267C, $F67C
+    STD   X++ ; Store D to screen.
+    EXG   X-D ; Screen loc to D
+    TSTB ; Test if column
+    BNE   RUG_DISP_NOT_COL
     LDB   #$38
-    STB   WATCHDOG
-    TFR   CC>B
-    BITB  #$10
-    BEQ   L_002699
-    CLR   BANKSWITCH
-    LDB   PIA_ROM_DATA_A
-    COMB  
-    BITB  #$03
-    BEQ   L_0026EA
-L_002699: ; 0x002699, $F699
-    CLRB  
-L_00269A: ; 0x00269A, $F69A
-    EXG   X-D
-    CMPX  #$C000
-    BNE   L_002667
-    TFR   U>D
-    LDX   #$0000
-L_0026A6: ; 0x0026A6, $F6A6
-    COMB  
+    STB   WATCHDOG ; Set watchdog.
+    TFR   CC>B ; CC to B
+    BITB  #$10 ; Test if IRQ mask
+    BEQ   IRQ_NO_MASK
+    CLR   BANKSWITCH ; Set to IO bank.
+    LDB   PIA_ROM_DATA_A ; Get switches from coin door. 1=Active
+    COMB ; Invert
+    BITB  #$03 ; Test if auto/man or adv weren't set.
+    BEQ   BOTH_INPUTS_ACTIVE ; Both were active. Probably for diagnostics menu pattern?
+IRQ_NO_MASK: ; 0x002699, $F699
+    CLRB ; Set init to proper val.
+RUG_DISP_NOT_COL: ; 0x00269A, $F69A
+    EXG   X-D ; Put screen location back to X.
+    CMPX  #$C000 ; End of screen.
+    BNE   RUG_PATTERN_LOOP ; Not done, loop.
+    TFR   U>D ; D=0
+    LDX   #$0000 ; Set X.
+COMPARE_RUG_LOOP: ; 0x0026A6, $F6A6
+    COMB
     BITB  #$09
-    BNE   L_0026B0
-    COMB  
-    RORA  
-    RORB  
-    BRA   L_0026BB
-L_0026B0: ; 0x0026B0, $F6B0
-    COMB  
+    BNE   BITS_SET
+    COMB
+    RORA
+    RORB
+    BRA   COMPARE_RUG
+BITS_SET: ; 0x0026B0, $F6B0
+    COMB
     BITB  #$09
-    BNE   L_0026B9
-    RORA  
-    RORB  
-    BRA   L_0026BB
-L_0026B9: ; 0x0026B9, $F6B9
-    LSRA  
-    RORB  
-L_0026BB: ; 0x0026BB, $F6BB
-    CMPD  X++
-    BEQ   L_0026D7
-    EXG   D-Y
+    BNE   BITS_SET2
+    RORA
+    RORB
+    BRA   COMPARE_RUG
+BITS_SET2: ; 0x0026B9, $F6B9
+    LSRA
+    RORB
+COMPARE_RUG: ; 0x0026BB, $F6BB
+    CMPD  X++ ; Test what is on screen.
+    BEQ   RUG_MATCH
+    EXG   D-Y ; Save value to Y.
     TFR   CC>A
-    BITA  #$10
-    BEQ   L_0026D2
+    BITA  #$10 ; Test if IRQ mask.
+    BEQ   RUG_MISMATCH_IRQ_NOMASK
     LDA   #$03
     STA   $36
     STA   BANKSWITCH
-    JMP   $C02A
-L_0026D2: ; 0x0026D2, $F6D2
-    CLRA  
-    EXG   Y-D
-    ORCC  #$40
-L_0026D7: ; 0x0026D7, $F6D7
-    EXG   X-D
-    TSTB  
-    BNE   L_00271E
+    JMP   RUG_MISMATCH
+RUG_MISMATCH_IRQ_NOMASK: ; 0x0026D2, $F6D2
+    CLRA ; Start over by clearing the top byte?
+    EXG   Y-D ; Put screen value back to D.
+    ORCC  #$40 ; Mask FIRQ
+RUG_MATCH: ; 0x0026D7, $F6D7
+    EXG   X-D ; Save screen pos to X.
+    TSTB ; See if at column.
+    BNE   NOT_COLUMN_RUG_MATCH
     TFR   CC>B
-    BITB  #$10
-    BEQ   L_0026F4
-    LDB   PIA_ROM_DATA_A
-    COMB  
-    BITB  #$03
-    BNE   L_002718
-L_0026EA: ; 0x0026EA, $F6EA
-    LDA   #$03
+    BITB  #$10 ; Test if IRQ mask.
+    BEQ   RUG_MATCH_NO_IRQMASK
+    LDB   PIA_ROM_DATA_A ; Get coin door buttons.
+    COMB ; Invert
+    BITB  #$03 ; Test auto/man and adv switches.
+    BNE   RUG_MATCH_EITHER_ACTIVE ; If either active.
+BOTH_INPUTS_ACTIVE: ; 0x0026EA, $F6EA
+    LDA   #$03 ; Bank val
     STA   $36
     STA   BANKSWITCH
     JMP   $C02D
-L_0026F4: ; 0x0026F4, $F6F4
+RUG_MATCH_NO_IRQMASK: ; 0x0026F4, $F6F4
     TFR   CC>B
-    BITB  #$40
-    BEQ   L_002718
-    ANDCC #$BF
-    TFR   DP>B
-    TFR   A>DP
-L_002700: ; 0x002700, $F700
-    SUBA  #$03
-    BHS   L_002700
-    INCA  
-    BNE   L_00270B
+    BITB  #$40 ; Test if FIRQ mask.
+    BEQ   RUG_MATCH_EITHER_ACTIVE ; No mask.
+    ANDCC #$BF ; Unset mask.
+    TFR   DP>B ; Clear B.
+    TFR   A>DP ; A to DP. Val?
+SUB_LOOP: ; 0x002700, $F700
+    SUBA  #$03 ; Sub 3
+    BHS   SUB_LOOP ; C=0
+    INCA ; Add 1...
+    BNE   A_NE_0
     ORB   #$02
-    BRA   L_002714
-L_00270B: ; 0x00270B, $F70B
-    INCA  
-    BNE   L_002712
-    ORB   #$01
-    BRA   L_002714
-L_002712: ; 0x002712, $F712
+    BRA   DP_THINGS
+A_NE_0: ; 0x00270B, $F70B
+    INCA
+    BNE   SET_B_BIT4 ; If not 0
+    ORB   #$01 ; Set bit.
+    BRA   DP_THINGS ; Always taken.
+SET_B_BIT4: ; 0x002712, $F712
     ORB   #$04
-L_002714: ; 0x002714, $F714
-    TFR   DP>A
-    TFR   B>DP
-L_002718: ; 0x002718, $F718
+DP_THINGS: ; 0x002714, $F714
+    TFR   DP>A ; A=DP
+    TFR   B>DP ; DP=B
+RUG_MATCH_EITHER_ACTIVE: ; 0x002718, $F718
     LDB   #$38
     STB   WATCHDOG
-    CLRB  
-L_00271E: ; 0x00271E, $F71E
-    EXG   X-D
-    CMPX  #$C000
-    LBNE  L_0026A6
-    LEAY  [-1,Y]
-    LBNE  L_002662
+    CLRB
+NOT_COLUMN_RUG_MATCH: ; 0x00271E, $F71E
+    EXG   X-D ; Put screen back to X.
+    CMPX  #$C000 ; Is end of screeen.
+    LBNE  COMPARE_RUG_LOOP ; No, loop.
+    LEAY  -1,Y ; Rug pattern finished, minus 1 loop.
+    LBNE  RUG_PATTERN_SETUP ; Repeat if not 0.
     TFR   CC>B
-    TSTB  
-    BMI   L_00273D
+    TSTB ; Test CC
+    BMI   RUG_POST_ENTIRE_SET ; If bit 7 set
     LDB   #$03
     STB   BANKSWITCH
     JSR   L_002800
-    JMP   $C030
-L_00273D: ; 0x00273D, $F73D
-    BITB  #$10
-    LBNE  L_002662
-    LDA   #$9E
+    JMP   RUG_MATCH_SUCCESS
+RUG_POST_ENTIRE_SET: ; 0x00273D, $F73D
+    BITB  #$10 ; Test for IRQ mask.
+    LBNE  RUG_PATTERN_SETUP ; IRQ masked, try again?
+    LDA   #$9E ; Init A
     TFR   DP>B
-    TSTB  
-    BEQ   L_00274E
-L_00274A: ; 0x00274A, $F74A
-    INCA  
-    LSRB  
-    BLO   L_00274A
-L_00274E: ; 0x00274E, $F74E
-    TFR   A>DP
-    ADDA  #$01
-    CLRB  
-    TFR   D>S
+    TSTB
+    BEQ   RUG_POST_ENT_DP_Z ; DP is zero.
+BIT_0_NOT_SET: ; 0x00274A, $F74A
+    INCA ; ++
+    LSRB ; Get bit off B (DP)
+    BLO   BIT_0_NOT_SET ; If bit 0 not set, go.
+RUG_POST_ENT_DP_Z: ; 0x00274E, $F74E
+    TFR   A>DP ; Write A to DP. Can be up to #$A6 here.
+    ADDA  #$01 ; ++
+    CLRB ; D=##00
+    TFR   D>S ; Put S stack there.
     JSR   L_002800
 L_002758: ; 0x002758, $F758
     LDU   #$F86E
@@ -5553,18 +5556,18 @@ L_00275B: ; 0x00275B, $F75B
     ANDB  #$0F
     STB   BANKSWITCH
     ANDA  #$70
-    LSRA  
+    LSRA
     ADDA  #$C0
-    CLRB  
+    CLRB
     TFR   D>X
     LDY   #$0800
     TFR   U>D
     SUBB  #$6C
-    LSRB  
-    CLRA  
+    LSRB
+    CLRA
 L_002780: ; 0x002780, $F780
     ADCB  X+
-    LEAY  [-1,Y]
+    LEAY  -1,Y
     BNE   L_002780
     CMPB  #$80
     BEQ   L_002793
@@ -5599,7 +5602,7 @@ L_0027B8: ; 0x0027B8, $F7B8
 L_0027C2: ; 0x0027C2, $F7C2
     LDA   #$38
     STA   WATCHDOG
-    LEAX  [-1,X]
+    LEAX  -1,X
     BNE   L_0027C2
     JMP   L_002507
 L_0027CE: ; 0x0027CE, $F7CE
@@ -5644,12 +5647,12 @@ L_002813: ; 0x002813, $F813
     ANDA  #$0F
     PSHS  A
     LDA   X++
-    ASLA  
-    ASLA  
-    ASLA  
-    ASLA  
+    ASLA
+    ASLA
+    ASLA
+    ASLA
     ADDA  S+
-    RTS   
+    RTS
 L_002822: ; 0x002822, $F822
     PSHS  B
     LDB   $36
@@ -5671,10 +5674,10 @@ L_00283A: ; 0x00283A, $F83A
 L_002842: ; 0x002842, $F842
     PSHS  A
     STA   1,X
-    LSRA  
-    LSRA  
-    LSRA  
-    LSRA  
+    LSRA
+    LSRA
+    LSRA
+    LSRA
     STA   X++
     PULS  A,PC
 L_00284E: ; 0x00284E, $F84E
@@ -6792,10 +6795,10 @@ L_002CF8: ; 0x002CF8, $FCF8
     LEAU  64,Y
     STU   4,Y
     LDD   $E9
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     LDB   12,X
     STD   8,Y
     SUBD  $F8
@@ -6808,8 +6811,8 @@ L_002CF8: ; 0x002CF8, $FCF8
     BRA   L_002D29
 L_002D23: ; 0x002D23, $FD23
     LDD   U
-    LSRA  
-    LSRB  
+    LSRA
+    LSRB
     ADDD  8,Y
 L_002D29: ; 0x002D29, $FD29
     STD   6,Y
@@ -6845,10 +6848,10 @@ L_002D5E: ; 0x002D5E, $FD5E
     LDD   $22
     ANDB  #$C0
     SUBD  S++
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     PSHS  A
     LDA   6,Y
     ADDA  S
@@ -6880,20 +6883,20 @@ L_002D91: ; 0x002D91, $FD91
     BRA   L_002DC9
 L_002DA9: ; 0x002DA9, $FDA9
     SUBA  #$0C
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     LDB   12,X
     STD   8,Y
     LDB   #$DA
-    MUL   
-    ASLA  
+    MUL
+    ASLA
     LDU   2,Y
     LDB   U
-    MUL   
+    MUL
     LDB   1,U
-    LSRB  
+    LSRB
     ADDD  8,Y
     STD   6,Y
 L_002DC3: ; 0x002DC3, $FDC3
@@ -6903,7 +6906,7 @@ L_002DC9: ; 0x002DC9, $FDC9
     LEAY  64,Y
     CMPY  #$A000
     LBNE  L_002D31
-    RTS   
+    RTS
 L_002DD5: ; 0x002DD5, $FDD5
     PSHS  X,B,A
     LDD   #$0000
@@ -6944,19 +6947,19 @@ L_002E17: ; 0x002E17, $FE17
     LDD   6,Y
     SUBD  8,Y
     STA   $E4
-    LSRB  
+    LSRB
     STB   $E5
     ROL   $E6
     LDA   $E7
     LDB   $E4
-    MUL   
+    MUL
     STD   $E9
     LDB   6,Y
-    CLRA  
+    CLRA
     SUBD  $E9
     STD   $E9
 L_002E32: ; 0x002E32, $FE32
-    TSTA  
+    TSTA
     BEQ   L_002E4D
     LDD   $F3
     ADDB  $F2
@@ -6973,19 +6976,19 @@ L_002E4D: ; 0x002E4D, $FE4D
     CMPB  #$98
     LBHI  L_002F35
     LDA   $E7
-    ASLA  
+    ASLA
     STA   $E8
     LDB   $E5
-    MUL   
+    MUL
     STD   $EB
     LDB   7,Y
-    CLRA  
+    CLRA
     SUBD  $EB
     SUBB  $E6
     ADCA  #$00
     CLR   $F5
 L_002E68: ; 0x002E68, $FE68
-    TSTA  
+    TSTA
     BNE   L_002E6F
     CMPB  #$2A
     BHS   L_002E7F
@@ -7009,7 +7012,7 @@ L_002E7F: ; 0x002E7F, $FE7F
     LDA   $EA
 L_002E92: ; 0x002E92, $FE92
     LDB   $F5
-    ABX   
+    ABX
     LDB   $EC
     JMP   [R_A0EF]
     STD   --U
@@ -7207,7 +7210,7 @@ L_002FBF: ; 0x002FBF, $FFBF
 L_002FC2: ; 0x002FC2, $FFC2
     JMP   L_002793
 L_002FC5: ; 0x002FC5, $FFC5
-    JMP   L_002662
+    JMP   RUG_PATTERN_SETUP
 L_002FC8: ; 0x002FC8, $FFC8
     JMP   L_0027D5
     JMP   L_0024FA
@@ -7270,7 +7273,7 @@ L_003006: ; 0x003006, $C006
     JSR   L_001052
     LDA   $37
     STA   R_A183
-    CLRA  
+    CLRA
     STA   R_A184
     STA   R_A178
     LDA   $B7
@@ -7289,7 +7292,7 @@ L_003030: ; 0x003030, $C030
     INC   R_A178
     JSR   L_0025D1
     LDA   $06
-    DECA  
+    DECA
     BNE   L_003050
     JSR   L_0008DC
     BRA   L_003053
@@ -7310,7 +7313,7 @@ L_003063: ; 0x003063, $C063
     LDB   #$24
     JSR   L_002FD4
 L_003070: ; 0x003070, $C070
-    DECB  
+    DECB
     BNE   L_003070
     LDB   #$3F
     JSR   L_002FD4
@@ -7318,7 +7321,7 @@ L_003070: ; 0x003070, $C070
     JSR   L_002FD4
     LDU   #$C0ED
     LDA   $06
-    ASLA  
+    ASLA
     LEAU  A,U
     LDX   #$3E38
     JSR   L_002FCE
@@ -7351,7 +7354,7 @@ L_003070: ; 0x003070, $C070
     CLR   R_A17A
     JSR   L_00316B
 L_0030CB: ; 0x0030CB, $C0CB
-    CLRA  
+    CLRA
     STA   R_A186
     STA   R_A185
 L_0030D2: ; 0x0030D2, $C0D2
@@ -7394,7 +7397,7 @@ L_00310E: ; 0x00310E, $C10E
 L_00312A: ; 0x00312A, $C12A
     LDY   #$A1FF
     LDA   $06
-    INCA  
+    INCA
     CMPA  #$03
     LBNE  L_003030
     TST   R_A178
@@ -7422,7 +7425,7 @@ L_003158: ; 0x003158, $C158
     .db $C0
     .db $02
     .db $02
-    RTS   
+    RTS
 L_00316B: ; 0x00316B, $C16B
     CLR   R_A162
     LDX   #$45B7
@@ -7436,13 +7439,13 @@ L_00317F: ; 0x00317F, $C17F
     LDD   #$0400
 L_003182: ; 0x003182, $C182
     STU   D,X
-    DECA  
+    DECA
     BNE   L_003182
     INC   R_A162
     LEAX  2048,X
     CMPX  #$5DB7
     BNE   L_003171
-    RTS   
+    RTS
 L_003194: ; 0x003194, $C194
     STU   R_A164
     LDY   R_A17B
@@ -7450,7 +7453,7 @@ L_00319B: ; 0x00319B, $C19B
     BSR   L_003147
     BHS   L_0031A8
     BSR   L_0031C5
-    LEAX  [-12,X]
+    LEAX  -12,X
     CMPX  R_A164
     BHI   L_00319B
 L_0031A8: ; 0x0031A8, $C1A8
@@ -7466,7 +7469,7 @@ L_0031B7: ; 0x0031B7, $C1B7
     LEAU  2,U
     CMPU  #$A006
     BNE   L_0031B7
-    RTS   
+    RTS
 L_0031C5: ; 0x0031C5, $C1C5
     PSHS  X
 L_0031C7: ; 0x0031C7, $C1C7
@@ -7489,7 +7492,7 @@ L_0031DA: ; 0x0031DA, $C1DA
     LDA   $27
     BRA   L_0031F0
 L_0031EF: ; 0x0031EF, $C1EF
-    CLRA  
+    CLRA
 L_0031F0: ; 0x0031F0, $C1F0
     STA   $33
     LDA   #$0F
@@ -7517,8 +7520,8 @@ L_003216: ; 0x003216, $C216
     BNE   L_00324A
     LDX   #$A000
     LDB   R_A17A
-    ASLB  
-    ABX   
+    ASLB
+    ABX
     LDA   X
     ADDA  R_A179
     CMPA  #$3F
@@ -7532,7 +7535,7 @@ L_003239: ; 0x003239, $C239
     STA   X
     JSR   L_003158
     LDA   R_A17E
-    LSRA  
+    LSRA
     ADDA  #$05
     STA   R_A17E
     STA   R_A17F
@@ -7574,7 +7577,7 @@ L_003294: ; 0x003294, $C294
     BNE   L_00329C
     LDA   #$1F
 L_00329C: ; 0x00329C, $C29C
-    DECA  
+    DECA
     BPL   L_003294
     LDA   #$2F
     STA   $07
@@ -7620,7 +7623,7 @@ L_003306: ; 0x003306, $C306
     LDA   #$31
     STA   $06
 L_00330A: ; 0x00330A, $C30A
-    CLRA  
+    CLRA
     LDY   #$A00C
     LDX   R_A164
 L_003312: ; 0x003312, $C312
@@ -7628,12 +7631,12 @@ L_003312: ; 0x003312, $C312
     LEAX  1,X
     ANDB  #$0F
     BNE   L_003322
-    TSTA  
+    TSTA
     BNE   L_003322
     LDB   #$40
     BRA   L_003325
 L_003322: ; 0x003322, $C322
-    INCA  
+    INCA
     ADDB  #$30
 L_003325: ; 0x003325, $C325
     STB   Y+
@@ -7655,7 +7658,7 @@ L_003325: ; 0x003325, $C325
     LDA   $06
     CMPA  #$39
     BNE   L_00330A
-    RTS   
+    RTS
 L_003351: ; 0x003351, $C351
     JSR   L_00007C
     JSR   L_00343C
@@ -7761,11 +7764,11 @@ L_00343C: ; 0x00343C, $C43C
     STA   $BA
     LDX   #$1030
     STX   $BF
-    RTS   
+    RTS
 L_003460: ; 0x003460, $C460
     LDX   R_A187
     LDU   R_A194
-    CLRA  
+    CLRA
 L_003467: ; 0x003467, $C467
     STA   U
     LEAU  256,U
@@ -7925,7 +7928,7 @@ L_00354F: ; 0x00354F, $C54F
 L_00360B: ; 0x00360B, $C60B
     STB   X
     LEAX  256,X
-    DECA  
+    DECA
     BNE   L_00360B
     LDB   #$99
     STB   X
@@ -7941,7 +7944,7 @@ L_00362B: ; 0x00362B, $C62B
     LDB   Y+
     STB   X
     LEAX  256,X
-    DECA  
+    DECA
     BNE   L_00362B
     STY   $A4
     STX   9,U
@@ -8001,34 +8004,34 @@ L_0036BA: ; 0x0036BA, $C6BA
     LDA   Y+
     CMPA  #$AA
     BLS   L_0036CE
-    COMA  
+    COMA
     BEQ   L_0036BA
-    DECA  
+    DECA
     BNE   L_003711
     LDD   Y++
     STD   R_A166
-    CLRA  
+    CLRA
     BRA   L_0036E6
 L_0036CE: ; 0x0036CE, $C6CE
-    ASLA  
+    ASLA
     BHS   L_0036D4
     DEC   R_A166
 L_0036D4: ; 0x0036D4, $C6D4
-    ASLA  
+    ASLA
     BHS   L_0036DA
     INC   R_A166
 L_0036DA: ; 0x0036DA, $C6DA
-    ASLA  
+    ASLA
     BHS   L_0036E0
     DEC   R_A167
 L_0036E0: ; 0x0036E0, $C6E0
-    ASLA  
+    ASLA
     BHS   L_0036E6
     INC   R_A167
 L_0036E6: ; 0x0036E6, $C6E6
     STA   R_A162
     LDD   R_A166
-    LSRA  
+    LSRA
     TFR   D>X
     LDB   X
     BLO   L_0036F7
@@ -8133,7 +8136,7 @@ L_0037E6: ; 0x0037E6, $C7E6
     STD   R_A164
     LDA   #$01
 L_0037ED: ; 0x0037ED, $C7ED
-    CLRB  
+    CLRB
     BITA  R_A164
     BEQ   L_0037F5
     LDB   #$10
@@ -8143,7 +8146,7 @@ L_0037F5: ; 0x0037F5, $C7F5
     ORB   #$01
 L_0037FC: ; 0x0037FC, $C7FC
     STB   X+
-    ASLA  
+    ASLA
     BNE   L_0037ED
     LEAX  248,X
     CMPY  #$CC61
@@ -8151,7 +8154,7 @@ L_0037FC: ; 0x0037FC, $C7FC
     LDX   #$A026
     LDB   L_0036F8
     LDA   B,X
-    COMA  
+    COMA
     ANDA  #$07
     BNE   L_003820
     LDX   #$8018
@@ -8192,15 +8195,15 @@ L_003867: ; 0x003867, $C867
 L_00386F: ; 0x00386F, $C86F
     LDX   #$B412
     LDY   #$CAA0
-    CLRA  
+    CLRA
     STA   R_A177
     STA   R_A176
 L_00387D: ; 0x00387D, $C87D
     LDA   Y
-    LSRA  
-    LSRA  
-    LSRA  
-    LSRA  
+    LSRA
+    LSRA
+    LSRA
+    LSRA
     BSR   L_003891
     LDA   Y+
     ANDA  #$0F
@@ -8211,10 +8214,10 @@ L_003891: ; 0x003891, $C891
     BITA  #$0C
     BNE   L_00389E
     ADDA  R_A176
-    ASLA  
-    ASLA  
+    ASLA
+    ASLA
     STA   R_A176
-    RTS   
+    RTS
 L_00389E: ; 0x00389E, $C89E
     PSHS  A
     ANDA  #$03
@@ -8222,8 +8225,8 @@ L_00389E: ; 0x00389E, $C89E
     STA   R_A176
     PULS  A
     ANDA  #$0C
-    LSRA  
-    LSRA  
+    LSRA
+    LSRA
     LDU   #$CC0D
     LDB   A,U
     STB   R_A175
@@ -8256,7 +8259,7 @@ L_0038E5: ; 0x0038E5, $C8E5
     CLR   R_A177
 L_0038F0: ; 0x0038F0, $C8F0
     CLR   R_A176
-    RTS   
+    RTS
     LDB   $37
     BEQ   L_003919
     CMPB  R_A183
@@ -8270,7 +8273,7 @@ L_003903: ; 0x003903, $C903
     .db $C0
     .db $02
     .db $02
-    CLRA  
+    CLRA
     LDX   #$48E5
     JSR   L_002FCE
     .db $C0
@@ -8293,10 +8296,10 @@ L_003936: ; 0x003936, $C936
 L_003938: ; 0x003938, $C938
     BEQ   L_003940
     JSR   L_0003DB
-    DECA  
+    DECA
     BRA   L_003938
 L_003940: ; 0x003940, $C940
-    RTS   
+    RTS
     .db $FE
     .db $74
     .db $40
@@ -9182,7 +9185,7 @@ L_003CB5: ; 0x003CB5, $CCB5
     STU   [2,X]
     STU   [4,X]
     STU   [6,X]
-    ABX   
+    ABX
     CMPX  $97
     BLO   L_003CB5
     LDX   [R_A097]
@@ -9194,11 +9197,11 @@ L_003CD3: ; 0x003CD3, $CCD3
     LDD   $20
     SUBD  #$6D40
     STD   $73
-    LSRA  
-    LSRA  
+    LSRA
+    LSRA
     LDU   #$CD69
     LDB   #$03
-    MUL   
+    MUL
     LEAU  D,U
     LDA   $BA
     BITA  #$02
@@ -9211,13 +9214,13 @@ L_003CF0: ; 0x003CF0, $CCF0
     PULU  B,X
     STD   Y
     STX   [Y++]
-    INCA  
+    INCA
     LDX   #$0000
     STX   [Y]
     PULU  B,X
     STD   Y
     STX   [Y++]
-    INCA  
+    INCA
     CMPA  #$70
     BNE   L_003CF0
 L_003D0C: ; 0x003D0C, $CD0C
@@ -9236,13 +9239,13 @@ L_003D0C: ; 0x003D0C, $CD0C
     BSR   L_003D64
     STU   $97
     LDD   $BF
-    LSRA  
-    LSRA  
-    LSRA  
-    LSRA  
-    LSRB  
-    LSRB  
-    LSRB  
+    LSRA
+    LSRA
+    LSRA
+    LSRA
+    LSRB
+    LSRB
+    LSRB
     ADDD  #$4B07
     STD   U
     LDX   U
@@ -9251,16 +9254,16 @@ L_003D0C: ; 0x003D0C, $CD0C
     STA   2,X
     LDA   #$09
     STA   -255,X
-    RTS   
+    RTS
 L_003D4F: ; 0x003D4F, $CD4F
     LDD   10,X
     SUBD  $73
-    LSRA  
-    LSRA  
+    LSRA
+    LSRA
     LDB   12,X
-    LSRB  
-    LSRB  
-    LSRB  
+    LSRB
+    LSRB
+    LSRB
     ADDD  #$3007
     STD   U
     LDD   18,X
@@ -9268,7 +9271,7 @@ L_003D4F: ; 0x003D4F, $CD4F
 L_003D64: ; 0x003D64, $CD64
     LDX   X
     BNE   L_003D4F
-    RTS   
+    RTS
     .db $25
     .db $70
     .db $07
@@ -12649,15 +12652,15 @@ L_004B07: ; 0x004B07, $CB07
     CLR   $52
     PULS  CC,A,B,X,Y,U
     ORCC  #$01
-    RTS   
+    RTS
 L_004B0E: ; 0x004B0E, $CB0E
     LDU   X++
     BMI   L_004B23
-    LEAX  [-1,X]
+    LEAX  -1,X
     TFR   U>D
     CMPA  #$08
     BHI   L_004B07
-    ASLA  
+    ASLA
     LDY   #$CB64
     JSR   [A,Y]
     BRA   L_004B03
@@ -12683,10 +12686,10 @@ L_004B29: ; 0x004B29, $CB29
 L_004B45: ; 0x004B45, $CB45
     LDB   #$03
 L_004B47: ; 0x004B47, $CB47
-    ASLB  
-    ASLB  
+    ASLB
+    ASLB
     LDX   #$C5E3
-    ABX   
+    ABX
     TFR   X>Y
     LDD   $50
     LDX   $3D
@@ -12698,7 +12701,7 @@ L_004B47: ; 0x004B47, $CB47
     JMP   X
     PULS  CC,A,B,X,Y,U
     ANDCC #$FE
-    RTS   
+    RTS
     ADDB  #$76
     ADDB  #$7B
     ADDB  #$80
@@ -12710,35 +12713,35 @@ L_004B47: ; 0x004B47, $CB47
     ADDB  #$AC
     LDA   X+
     STA   $4C
-    RTS   
+    RTS
     LDB   X+
     STB   $4D
-    RTS   
+    RTS
     LDA   $4E
     ADDA  X+
     STA   $50
-    RTS   
+    RTS
     LDA   $50
     ADDA  X+
     STA   $50
-    RTS   
+    RTS
     LDB   $4F
     ADDB  X+
     STB   $51
-    RTS   
+    RTS
     LDB   $51
     ADDB  X+
     STB   $51
-    RTS   
+    RTS
     LDD   X++
     STD   $4E
     STD   $50
-    RTS   
+    RTS
     LDA   $4E
     LDB   $51
     ADDB  $4D
     STD   $50
-    RTS   
+    RTS
     LDY   X++
     STX   $52
     LDX   $3D
@@ -12794,10 +12797,10 @@ L_004C0D: ; 0x004C0D, $CC0D
     PULS  CC,A,B,X,Y,U
     LDX   $50
     ORCC  #$01
-    RTS   
+    RTS
 L_004C1C: ; 0x004C1C, $CC1C
-    LSRA  
-    LSRA  
+    LSRA
+    LSRA
     LDX   #$C5FB
     LEAY  A,X
     LDD   $50
@@ -12813,18 +12816,18 @@ L_004C1C: ; 0x004C1C, $CC1C
     JMP   X
     PULS  CC,A,B,X,Y,U
     ANDCC #$FE
-    RTS   
+    RTS
 L_004C3E: ; 0x004C3E, $CC3E
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     ORB   #$0F
-    RTS   
+    RTS
     .db $00
     .db $00
     .db $00
@@ -13796,8 +13799,10 @@ L_004C3E: ; 0x004C3E, $CC3E
     JMP   L_005799
     JMP   L_005127
     JMP   L_005146
-    JMP   L_00523D
+RUG_MISMATCH: ; 0x00502A, $C02A
+    JMP   RUG_MISMATCH_JMP
     JMP   L_0052C3
+RUG_MATCH_SUCCESS: ; 0x005030, $C030
     JMP   L_005406
     JMP   L_005CC1
 L_005036: ; 0x005036, $C036
@@ -13809,48 +13814,48 @@ L_00503C: ; 0x00503C, $C03C
     .db $C0
     .db $02
     .db $02
-    RTS   
+    RTS
     JSR   L_002FCE
     .db $C0
     .db $05
     .db $02
-    RTS   
+    RTS
 L_00504A: ; 0x00504A, $C04A
     JSR   L_002FCE
     .db $C0
     .db $0E
     .db $02
-    RTS   
+    RTS
 L_005051: ; 0x005051, $C051
     JSR   L_002FCE
     .db $C0
     .db $11
     .db $02
-    RTS   
+    RTS
 L_005058: ; 0x005058, $C058
     JSR   L_002FCE
     .db $C0
     .db $1A
     .db $02
-    RTS   
+    RTS
 L_00505F: ; 0x00505F, $C05F
     JSR   L_002FCE
     .db $C0
     .db $1D
     .db $02
-    RTS   
+    RTS
 L_005066: ; 0x005066, $C066
     JSR   L_002FCE
     .db $C0
     .db $20
     .db $02
-    RTS   
+    RTS
 L_00506D: ; 0x00506D, $C06D
     JSR   L_002FCE
     .db $C0
     .db $23
     .db $02
-    RTS   
+    RTS
     ADCB  $FF
     JSR   L_005A2A
     LDB   #$7A
@@ -13900,14 +13905,14 @@ L_0050E5: ; 0x0050E5, $C0E5
     JSR   L_005039
     BITB  #$02
     BEQ   L_0050F7
-    LSRB  
+    LSRB
     BLO   L_0050FB
     BRA   L_005146
 L_0050F7: ; 0x0050F7, $C0F7
-    LEAY  [-1,Y]
+    LEAY  -1,Y
     BNE   L_0050E5
 L_0050FB: ; 0x0050FB, $C0FB
-    RTS   
+    RTS
 L_0050FC: ; 0x0050FC, $C0FC
     ANDCC #$EF
     LDX   #$C47F
@@ -13918,14 +13923,14 @@ L_0050FC: ; 0x0050FC, $C0FC
     JSR   L_005039
     ANDB  #$0F
     BNE   L_005113
-    RTS   
+    RTS
 L_005113: ; 0x005113, $C113
-    CLRB  
+    CLRB
     JSR   L_005036
     LDX   #$C47D
     JSR   L_002FA4
-    CLRA  
-    LEAX  [-2,X]
+    CLRA
+    LEAX  -2,X
     JSR   L_002FAA
     CMPB  #$15
     BNE   L_00512B
@@ -13943,7 +13948,7 @@ L_005132: ; 0x005132, $C132
 L_005139: ; 0x005139, $C139
     CMPB  #$45
     BEQ   L_00513E
-    RTS   
+    RTS
 L_00513E: ; 0x00513E, $C13E
     LEAS  2,S
     JSR   L_005BCF
@@ -13982,11 +13987,11 @@ L_005180: ; 0x005180, $C180
     LDU   $5B
     LDD   $5B
     SUBD  $43
-    LSRB  
+    LSRB
     BLO   L_00519C
     LEAU  1,U
 L_00519C: ; 0x00519C, $C19C
-    INCB  
+    INCB
     STB   $3A
     JSR   L_005B23
     LDX   $50
@@ -14008,7 +14013,7 @@ L_00519C: ; 0x00519C, $C19C
     BRA   L_0051EE
 L_0051CF: ; 0x0051CF, $C1CF
     TFR   CC>B
-    TSTB  
+    TSTB
     BPL   L_005212
     LDB   #$7A
     JSR   L_005793
@@ -14023,7 +14028,7 @@ L_0051EE: ; 0x0051EE, $C1EE
     JSR   L_005A39
 L_0051F1: ; 0x0051F1, $C1F1
     JSR   L_005A2A
-    CLRB  
+    CLRB
     JSR   L_005AAA
     JSR   L_005791
     LDU   #$C079
@@ -14044,7 +14049,7 @@ L_005212: ; 0x005212, $C212
 L_005224: ; 0x005224, $C224
     JSR   L_005036
     LDA   #$B5
-    MUL   
+    MUL
     EXG   A-B
     LEAX  1,X
     CMPX  #$C010
@@ -14052,7 +14057,7 @@ L_005224: ; 0x005224, $C224
     LDD   #$0000
     LDY   #$000A
     JMP   L_002FC5
-L_00523D: ; 0x00523D, $C23D
+RUG_MISMATCH_JMP: ; 0x00523D, $C23D
     TFR   Y>D
     EORB  -X
     EORA  -X
@@ -14072,14 +14077,14 @@ L_00523D: ; 0x00523D, $C23D
     LDY   #$C041
     JSR   L_00506D
     LDD   $41
-    TSTA  
+    TSTA
     BNE   L_005274
     TFR   B>A
 L_005274: ; 0x005274, $C274
-    CLRB  
+    CLRB
 L_005275: ; 0x005275, $C275
-    INCB  
-    LSRA  
+    INCB
+    LSRA
     BHS   L_005275
     STB   $3A
     LDD   $43
@@ -14092,12 +14097,12 @@ L_00527D: ; 0x00527D, $C27D
     LDX   #$4290
     JSR   L_00503C
     LDB   $3B
-    ASLB  
-    ASLB  
-    ASLB  
-    ASLB  
+    ASLB
+    ASLB
+    ASLB
+    ASLB
     ADDB  $3A
-    CLRA  
+    CLRA
     LDX   $50
     JSR   L_00504A
     JSR   L_005A0E
@@ -14106,8 +14111,8 @@ L_00527D: ; 0x00527D, $C27D
     LDA   $3B
     LDB   #$10
 L_0052A7: ; 0x0052A7, $C2A7
-    LSRB  
-    DECA  
+    LSRB
+    DECA
     BNE   L_0052A7
     JSR   L_005AAA
     JSR   L_005A0E
@@ -14153,7 +14158,7 @@ L_0052F2: ; 0x0052F2, $C2F2
     JMP   L_0053BB
 L_005318: ; 0x005318, $C318
     ADDA  #$03
-    CLRB  
+    CLRB
     STD   $41
     LDU   $41
     LDX   #$C400
@@ -14165,28 +14170,28 @@ L_005322: ; 0x005322, $C322
     BNE   L_005322
     LDD   #$0010
     STB   $3A
-    CLRA  
+    CLRA
 L_005334: ; 0x005334, $C334
     LDX   #$C400
     LDB   $3A
 L_005339: ; 0x005339, $C339
     JSR   L_005036
     LEAX  1,X
-    INCB  
+    INCB
     CMPB  $3A
     BNE   L_005339
     LDX   #$C400
-    INCA  
+    INCA
 L_005347: ; 0x005347, $C347
     JSR   L_005039
     STB   $3B
     LEAX  1,X
     JSR   L_005039
     SUBB  $3B
-    DECB  
+    DECB
     ANDB  #$0F
     BNE   L_005366
-    INCA  
+    INCA
     BNE   L_005347
     JSR   L_005A69
     TST   $49
@@ -14261,7 +14266,7 @@ L_0053EF: ; 0x0053EF, $C3EF
     BEQ   L_0053E7
 L_005406: ; 0x005406, $C406
     JSR   L_005A2A
-    CLRB  
+    CLRB
     STB   $41
     STB   $42
     JSR   L_005AAA
@@ -14274,7 +14279,7 @@ L_005406: ; 0x005406, $C406
     LDY   #$0001
 L_005428: ; 0x005428, $C428
     LDU   #$C9F0
-    CLRA  
+    CLRA
 L_00542C: ; 0x00542C, $C42C
     LDX   #$CC00
     JSR   L_005039
@@ -14287,7 +14292,7 @@ L_00542C: ; 0x00542C, $C42C
 L_00543F: ; 0x00543F, $C43F
     JSR   L_005A44
 L_005442: ; 0x005442, $C442
-    INCA  
+    INCA
     CMPA  U
     BNE   L_00544B
     LEAU  1,U
@@ -14308,7 +14313,7 @@ L_00544F: ; 0x00544F, $C44F
     JSR   L_005051
     LDB   $3A
     JSR   L_005B23
-    CLRA  
+    CLRA
     STD   $41
     LDX   #$5A8C
     JSR   L_00504A
@@ -14316,7 +14321,7 @@ L_00544F: ; 0x00544F, $C44F
     CMPA  #$1F
     BNE   L_00542C
     TFR   CC>B
-    TSTB  
+    TSTB
     LBPL  L_005585
     BRA   L_005428
 L_005486: ; 0x005486, $C486
@@ -14347,8 +14352,8 @@ L_0054B8: ; 0x0054B8, $C4B8
     STA   $3C
     LDX   #$CC00
     LDU   $41
-    LEAU  [-5,U]
-    CLRA  
+    LEAU  -5,U
+    CLRA
 L_0054C4: ; 0x0054C4, $C4C4
     JSR   L_005039
     CMPX  #$CC06
@@ -14371,14 +14376,14 @@ L_0054DC: ; 0x0054DC, $C4DC
     BNE   L_0054C4
     CMPA  #$28
     BEQ   L_005501
-    LEAX  [-2,X]
+    LEAX  -2,X
     JSR   L_005039
-    TSTB  
+    TSTB
     BPL   L_005501
     LDB   #$34
     LEAX  1,X
     JSR   L_005036
-    LEAX  [-3,X]
+    LEAX  -3,X
     INC   $3C
     BRA   L_0054C4
 L_005501: ; 0x005501, $C501
@@ -14395,8 +14400,8 @@ L_005512: ; 0x005512, $C512
 L_005516: ; 0x005516, $C516
     BITB  $3B
     BNE   L_00551E
-    INCA  
-    ASLB  
+    INCA
+    ASLB
     BRA   L_005516
 L_00551E: ; 0x00551E, $C51E
     LDX   $41
@@ -14427,15 +14432,15 @@ L_005541: ; 0x005541, $C541
     PULS  A
     CMPA  #$08
     BLO   L_005501
-    LSRA  
+    LSRA
     CMPA  #$06
     BEQ   L_005501
     LDX   #$CC06
     JSR   L_005039
-    TSTB  
+    TSTB
     BPL   L_005501
     LDX   $50
-    CLRA  
+    CLRA
     LDB   $3C
     JSR   L_00504A
     BRA   L_005501
@@ -14445,15 +14450,15 @@ L_00556C: ; 0x00556C, $C56C
     BLO   L_005575
     SUBA  #$10
 L_005575: ; 0x005575, $C575
-    ASLA  
+    ASLA
     LEAU  A,U
     TFR   X>D
     SUBD  $41
     LDA   #$0A
-    MUL   
+    MUL
     ADDD  #$3830
     TFR   D>X
-    RTS   
+    RTS
 L_005585: ; 0x005585, $C585
     JSR   L_005A2A
     JSR   L_005791
@@ -14490,7 +14495,7 @@ L_0055C5: ; 0x0055C5, $C5C5
     LDY   #$1388
     JSR   L_005A44
     TFR   CC>B
-    TSTB  
+    TSTB
     LBPL  L_005146
     BRA   L_00559E
     JSR   L_005A69
@@ -14810,11 +14815,11 @@ L_005799: ; 0x005799, $C799
     JSR   L_005A69
     LDA   #$20
     TFR   A>B
-    DECB  
+    DECB
     LEAX  S
 L_0057EA: ; 0x0057EA, $C7EA
     STA   X+
-    DECB  
+    DECB
     BNE   L_0057EA
     LDA   #$2F
     STA   X+
@@ -14852,7 +14857,7 @@ L_005825: ; 0x005825, $C825
     BNE   L_005857
     LDX   #$C487
     JSR   L_002FA4
-    TSTB  
+    TSTB
     BEQ   L_005857
     CMPB  #$08
     BHI   L_005844
@@ -14864,7 +14869,7 @@ L_005844: ; 0x005844, $C844
     LDB   #$01
     JSR   L_002FAD
     JSR   L_005B99
-    CLRB  
+    CLRB
     PULS  X
     JSR   L_002FAD
 L_005857: ; 0x005857, $C857
@@ -14872,7 +14877,7 @@ L_005857: ; 0x005857, $C857
     LDA   $3A
     CMPA  #$06
     BEQ   L_00586D
-    TSTA  
+    TSTA
     BNE   L_005866
     LDA   #$64
     BRA   L_005868
@@ -14880,11 +14885,11 @@ L_005866: ; 0x005866, $C866
     LDA   #$06
 L_005868: ; 0x005868, $C868
     STA   $3A
-    INCA  
+    INCA
     LDB   #$FF
 L_00586D: ; 0x00586D, $C86D
     JSR   L_005A57
-    DECA  
+    DECA
     BEQ   L_00588C
     LDX   #$CC00
     PSHS  B
@@ -14897,7 +14902,7 @@ L_005883: ; 0x005883, $C883
     ORCC  #$01
 L_005885: ; 0x005885, $C885
     PULS  B
-    RORB  
+    RORB
     BNE   L_00586D
     CLR   $3A
 L_00588C: ; 0x00588C, $C88C
@@ -14909,15 +14914,15 @@ L_005891: ; 0x005891, $C891
     JSR   L_005058
     JSR   L_00591F
     LDA   $3C
-    INCA  
+    INCA
     JSR   L_005902
     JSR   L_005910
     STD   X
     LDB   $3C
-    ASLB  
-    ASLB  
+    ASLB
+    ASLB
     LDX   #$CCD6
-    ABX   
+    ABX
     LDY   X
     LDU   2,X
     LEAX  14,S
@@ -14931,11 +14936,11 @@ L_0058C0: ; 0x0058C0, $C8C0
     TFR   U>D
     LEAU  2,S
     LDX   #$C400
-    ABX   
+    ABX
     JSR   L_002FA4
     PSHS  B,A
     LDB   $3C
-    INCB  
+    INCB
     CMPB  #$07
     BHI   L_0058E7
 L_0058D4: ; 0x0058D4, $C8D4
@@ -14953,7 +14958,7 @@ L_0058E7: ; 0x0058E7, $C8E7
     BNE   L_0058F4
     LDD   #$3030
     STD   9,U
-    LEAU  [-2,U]
+    LEAU  -2,U
     BRA   L_0058D4
 L_0058F4: ; 0x0058F4, $C8F4
     PULS  A,B
@@ -14969,47 +14974,47 @@ L_005902: ; 0x005902, $C902
     LDA   #$99
 L_005908: ; 0x005908, $C908
     ADDA  #$01
-    DAA   
-    DECB  
+    DAA
+    DECB
     BPL   L_005908
     PULS  B,PC
 L_005910: ; 0x005910, $C910
     TFR   A>B
     ANDA  #$F0
-    LSRA  
-    LSRA  
-    LSRA  
-    LSRA  
+    LSRA
+    LSRA
+    LSRA
+    LSRA
     ADDA  #$30
     ANDB  #$0F
     ADDB  #$30
-    RTS   
+    RTS
 L_00591F: ; 0x00591F, $C91F
     LDA   #$20
     TFR   A>B
-    DECB  
+    DECB
     LEAX  4,S
 L_005926: ; 0x005926, $C926
     STA   X+
-    DECB  
+    DECB
     BNE   L_005926
     LDA   #$2F
     STA   X+
     LEAX  4,S
-    RTS   
+    RTS
 L_005932: ; 0x005932, $C932
     CMPX  #$C481
     BNE   L_005951
     JSR   L_002FA7
-    LEAX  [-4,X]
+    LEAX  -4,X
     EXG   A-B
     ADDA  #$10
-    DAA   
+    DAA
     BHS   L_00594A
     EXG   A-B
     ADDA  #$01
 L_005947: ; 0x005947, $C947
-    DAA   
+    DAA
     EXG   A-B
 L_00594A: ; 0x00594A, $C94A
     EXG   A-B
@@ -15019,18 +15024,18 @@ L_005951: ; 0x005951, $C951
     JSR   L_002FA1
     ADDA  #$01
 L_005956: ; 0x005956, $C956
-    DAA   
-    LEAX  [-2,X]
+    DAA
+    LEAX  -2,X
     INC   $3B
     JMP   L_002FAA
 L_00595E: ; 0x00595E, $C95E
     CMPX  #$C481
     BNE   L_005973
     JSR   L_002FA7
-    LEAX  [-4,X]
+    LEAX  -4,X
     EXG   A-B
     ADDA  #$90
-    DAA   
+    DAA
     EXG   A-B
     ADCA  #$99
     BRA   L_005947
@@ -15040,11 +15045,11 @@ L_005973: ; 0x005973, $C973
     BRA   L_005956
 L_00597A: ; 0x00597A, $C97A
     LDB   $3C
-    INCB  
+    INCB
     CMPB  #$07
     BHI   L_005982
 L_005981: ; 0x005981, $C981
-    RTS   
+    RTS
 L_005982: ; 0x005982, $C982
     CMPB  #$09
     BLS   L_005997
@@ -15054,17 +15059,17 @@ L_005982: ; 0x005982, $C982
     BEQ   L_005997
     LDX   #$C487
     JSR   L_002FA1
-    TSTA  
+    TSTA
     BNE   L_005981
 L_005997: ; 0x005997, $C997
-    DECB  
-    ASLB  
-    ASLB  
+    DECB
+    ASLB
+    ASLB
     LDX   #$CCD6
-    ABX   
+    ABX
     LDB   3,X
     LDX   #$C400
-    ABX   
+    ABX
     PSHS  X
 L_0059A6: ; 0x0059A6, $C9A6
     JSR   L_005A57
@@ -15088,7 +15093,7 @@ L_0059BD: ; 0x0059BD, $C9BD
     JSR   L_005036
     PULS  B,X
 L_0059D0: ; 0x0059D0, $C9D0
-    LSRB  
+    LSRB
     LBLO  L_005932
     JMP   L_00595E
     .db $02
@@ -15158,7 +15163,7 @@ L_005A1F: ; 0x005A1F, $CA1F
     JSR   L_005039
     BITB  #$02
     BEQ   L_005A1F
-    RTS   
+    RTS
 L_005A2A: ; 0x005A2A, $CA2A
     JSR   L_002FBC
     BSR   L_005A69
@@ -15167,14 +15172,14 @@ L_005A2A: ; 0x005A2A, $CA2A
     BPL   L_005A38
     CLR   $49
 L_005A38: ; 0x005A38, $CA38
-    RTS   
+    RTS
 L_005A39: ; 0x005A39, $CA39
     LDY   #$0001
 L_005A3D: ; 0x005A3D, $CA3D
     BSR   L_005A44
     TST   $49
     BEQ   L_005A3D
-    RTS   
+    RTS
 L_005A44: ; 0x005A44, $CA44
     PSHS  Y,A,CC
 L_005A46: ; 0x005A46, $CA46
@@ -15183,9 +15188,9 @@ L_005A46: ; 0x005A46, $CA46
     BNE   L_005A55
     LDA   #$B2
 L_005A4E: ; 0x005A4E, $CA4E
-    DECA  
+    DECA
     BNE   L_005A4E
-    LEAY  [-1,Y]
+    LEAY  -1,Y
     BNE   L_005A46
 L_005A55: ; 0x005A55, $CA55
     PULS  CC,A,Y,PC
@@ -15205,22 +15210,22 @@ L_005A69: ; 0x005A69, $CA69
     JSR   L_005036
     LDX   #$CC00
     JSR   L_005039
-    COMB  
+    COMB
     ANDB  #$03
     BEQ   L_005A80
     ANDCC #$FE
 L_005A80: ; 0x005A80, $CA80
     LDB   $47
-    RORB  
+    RORB
     STB   $47
     BNE   L_005A89
     STB   $48
 L_005A89: ; 0x005A89, $CA89
-    COMB  
+    COMB
     BNE   L_005A95
     LDB   $48
     BNE   L_005A95
-    COMB  
+    COMB
     STB   $48
     INC   $49
 L_005A95: ; 0x005A95, $CA95
@@ -15237,20 +15242,20 @@ L_005A9C: ; 0x005A9C, $CA9C
     PULS  B,X,Y,PC
 L_005AAA: ; 0x005AAA, $CAAA
     PSHS  X,B
-    LSRB  
-    RORB  
-    RORB  
-    RORB  
+    LSRB
+    RORB
+    RORB
+    RORB
     BPL   L_005AB3
-    INCB  
+    INCB
 L_005AB3: ; 0x005AB3, $CAB3
-    RORB  
-    RORB  
+    RORB
+    RORB
     LDX   #$CC00
     JSR   L_005036
-    ASLB  
-    ASLB  
-    ASLB  
+    ASLB
+    ASLB
+    ASLB
     ORB   #$3F
     LDX   #$CC02
     JSR   L_005036
@@ -15262,11 +15267,11 @@ L_005AC8: ; 0x005AC8, $CAC8
 L_005AD0: ; 0x005AD0, $CAD0
     JSR   L_005AAA
     JSR   L_005A44
-    CLRB  
+    CLRB
     JSR   L_005AAA
     JSR   L_005A44
     LDB   1,S
-    DECA  
+    DECA
     BNE   L_005AD0
     PULS  A,B,Y
 L_005AE4: ; 0x005AE4, $CAE4
@@ -15282,7 +15287,7 @@ L_005AE4: ; 0x005AE4, $CAE4
     PULS  A,B,PC
 L_005AF9: ; 0x005AF9, $CAF9
     PSHS  X,B
-    CLRB  
+    CLRB
     LDX   #$C000
 L_005AFF: ; 0x005AFF, $CAFF
     JSR   L_005036
@@ -15292,7 +15297,7 @@ L_005AFF: ; 0x005AFF, $CAFF
     PULS  B,X,PC
 L_005B0B: ; 0x005B0B, $CB0B
     PSHS  X,B
-    COMB  
+    COMB
     ANDB  #$3F
     LDX   #$CC02
     JSR   L_005036
@@ -15306,12 +15311,12 @@ L_005B23: ; 0x005B23, $CB23
     TFR   B>A
     ANDA  #$0F
     ADDA  #$00
-    DAA   
+    DAA
     ANDB  #$F0
 L_005B2E: ; 0x005B2E, $CB2E
     BEQ   L_005B37
     ADDA  #$16
-    DAA   
+    DAA
     SUBB  #$10
     BRA   L_005B2E
 L_005B37: ; 0x005B37, $CB37
@@ -15329,7 +15334,7 @@ L_005B49: ; 0x005B49, $CB49
     CMPX  $3D
     BNE   L_005B49
     LEAX  2304,X
-    TSTA  
+    TSTA
     BNE   L_005B59
     LDX   #$0F00
 L_005B59: ; 0x005B59, $CB59
@@ -15354,7 +15359,7 @@ L_005B7B: ; 0x005B7B, $CB7B
     CMPX  $3D
     BNE   L_005B7B
     LEAX  2304,X
-    TSTA  
+    TSTA
     BNE   L_005B8B
     LDX   #$0F00
 L_005B8B: ; 0x005B8B, $CB8B
@@ -15364,16 +15369,16 @@ L_005B8B: ; 0x005B8B, $CB8B
     CMPY  #$C9F0
     BNE   L_005B71
 L_005B98: ; 0x005B98, $CB98
-    RTS   
+    RTS
 L_005B99: ; 0x005B99, $CB99
     LDX   #$C487
     JSR   L_002FAD
-    ASLB  
+    ASLB
     PSHS  B
-    ASLB  
+    ASLB
     ADDB  S+
     LDX   #$CF10
-    ABX   
+    ABX
     LDY   #$C489
     LDB   #$06
 L_005BAF: ; 0x005BAF, $CBAF
@@ -15383,22 +15388,22 @@ L_005BB1: ; 0x005BB1, $CBB1
     EXG   X-Y
     JSR   L_002FAA
     EXG   X-Y
-    DECB  
+    DECB
     BNE   L_005BB1
     PULS  A,PC
 L_005BBF: ; 0x005BBF, $CBBF
     LDB   #$0E
     BRA   L_005BC4
 L_005BC3: ; 0x005BC3, $CBC3
-    CLRB  
+    CLRB
 L_005BC4: ; 0x005BC4, $CBC4
     LDX   #$C400
-    CLRA  
+    CLRA
 L_005BC8: ; 0x005BC8, $CBC8
     JSR   L_002FAA
-    DECB  
+    DECB
     BNE   L_005BC8
-    RTS   
+    RTS
 L_005BCF: ; 0x005BCF, $CBCF
     PSHS  Y,X,B,A
     BSR   L_005BC3
@@ -15416,28 +15421,28 @@ L_005BE6: ; 0x005BE6, $CBE6
 L_005BE8: ; 0x005BE8, $CBE8
     ANDB  #$07
     BEQ   L_005C0B
-    ASLB  
-    ASLB  
+    ASLB
+    ASLB
     LDX   #$C3FD
-    ABX   
+    ABX
     JSR   L_002FA4
     PSHS  B
     JSR   L_002FA4
     PSHS  B
     ADDA  S+
-    DAA   
+    DAA
     EXG   A-B
     PULS  A
     ADCA  #$00
-    DAA   
-    LEAX  [-4,X]
+    DAA
+    LEAX  -4,X
     JSR   L_002FB0
 L_005C0B: ; 0x005C0B, $CC0B
     PULS  A,B,X,PC
 L_005C0D: ; 0x005C0D, $CC0D
     PSHS  X,A
     ADDA  $37
-    DAA   
+    DAA
     BHS   L_005C16
     LDA   #$99
 L_005C16: ; 0x005C16, $CC16
@@ -15458,9 +15463,9 @@ L_005C2C: ; 0x005C2C, $CC2C
     LDB   #$01
 L_005C30: ; 0x005C30, $CC30
     JSR   L_005BE0
-    ASLB  
+    ASLB
     LDX   #$C487
-    ABX   
+    ABX
     JSR   L_002FA4
     BSR   L_005C9F
     LDA   $39
@@ -15489,45 +15494,45 @@ L_005C5B: ; 0x005C5B, $CC5B
     LDA   $39
     BSR   L_005C9F
     BSR   L_005C89
-    TSTA  
+    TSTA
     BEQ   L_005C7C
     CLR   $38
     CLR   $39
 L_005C7C: ; 0x005C7C, $CC7C
     ADDA  S+
-    DAA   
+    DAA
     LDB   #$04
     JSR   L_005BE6
     JSR   L_005C0D
     PULS  A,B,X,PC
 L_005C89: ; 0x005C89, $CC89
     PSHS  B
-    TSTB  
+    TSTB
     BNE   L_005C91
-    CLRA  
+    CLRA
     PULS  B,PC
 L_005C91: ; 0x005C91, $CC91
     EXG   A-B
     LDA   #$99
 L_005C95: ; 0x005C95, $CC95
     ADDA  #$01
-    DAA   
+    DAA
     SUBB  S
     BHS   L_005C95
     ADDB  S+
-    RTS   
+    RTS
 L_005C9F: ; 0x005C9F, $CC9F
     PSHS  A
     EXG   A-B
-    CLRB  
+    CLRB
 L_005CA4: ; 0x005CA4, $CCA4
-    TSTA  
+    TSTA
     BNE   L_005CA9
     PULS  A,PC
 L_005CA9: ; 0x005CA9, $CCA9
     ADDA  #$99
-    DAA   
-    INCB  
+    DAA
+    INCB
     BRA   L_005CA4
 L_005CAF: ; 0x005CAF, $CCAF
     PSHS  Y,X,B,A
@@ -15545,7 +15550,7 @@ L_005CC1: ; 0x005CC1, $CCC1
 L_005CCC: ; 0x005CCC, $CCCC
     LDA   Y+
     JSR   L_002FAA
-    DECB  
+    DECB
     BNE   L_005CCC
     PULS  A,B,X,Y,PC
     .db $CD
@@ -16437,17 +16442,17 @@ L_006089: ; 0x006089, $C089
     STX   Y++
     CMPY  #$BF50
     BNE   L_006089
-    RTS   
+    RTS
 L_006092: ; 0x006092, $C092
     LDD   $20
     ANDB  #$E0
     SUBD  $15
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
-    ASLB  
-    ROLA  
+    ASLB
+    ROLA
+    ASLB
+    ROLA
+    ASLB
+    ROLA
     STA   $00
     BEQ   L_0060C2
     BMI   L_0060B4
@@ -16484,45 +16489,45 @@ L_0060DE: ; 0x0060DE, $C0DE
     PULS  B,U
     STD   Y
     STU   [Y++]
-    DECA  
+    DECA
     STX   [Y]
     PULS  B,U
     STD   Y
     STU   [Y++]
-    DECA  
+    DECA
     STX   [Y]
     PULS  B,U
     STD   Y
     STU   [Y++]
-    DECA  
+    DECA
     STX   [Y]
     PULS  B,U
     STD   Y
     STU   [Y++]
-    DECA  
+    DECA
     STX   [Y]
     PULS  B,U
     STD   Y
     STU   [Y++]
-    DECA  
+    DECA
     STX   [Y]
     PULS  B,U
     STD   Y
     STU   [Y++]
-    DECA  
+    DECA
     STX   [Y]
     PULS  B,U
     STD   Y
     STU   [Y++]
-    DECA  
+    DECA
     STX   [Y]
     PULS  B,U
     STD   Y
     STU   [Y++]
-    DECA  
+    DECA
     BNE   L_0060DE
     LDS   $13
-    RTS   
+    RTS
 L_00612C: ; 0x00612C, $C12C
     JSR   L_006323
     BMI   L_006135
@@ -16550,12 +16555,12 @@ L_006137: ; 0x006137, $C137
     LDX   #$BA90
 L_006161: ; 0x006161, $C161
     STX   $07
-    RTS   
+    RTS
 L_006164: ; 0x006164, $C164
     LDA   $11
     STA   X
     STA   456,X
-    INCA  
+    INCA
     STA   $11
     LDD   #$0770
     STD   1,X
@@ -16566,7 +16571,7 @@ L_006164: ; 0x006164, $C164
     LDX   #$BA90
 L_006182: ; 0x006182, $C182
     STX   $07
-    RTS   
+    RTS
 L_006185: ; 0x006185, $C185
     LDX   $05
     JSR   L_0062F6
@@ -16584,12 +16589,12 @@ L_006185: ; 0x006185, $C185
     LDX   #$B700
 L_0061A9: ; 0x0061A9, $C1A9
     STX   $05
-    RTS   
+    RTS
 L_0061AC: ; 0x0061AC, $C1AC
     LDA   $11
     STA   X
     STA   456,X
-    INCA  
+    INCA
     STA   $11
     LDD   #$0770
     STD   1,X
@@ -16600,7 +16605,7 @@ L_0061AC: ; 0x0061AC, $C1AC
     LDX   #$B700
 L_0061CA: ; 0x0061CA, $C1CA
     STX   $05
-    RTS   
+    RTS
 L_0061CD: ; 0x0061CD, $C1CD
     LDA   $0D
     BPL   L_0061D5
@@ -16614,7 +16619,7 @@ L_0061D7: ; 0x0061D7, $C1D7
     BITA  $16
     BEQ   L_006221
     LDX   $07
-    LEAX  [-3,X]
+    LEAX  -3,X
     CMPX  #$BA8D
     BNE   L_0061EC
     LDX   #$BC55
@@ -16630,21 +16635,21 @@ L_0061EC: ; 0x0061EC, $C1EC
     STD   1,X
     STD   457,X
     JSR   L_0062D0
-    RTS   
+    RTS
 L_006209: ; 0x006209, $C209
     LDA   $12
     STA   X
     STA   456,X
-    INCA  
+    INCA
     STA   $12
     LDD   #$7007
     STD   1,X
     STD   457,X
     JSR   L_0062D0
-    RTS   
+    RTS
 L_006221: ; 0x006221, $C221
     LDX   $05
-    LEAX  [-3,X]
+    LEAX  -3,X
     CMPX  #$B6FD
     BNE   L_00622D
 L_00622A: ; 0x00622A, $C22A
@@ -16661,18 +16666,18 @@ L_00622D: ; 0x00622D, $C22D
     STD   1,X
     STD   457,X
     JSR   L_0062D0
-    RTS   
+    RTS
 L_00624A: ; 0x00624A, $C24A
     LDA   $12
     STA   X
     STA   456,X
-    INCA  
+    INCA
     STA   $12
     LDD   #$7007
     STD   1,X
     STD   457,X
     JSR   L_0062D0
-    RTS   
+    RTS
 L_006262: ; 0x006262, $C262
     LDX   #$C350
     STX   $0B
@@ -16706,7 +16711,7 @@ L_006291: ; 0x006291, $C291
     CMPX  #$B700
 L_006297: ; 0x006297, $C297
     BNE   L_006276
-    RTS   
+    RTS
 L_00629A: ; 0x00629A, $C29A
     LDX   #$0000
     LDY   #$BE20
@@ -16714,16 +16719,16 @@ L_0062A1: ; 0x0062A1, $C2A1
     STX   [Y++]
     CMPY  #$BF50
     BNE   L_0062A1
-    RTS   
+    RTS
 L_0062AA: ; 0x0062AA, $C2AA
     LDA   $0F
     BEQ   L_0062B8
     DEC   $0F
     LDA   $0D
-    ASLA  
+    ASLA
     ADCA  #$00
     STA   $0D
-    RTS   
+    RTS
 L_0062B8: ; 0x0062B8, $C2B8
     LDU   $09
     LEAU  1,U
@@ -16736,16 +16741,16 @@ L_0062C5: ; 0x0062C5, $C2C5
     STA   $0F
     LDA   U
     STA   $0D
-    RTS   
+    RTS
 L_0062D0: ; 0x0062D0, $C2D0
     LDA   $10
     BEQ   L_0062DE
     DEC   $10
     LDA   $0E
-    ASLA  
+    ASLA
     ADCA  #$00
     STA   $0E
-    RTS   
+    RTS
 L_0062DE: ; 0x0062DE, $C2DE
     LDU   $0B
     LEAU  1,U
@@ -16758,47 +16763,47 @@ L_0062EB: ; 0x0062EB, $C2EB
     STA   $10
     LDA   U
     STA   $0E
-    RTS   
+    RTS
 L_0062F6: ; 0x0062F6, $C2F6
     LDA   $0F
     CMPA  #$07
     BEQ   L_006308
     INC   $0F
     LDA   $0D
-    LSRA  
+    LSRA
     BHS   L_006305
     ADDA  #$80
 L_006305: ; 0x006305, $C305
     STA   $0D
-    RTS   
+    RTS
 L_006308: ; 0x006308, $C308
     LDU   $09
     CMPU  #$C350
     BNE   L_006313
     LDU   #$C450
 L_006313: ; 0x006313, $C313
-    LEAU  [-1,U]
+    LEAU  -1,U
     STU   $09
     CLR   $0F
     LDA   U
-    LSRA  
+    LSRA
     BHS   L_006320
     ADDA  #$80
 L_006320: ; 0x006320, $C320
     STA   $0D
-    RTS   
+    RTS
 L_006323: ; 0x006323, $C323
     LDA   $10
     CMPA  #$07
     BEQ   L_006335
     INC   $10
     LDA   $0E
-    LSRA  
+    LSRA
     BHS   L_006332
     ADDA  #$80
 L_006332: ; 0x006332, $C332
     STA   $0E
-    RTS   
+    RTS
 L_006335: ; 0x006335, $C335
     LDU   $0B
     CMPU  #$C350
@@ -16806,16 +16811,16 @@ L_00633B: ; 0x00633B, $C33B
     BNE   L_006340
     LDU   #$C450
 L_006340: ; 0x006340, $C340
-    LEAU  [-1,U]
+    LEAU  -1,U
     STU   $0B
     CLR   $10
     LDA   U
-    LSRA  
+    LSRA
     BHS   L_00634D
     ADDA  #$80
 L_00634D: ; 0x00634D, $C34D
     STA   $0E
-    RTS   
+    RTS
     .db $2A
     .db $AA
     .db $AA
@@ -17467,15 +17472,15 @@ L_0065D0: ; 0x0065D0, $C5D0
     LDY   #$B300
 L_0065E4: ; 0x0065E4, $C5E4
     LDA   $00
-    CLRB  
+    CLRB
     STD   2,Y
     LDA   $01
     STD   4,Y
     LDA   $05
-    LSRA  
+    LSRA
     EORA  $05
-    LSRA  
-    LSRA  
+    LSRA
+    LSRA
     ROR   $04
     ROR   $05
     LDA   $04
@@ -17484,15 +17489,15 @@ L_0065E4: ; 0x0065E4, $C5E4
     LDB   $05
     STD   6,Y
     BPL   L_006606
-    COMA  
-    COMB  
+    COMA
+    COMB
 L_006606: ; 0x006606, $C606
     PSHS  B,A
     LDA   $07
-    LSRA  
+    LSRA
     EORA  $07
-    LSRA  
-    LSRA  
+    LSRA
+    LSRA
     ROR   $06
     ROR   $07
     LDA   $06
@@ -17501,11 +17506,11 @@ L_006606: ; 0x006606, $C606
     LDB   $07
     STD   8,Y
     BPL   L_006621
-    COMA  
-    COMB  
+    COMA
+    COMB
 L_006621: ; 0x006621, $C621
-    LSRA  
-    RORB  
+    LSRA
+    RORB
     ADDD  S++
     CMPD  #$016A
     BHS   L_0065E4
@@ -17543,7 +17548,7 @@ L_006658: ; 0x006658, $C658
     BHI   L_006690
     STD   2,Y
     STA   Y
-    TSTB  
+    TSTB
     BMI   L_006682
     LDD   #$BBBB
     STD   [Y]
@@ -17818,11 +17823,11 @@ L_006791: ; 0x006791, $C791
     JSR   L_006269
     LDA   #$20
     TFR   A>B
-    DECB  
+    DECB
     LEAX  S
 L_0067EA: ; 0x0067EA, $C7EA
     STA   X+
-    DECB  
+    DECB
     BNE   L_0067EA
     LDA   #$17
     STA   X+
