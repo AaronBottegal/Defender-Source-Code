@@ -5176,27 +5176,27 @@ L_0024BE: ; 0x0024BE, $F4BE
     LDA   12,U
     BSR   BANKSWITCH_TO_A
     JMP   [13,U]
-L_0024D3: ; 0x0024D3, $F4D3
-    LEAS  -3,S
-    PSHS  U,A
-    LDA   $36
-    STA   5,S
-    LDU   6,S
-    LDA   2,U
-    LDU   U
-    STU   3,S
-    BSR   BANKSWITCH_TO_A
-    PULS  A,U
-    JSR   [S]
-    PSHS  U,A
-    LDA   5,S
-    BSR   BANKSWITCH_TO_A
-    LDU   6,S
-    LEAU  3,U
-    STU   6,S
-    PULS  A,U
-    LEAS  3,S
-    RTS
+GOTO_PAST_JSR: ; 0x0024D3, $F4D3
+    LEAS  -3,S ; Save 3 bytes of stack. FORMAT: [ptr,bank]
+    PSHS  U,A ; STACK S 0:A 2:U 3-5:RSV 6:RTS
+    LDA   $36 ; Get current bank.
+    STA   5,S ; Save bank up stack.
+    LDU   6,S ; Pull location from.
+    LDA   2,U ; Pull bank going to into A.
+    LDU   U ; Get ptr past JSR.
+    STU   3,S ; Save on stack.
+    BSR   BANKSWITCH_TO_A ; Goto bank past JSR.
+    PULS  A,U ; Pull saved.
+    JSR   [S] ; JSR to location past original JSR.
+    PSHS  U,A ; Save new info.
+    LDA   5,S ; Load bank from up stack.
+    BSR   BANKSWITCH_TO_A ; Switch back to it.
+    LDU   6,S ; Load location from.
+    LEAU  3,U ; Add 3 to skip data.
+    STU   6,S ; Store new RTS location.
+    PULS  A,U ; Pull saved.
+    LEAS  3,S ; Unreserve stack.
+    RTS ; RTS
 GOTO_B7-C000: ; 0x0024FA, $F4FA
     BSR   BANKSWITCH_TO_7
     JMP   $C000
@@ -5530,7 +5530,7 @@ NOT_COLUMN_RUG_MATCH: ; 0x00271E, $F71E
     LDB   #$03
     STB   BANKSWITCH
     JSR   SETUP_DP_52_49_36_48_59
-    JMP   RUG_MATCH_SUCCESS ; Successful exit.
+    JMP   JUMP_RUG_FAIL? ; Successful exit.
 RUG_POST_ENTIRE_SET: ; 0x00273D, $F73D
     BITB  #$10 ; Test for IRQ mask.
     LBNE  RUG_PATTERN_SETUP ; IRQ masked, try again?
@@ -7219,8 +7219,8 @@ JMP_RUG_SETUP: ; 0x002FC5, $FFC5
 L_002FC8: ; 0x002FC8, $FFC8
     JMP   L_0027D5
     JMP   GOTO_B7-C000
-L_002FCE: ; 0x002FCE, $FFCE
-    JMP   L_0024D3
+JMP_GOTO_PAST_JSR: ; 0x002FCE, $FFCE
+    JMP   GOTO_PAST_JSR
 L_002FD1: ; 0x002FD1, $FFD1
     JMP   L_0024BE
 JMP_STORE_B@X_BANK0: ; 0x002FD4, $FFD4
@@ -7329,13 +7329,13 @@ L_003070: ; 0x003070, $C070
     ASLA
     LEAU  A,U
     LDX   #$3E38
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $02
     .db $02
     LDU   #$C0FD
     LDX   #$1458
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $02
     .db $02
@@ -7426,7 +7426,7 @@ L_003158: ; 0x003158, $C158
     LDD   #$1408
     JSR   SAVE_UXBA+BANK_UNK
     LDU   #$C0FF
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $02
     .db $02
@@ -7569,7 +7569,7 @@ L_003263: ; 0x003263, $C263
     JSR   L_003936
     LDU   #$C101
     LDX   #$3854
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $02
     .db $02
@@ -7653,7 +7653,7 @@ L_003325: ; 0x003325, $C325
     STA   $0A
     STX   R_A164
     LDX   R_A181
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $02
     .db $02
@@ -7760,7 +7760,7 @@ L_00343C: ; 0x00343C, $C43C
     LDD   #$0000
     STD   $20
     STD   $22
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $F4
     .db $FA
     .db $00
@@ -7965,7 +7965,7 @@ L_00364F: ; 0x00364F, $C64F
 L_003653: ; 0x003653, $C653
     LDU   14,Y
     LDX   Y++
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $02
     .db $02
@@ -8073,7 +8073,7 @@ L_003728: ; 0x003728, $C728
     JSR   L_000055
     LDX   #$3258
     LDU   #$C0ED
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $02
     .db $02
@@ -8274,13 +8274,13 @@ L_0038F0: ; 0x0038F0, $C8F0
 L_003903: ; 0x003903, $C903
     LDU   #$C0E9
     LDX   #$28E5
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $02
     .db $02
     CLRA
     LDX   #$48E5
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $0E
     .db $02
@@ -9946,7 +9946,7 @@ L_003D64: ; 0x003D64, $CD64
 
     .db $C5
     .db $FB
-    JMP   L_004AA7
+    JMP   TEXT_RELATED_ROUTINE?
     JMP   L_004AB2
     JMP   L_004ABD
     JMP   L_004AC8
@@ -9957,7 +9957,7 @@ L_003D64: ; 0x003D64, $CD64
     JMP   L_004A79
     JMP   L_004A81
     JMP   L_004A51
-    JMP   L_004A58
+    JMP   ANOTHER_RUG_FAIL_TEXT?
     .db $00
     .db $00
     .db $00
@@ -10053,8 +10053,10 @@ L_003D64: ; 0x003D64, $CD64
     .db $53
     .db $C1
     .db $6D
+RUG_STR_DATA_UNK: ; 0x004085, $C085
     .db $C1
     .db $88
+RUG_STR_DATA_END?: ; 0x004087, $C087
     .db $C1
     .db $92
     .db $C1
@@ -11427,6 +11429,7 @@ L_003D64: ; 0x003D64, $CD64
     .db $4F
     .db $55
     .db $2F
+TEXT_POINTER_START: ; 0x0045E3, $C5E3
     .db $01
     .db $08
     .db $C6
@@ -12565,23 +12568,23 @@ L_004A51: ; 0x004A51, $CA51
     PSHS  U,Y,X
     LDU   #$C0D9
     BRA   L_004A5D
-L_004A58: ; 0x004A58, $CA58
+ANOTHER_RUG_FAIL_TEXT?: ; 0x004A58, $CA58
     PSHS  U,Y,X
     LDU   #$C0BB
 L_004A5D: ; 0x004A5D, $CA5D
     LDX   #$18CE
-    JSR   L_004AA7
+    JSR   TEXT_RELATED_ROUTINE?
     LDU   Y++
     BEQ   L_004A6D
     LDX   #$10DA
-    JSR   L_004AA7
+    JSR   TEXT_RELATED_ROUTINE?
 L_004A6D: ; 0x004A6D, $CA6D
     LDU   Y++
     BEQ   L_004A77
     LDX   #$10E4
-    JSR   L_004AA7
+    JSR   TEXT_RELATED_ROUTINE?
 L_004A77: ; 0x004A77, $CA77
-    PULS  X,Y,U,PC
+    PULS  X,Y,U,PC ; Leave
 L_004A79: ; 0x004A79, $CA79
     PSHS  U,Y,X,B,A,CC
     LDY   #$FFB6
@@ -12603,120 +12606,130 @@ L_004A87: ; 0x004A87, $CA87
     LEAU  32,U
     STU   $56
     STU   $52
-    BRA   L_004AED
-L_004AA7: ; 0x004AA7, $CAA7
-    PSHS  U,Y,X,B,A,CC
-    LDY   #$FFB3
+    BRA   NOT_NULL_1
+TEXT_RELATED_ROUTINE?: ; 0x004AA7, $CAA7
+    PSHS  U,Y,X,B,A,CC ; Save
+    LDY   #$FFB3 ; Set
     LDD   #$CAED
-    BRA   L_004AD1
+    BRA   TEXT_YD
 L_004AB2: ; 0x004AB2, $CAB2
     PSHS  U,Y,X,B,A,CC
     LDY   #$FFB6
     LDD   #$CAED
-    BRA   L_004AD1
+    BRA   TEXT_YD
 L_004ABD: ; 0x004ABD, $CABD
     PSHS  U,Y,X,B,A,CC
     LDY   #$FFB3
     LDD   #$CB5F
-    BRA   L_004AD1
+    BRA   TEXT_YD
 L_004AC8: ; 0x004AC8, $CAC8
     PSHS  U,Y,X,B,A,CC
     LDY   #$FFB6
     LDD   #$CB5F
-L_004AD1: ; 0x004AD1, $CAD1
-    STY   $3D
+TEXT_YD: ; 0x004AD1, $CAD1
+    STY   $3D ; Store setup.
     STD   $3F
-    TST   $52
-    BNE   L_004AED
-    STX   $50
-    STX   $4E
-    LDX   #$010A
-    STX   $4C
-    CLR   $58
-    LDX   2,U
-    STX   $56
-    LDX   U
-    BRA   L_004B0E
-L_004AED: ; 0x004AED, $CAED
-    TST   $58
-    BNE   L_004AFF
-    LDX   $54
-    LDB   X+
-    CMPB  #$2F
-    BNE   L_004B29
-    LDB   #$20
-    STB   $58
-    BRA   L_004B29
-L_004AFF: ; 0x004AFF, $CAFF
+    TST   $52 ; Test
+    BNE   NOT_NULL_1 ; If is set.
+    STX   $50 ; Store location for text?
+    STX   $4E ; 2x...
+    LDX   #$010A ; Not sure of val
+    STX   $4C ; Store...
+    CLR   $58 ; Clear
+    LDX   2,U ; Get X from ptr+2
+    STX   $56 ; Store. End?
+    LDX   U ; Load X with data at U
+    BRA   MORE_STUFF_TO_DO ; Goto
+NOT_NULL_1: ; 0x004AED, $CAED
+    TST   $58 ; Test
+    BNE   NOT_NULL_2
+    LDX   $54 ; Get X
+    LDB   X+ ; Load
+    CMPB  #$2F ; #$2F='\0' here.
+    BNE   NOT_END_OF_STRING
+    LDB   #$20 ; Space in ascii.
+    STB   $58 ; Not sure why stored.
+    BRA   NOT_END_OF_STRING
+NOT_NULL_2: ; 0x004AFF, $CAFF
     CLR   $58
     LDX   $52
-L_004B03: ; 0x004B03, $CB03
-    CMPX  $56
-    BNE   L_004B0E
-L_004B07: ; 0x004B07, $CB07
-    CLR   $52
-    PULS  CC,A,B,X,Y,U
-    ORCC  #$01
-    RTS
-L_004B0E: ; 0x004B0E, $CB0E
-    LDU   X++
-    BMI   L_004B23
-    LEAX  -1,X
-    TFR   U>D
-    CMPA  #$08
-    BHI   L_004B07
-    ASLA
-    LDY   #$CB64
-    JSR   [A,Y]
-    BRA   L_004B03
-L_004B23: ; 0x004B23, $CB23
-    STX   $52
-    STU   $54
-    BRA   L_004AED
-L_004B29: ; 0x004B29, $CB29
-    STX   $54
-    SUBB  #$20
-    CMPB  #$01
-    BLS   L_004B47
+DO_MORE_AFTER_CMD: ; 0x004B03, $CB03
+    CMPX  $56 ; Compare to end?
+    BNE   MORE_STUFF_TO_DO
+TOP_GT|E_8: ; 0x004B07, $CB07
+    CLR   $52 ; Clear
+    PULS  CC,A,B,X,Y,U ; Restore
+    ORCC  #$01 ; Set carry
+    RTS ; leave.
+MORE_STUFF_TO_DO: ; 0x004B0E, $CB0E
+    LDU   X++ ; Load U from X
+    BMI   DATA_IS_NEG ; If top bit set.
+    LEAX  -1,X ; Not neg, adjust X.
+    TFR   U>D ; Data to D
+    CMPA  #$08 ; Top byte
+    BHI   TOP_GT|E_8 ; Leaves
+    ASLA ; Make index to ptr
+    LDY   #$CB64 ; ptr
+    JSR   [A,Y] ; Run code.
+    BRA   DO_MORE_AFTER_CMD
+DATA_IS_NEG: ; 0x004B23, $CB23
+    STX   $52 ; Store X after end?
+    STU   $54 ; Store data...
+    BRA   NOT_NULL_1 ; Goto
+NOT_END_OF_STRING: ; 0x004B29, $CB29
+    STX   $54 ; Store X
+    SUBB  #$20 ; B-=20
+    CMPB  #$01 ; CMP 0x20-0x21
+    BLS   TEXT_CASE_USE_B ; If <=21
     CMPB  #$0B
-    BLS   L_004B45
-    SUBB  #$0A
-    CMPB  #$10
-    BLS   L_004B47
-    CMPB  #$14
-    BLS   L_004B45
-    SUBB  #$04
-    CMPB  #$2C
-    BLS   L_004B47
-L_004B45: ; 0x004B45, $CB45
-    LDB   #$03
-L_004B47: ; 0x004B47, $CB47
+    BLS   TEXT_CASE_USE_3 ; Misc ascii. Control chars?
+    SUBB  #$0A ; B-=0x2A
+    CMPB  #$10 ; CMP 0x2A to 0x3A
+    BLS   TEXT_CASE_USE_B ; if <=
+    CMPB  #$14 ; CMP 0x3B to 0x3E
+    BLS   TEXT_CASE_USE_3 ; if <=
+    SUBB  #$04 ; B-=2E
+    CMPB  #$2C ; CMP 0x2E to 5A
+    BLS   TEXT_CASE_USE_B
+TEXT_CASE_USE_3: ; 0x004B45, $CB45
+    LDB   #$03 ; Turns to 0xC
+TEXT_CASE_USE_B: ; 0x004B47, $CB47
+    ASLB ; Multiply by 4
     ASLB
-    ASLB
-    LDX   #$C5E3
-    ABX
-    TFR   X>Y
-    LDD   $50
-    LDX   $3D
-    JSR   X
-    ADDA  Y
-    ADDA  $4C
-    STA   $50
-    LDX   $3F
-    JMP   X
-    PULS  CC,A,B,X,Y,U
-    ANDCC #$FE
-    RTS
-    ADDB  #$76
-    ADDB  #$7B
-    ADDB  #$80
-    ADDB  #$87
-    ADDB  #$8E
-    ADDB  #$95
-    ADDB  #$9C
-    ADDB  #$A3
-    ADDB  #$AC
-    LDA   X+
+    LDX   #$C5E3 ; TEXT_PTR_START
+    ABX ; Add to X
+    TFR   X>Y ; Put to Y
+    LDD   $50 ; Load...
+    LDX   $3D ; Load...
+    JSR   X ; JSR to ptr
+    ADDA  Y ; Add to A from Y
+    ADDA  $4C ; Add to A from mem
+    STA   $50 ; Store high byte. Horizontal pos?
+    LDX   $3F ; Load...
+    JMP   X ; JMP to loc.
+    PULS  CC,A,B,X,Y,U ; Not gotten to? Pull state.
+    ANDCC #$FE ; Clear CC.C
+    RTS ; RTS
+TEXT_FUNCTION_POINTERS?: ; 0x004B64, $CB64
+    .db $CB ; FORMAT: [ptr]
+    .db $76
+    .db $CB
+    .db $7B
+    .db $CB
+    .db $80
+    .db $CB
+    .db $87
+    .db $CB
+    .db $8E
+    .db $CB
+    .db $95
+    .db $CB
+    .db $9C
+    .db $CB
+    .db $A3
+    .db $CB
+    .db $AC
+    LDA   X+ ; These functions called by table above front str/text routine
     STA   $4C
     RTS
     LDB   X+
@@ -13807,56 +13820,56 @@ L_004C3E: ; 0x004C3E, $CC3E
 RUG_MISMATCH: ; 0x00502A, $C02A
     JMP   RUG_MISMATCH_JMP
     JMP   L_0052C3
-RUG_MATCH_SUCCESS: ; 0x005030, $C030
-    JMP   RUG_MATCH_SUCCESS
+JUMP_RUG_FAIL?: ; 0x005030, $C030
+    JMP   RUG_MATCH_FAIL?
     JMP   L_005CC1
 JMP_STORE_B@X_BANK0: ; 0x005036, $C036
     JMP   JMP_STORE_B@X_BANK0
 LOAD_B@X_BANK0: ; 0x005039, $C039
     JMP   LOAD_B@X_BANK0
-L_00503C: ; 0x00503C, $C03C
-    JSR   L_002FCE
-    .db $C0
+GOTO_C002_B2: ; 0x00503C, $C03C
+    JSR   JMP_GOTO_PAST_JSR
+    .db $C0 ; $C002, bank 2
     .db $02
     .db $02
     RTS
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $05
     .db $02
     RTS
 L_00504A: ; 0x00504A, $C04A
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $0E
     .db $02
     RTS
 L_005051: ; 0x005051, $C051
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $11
     .db $02
     RTS
 L_005058: ; 0x005058, $C058
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $1A
     .db $02
     RTS
 L_00505F: ; 0x00505F, $C05F
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $1D
     .db $02
     RTS
 L_005066: ; 0x005066, $C066
-    JSR   L_002FCE
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $20
     .db $02
     RTS
-L_00506D: ; 0x00506D, $C06D
-    JSR   L_002FCE
+GOTO_C023_B2: ; 0x00506D, $C06D
+    JSR   JMP_GOTO_PAST_JSR
     .db $C0
     .db $23
     .db $02
@@ -13864,48 +13877,48 @@ L_00506D: ; 0x00506D, $C06D
     ADCB  $FF
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
     LDB   #$7A
-    JSR   L_005793
+    JSR   SET_COLOR_$C001
     LDU   #$C069
     LDX   #$2870
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDU   #$C06B
     LDX   #$4090
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDB   #$0F
     JSR   L_005AC8
     LDY   #$0BB8
-    JMP   L_005A44
+    JMP   AUTO/ADV_WAIT?
 L_00509C: ; 0x00509C, $C09C
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
     LDB   #$57
-    JSR   L_005793
+    JSR   SET_COLOR_$C001
     LDU   #$C069
     LDX   #$2870
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDU   #$C073
     LDX   #$3890
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     BRA   L_0050E1
 L_0050B8: ; 0x0050B8, $C0B8
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
     LDB   #$57
-    JSR   L_005793
+    JSR   SET_COLOR_$C001
     LDU   #$C069
     LDX   #$2860
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDU   #$C071
     LDX   #$3880
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     TFR   DP>A
     CMPA  #$9E
     BEQ   L_0050E1
     LDU   #$C073
     LDX   #$38A0
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
 L_0050E1: ; 0x0050E1, $C0E1
     LDY   #$0BB8
 L_0050E5: ; 0x0050E5, $C0E5
-    JSR   L_005A57
+    JSR   LONG_MESSAGE_DISLAY_FAILURE?
     LDX   #$CC00
     JSR   LOAD_B@X_BANK0
     BITB  #$02
@@ -13971,14 +13984,14 @@ L_005146: ; 0x005146, $C146
     BEQ   L_0051CF
     STU   $5B
     LDB   #$08
-    JSR   L_005AAA
+    JSR   ROM_BOARD_LED_FLASH?
     LDB   #$57
-    JSR   L_005793
+    JSR   SET_COLOR_$C001
     LDU   #$C071
     LDX   #$3860
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDY   #$C035
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     LDD   #$4266
     STD   $4A
 L_005180: ; 0x005180, $C180
@@ -13986,7 +13999,7 @@ L_005180: ; 0x005180, $C180
     LEAX  10,X
     STX   $4A
     LDU   #$C06D
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDU   L_002F9F
     STU   $43
     LDU   $5B
@@ -14012,21 +14025,21 @@ L_00519C: ; 0x00519C, $C19C
     TST   $49
     BNE   L_0051F1
     LDB   $3A
-    JSR   L_005AAA
+    JSR   ROM_BOARD_LED_FLASH?
     LDY   #$C039
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     BRA   L_0051EE
 L_0051CF: ; 0x0051CF, $C1CF
     TFR   CC>B
     TSTB
     BPL   L_005212
     LDB   #$7A
-    JSR   L_005793
+    JSR   SET_COLOR_$C001
     LDU   #$C077
     LDX   #$3880
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDY   #$C039
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     LDB   #$08
     JSR   L_005AC8
 L_0051EE: ; 0x0051EE, $C1EE
@@ -14034,17 +14047,17 @@ L_0051EE: ; 0x0051EE, $C1EE
 L_0051F1: ; 0x0051F1, $C1F1
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
     CLRB
-    JSR   L_005AAA
-    JSR   L_005791
+    JSR   ROM_BOARD_LED_FLASH?
+    JSR   SET_COLOR_#$A5_$C001
     LDU   #$C079
     LDX   #$4080
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDY   #$C03D
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     LDY   #$1388
-    JSR   L_005A44
+    JSR   AUTO/ADV_WAIT?
 L_005212: ; 0x005212, $C212
-    JSR   L_005A57
+    JSR   LONG_MESSAGE_DISLAY_FAILURE?
     TST   $49
     LBNE  L_0052F2
     TST   $47
@@ -14073,14 +14086,14 @@ RUG_MISMATCH_JMP: ; 0x00523D, $C23D
     JSR   L_005AE4
     JSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
     LDB   #$04
-    JSR   L_005AAA
+    JSR   ROM_BOARD_LED_FLASH?
     LDB   #$57
-    JSR   L_005793
+    JSR   SET_COLOR_$C001
     LDU   #$C073
     LDX   #$3870
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDY   #$C041
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     LDD   $41
     TSTA
     BNE   L_005274
@@ -14100,7 +14113,7 @@ L_00527D: ; 0x00527D, $C27D
     STA   $3B
     LDU   #$C06F
     LDX   #$4290
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDB   $3B
     ASLB
     ASLB
@@ -14119,14 +14132,14 @@ L_0052A7: ; 0x0052A7, $C2A7
     LSRB
     DECA
     BNE   L_0052A7
-    JSR   L_005AAA
+    JSR   ROM_BOARD_LED_FLASH?
     JSR   L_005A0E
     TST   $49
     BNE   L_0052F2
     LDB   $3A
-    JSR   L_005AAA
+    JSR   ROM_BOARD_LED_FLASH?
     LDY   #$C045
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     BRA   L_0052EF
 L_0052C3: ; 0x0052C3, $C2C3
     JSR   CLEAR_COLOR_PALETTE
@@ -14136,12 +14149,12 @@ L_0052C3: ; 0x0052C3, $C2C3
     CMPY  #$000A
     BEQ   L_0052F2
     LDB   #$7A
-    JSR   L_005793
+    JSR   SET_COLOR_$C001
     LDU   #$C07B
     LDX   #$2880
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDY   #$C045
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     LDB   #$04
     JSR   L_005AC8
 L_0052EF: ; 0x0052EF, $C2EF
@@ -14152,14 +14165,14 @@ L_0052F2: ; 0x0052F2, $C2F2
     CMPA  #$A2
     BNE   L_005318
     LDB   #$02
-    JSR   L_005AAA
+    JSR   ROM_BOARD_LED_FLASH?
     LDB   #$57
-    JSR   L_005793
+    JSR   SET_COLOR_$C001
     LDU   #$C081
     LDX   #$2880
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDY   #$C049
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     JMP   L_0053BB
 L_005318: ; 0x005318, $C318
     ADDA  #$03
@@ -14217,25 +14230,25 @@ L_00536B: ; 0x00536B, $C36B
     LDA   $3A
     BEQ   L_0053A1
     LDB   #$02
-    JSR   L_005AAA
+    JSR   ROM_BOARD_LED_FLASH?
     LDB   #$57
-    JSR   L_005793
+    JSR   SET_COLOR_$C001
     JSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
     LDU   #$C07D
     LDX   #$3080
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     JSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
     LDY   #$C049
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     BRA   L_0053BB
 L_0053A1: ; 0x0053A1, $C3A1
     LDB   #$7A
-    JSR   L_005793
+    JSR   SET_COLOR_$C001
     LDU   #$C07F
     LDX   #$3880
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDY   #$C049
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     LDB   #$02
     JSR   L_005AC8
 L_0053BB: ; 0x0053BB, $C3BB
@@ -14243,15 +14256,15 @@ L_0053BB: ; 0x0053BB, $C3BB
 L_0053BE: ; 0x0053BE, $C3BE
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
     LDB   #$01
-    JSR   L_005AAA
-    JSR   L_005791
+    JSR   ROM_BOARD_LED_FLASH?
+    JSR   SET_COLOR_#$A5_$C001
     LDU   #$C083
     LDX   #$3880
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDY   #$C04D
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     LDY   #$1388
-    JSR   L_005A44
+    JSR   AUTO/ADV_WAIT?
     JSR   L_005B67
     LDY   #$07D0
 L_0053E7: ; 0x0053E7, $C3E7
@@ -14264,38 +14277,38 @@ L_0053EF: ; 0x0053EF, $C3EF
     LEAX  1,X
     CMPX  #$C010
     BNE   L_0053EF
-    JSR   L_005A44
+    JSR   AUTO/ADV_WAIT?
     CMPU  #$C9E0
     BNE   L_0053EA
     TST   $49
     BEQ   L_0053E7
-RUG_MATCH_SUCCESS: ; 0x005406, $C406
+RUG_MATCH_FAIL?: ; 0x005406, $C406
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
     CLRB
-    STB   $41
-    STB   $42
-    JSR   L_005AAA
-    JSR   L_005791
-    LDU   #$C085
-    LDX   #$4078
-    JSR   L_00503C
+    STB   $41 ; Clear
+    STB   $42 ; Set
+    JSR   ROM_BOARD_LED_FLASH?
+    JSR   SET_COLOR_#$A5_$C001 ; Red?
+    LDU   #$C085 ; Str?
+    LDX   #$4078 ; Screen loc?
+    JSR   GOTO_C002_B2 ; Text?
     LDY   #$C055
-    JSR   L_00506D
-    LDY   #$0001
+    JSR   GOTO_C023_B2 ; Text?
+    LDY   #$0001 ; Set
 L_005428: ; 0x005428, $C428
-    LDU   #$C9F0
-    CLRA
-L_00542C: ; 0x00542C, $C42C
+    LDU   #$C9F0 ; Load
+    CLRA ; Clear
+LOOP_ERROR?: ; 0x00542C, $C42C
     LDX   #$CC00
-    JSR   LOAD_B@X_BANK0
-    BITB  #$01
-    BNE   L_00543F
-    BITB  #$02
-    BNE   L_00544F
-    JSR   L_005A57
-    BRA   L_00542C
-L_00543F: ; 0x00543F, $C43F
-    JSR   L_005A44
+    JSR   LOAD_B@X_BANK0 ; Get ROM PIA
+    BITB  #$01 ; Test auto/manual
+    BNE   AUTO/MANUAL PRESSED
+    BITB  #$02 ; Test advance switch
+    BNE   ADVANCED_PRESSED
+    JSR   LONG_MESSAGE_DISLAY_FAILURE?
+    BRA   LOOP_ERROR?
+AUTO/MANUAL PRESSED: ; 0x00543F, $C43F
+    JSR   AUTO/ADV_WAIT?
 L_005442: ; 0x005442, $C442
     INCA
     CMPA  U
@@ -14305,7 +14318,7 @@ L_005442: ; 0x005442, $C442
 L_00544B: ; 0x00544B, $C44B
     STA   $3A
     EORA  #$3F
-L_00544F: ; 0x00544F, $C44F
+ADVANCED_PRESSED: ; 0x00544F, $C44F
     LDB   #$13
     JSR   L_005B0B
     TST   $49
@@ -14324,19 +14337,19 @@ L_00544F: ; 0x00544F, $C44F
     JSR   L_00504A
     LDA   $3A
     CMPA  #$1F
-    BNE   L_00542C
+    BNE   LOOP_ERROR?
     TFR   CC>B
     TSTB
     LBPL  L_005585
     BRA   L_005428
 L_005486: ; 0x005486, $C486
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
-    JSR   L_005791
+    JSR   SET_COLOR_#$A5_$C001
     LDU   #$C087
     LDX   #$3820
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDY   #$C059
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     TFR   DP>A
     LDB   #$62
     STD   $41
@@ -14433,7 +14446,7 @@ L_005541: ; 0x005541, $C541
     STA   -X
     PSHS  A
     BSR   L_00556C
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     PULS  A
     CMPA  #$08
     BLO   L_005501
@@ -14466,12 +14479,12 @@ L_005575: ; 0x005575, $C575
     RTS
 L_005585: ; 0x005585, $C585
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
-    JSR   L_005791
+    JSR   SET_COLOR_#$A5_$C001
     LDU   #$C089
     LDX   #$2880
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDY   #$C05D
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     LDX   #$CC00
 L_00559E: ; 0x00559E, $C59E
     LDU   #$C9F4
@@ -14480,7 +14493,7 @@ L_0055A1: ; 0x0055A1, $C5A1
     BITB  #$01
     BEQ   L_0055BC
     LDY   #$1388
-    JSR   L_005A44
+    JSR   AUTO/ADV_WAIT?
     TST   $49
     LBNE  L_005799
     JSR   LOAD_B@X_BANK0
@@ -14498,7 +14511,7 @@ L_0055C5: ; 0x0055C5, $C5C5
     CMPU  #$C9FE
     BNE   L_0055A1
     LDY   #$1388
-    JSR   L_005A44
+    JSR   AUTO/ADV_WAIT?
     TFR   CC>B
     TSTB
     LBPL  L_005146
@@ -14786,23 +14799,23 @@ L_00577C: ; 0x00577C, $C77C
     LDY   #$C9FE
     JSR   L_005A97
     JMP   L_005B3B
-L_005791: ; 0x005791, $C791
+SET_COLOR_#$A5_$C001: ; 0x005791, $C791
     LDB   #$A5
-L_005793: ; 0x005793, $C793
+SET_COLOR_$C001: ; 0x005793, $C793
     LDX   #$C001
     JMP   JMP_STORE_B@X_BANK0
 L_005799: ; 0x005799, $C799
     JSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
-    BSR   L_005791
+    BSR   SET_COLOR_#$A5_$C001
     LDU   #$C0D7
     LDX   #$2820
     JSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     LDY   #$C061
-    JSR   L_00506D
+    JSR   GOTO_C023_B2
     LDY   #$05DC
-    JSR   L_005A44
+    JSR   AUTO/ADV_WAIT?
     TST   $49
     BNE   L_00581F
     CLR   $3C
@@ -14813,7 +14826,7 @@ L_005799: ; 0x005799, $C799
     LDU   #$C0D7
     LDX   #$2820
     JSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
-    JSR   L_00503C
+    JSR   GOTO_C002_B2
     CLR   $3A
     LDY   #$C065
     JSR   L_005066
@@ -14830,7 +14843,7 @@ L_0057EA: ; 0x0057EA, $C7EA
     STA   X+
     LEAX  S
 L_0057F5: ; 0x0057F5, $C7F5
-    JSR   L_005A57
+    JSR   LONG_MESSAGE_DISLAY_FAILURE?
     LDX   #$CC00
     JSR   LOAD_B@X_BANK0
     BITB  #$02
@@ -14893,7 +14906,7 @@ L_005868: ; 0x005868, $C868
     INCA
     LDB   #$FF
 L_00586D: ; 0x00586D, $C86D
-    JSR   L_005A57
+    JSR   LONG_MESSAGE_DISLAY_FAILURE?
     DECA
     BEQ   L_00588C
     LDX   #$CC00
@@ -15077,7 +15090,7 @@ L_005997: ; 0x005997, $C997
     ABX
     PSHS  X
 L_0059A6: ; 0x0059A6, $C9A6
-    JSR   L_005A57
+    JSR   LONG_MESSAGE_DISLAY_FAILURE?
     LDX   #$CC00
     JSR   LOAD_B@X_BANK0
     BITB  #$02
@@ -15159,12 +15172,12 @@ L_005A0E: ; 0x005A0E, $CA0E
     LDX   #$CC00
     LDY   #$0064
 L_005A15: ; 0x005A15, $CA15
-    JSR   L_005A44
+    JSR   AUTO/ADV_WAIT?
     JSR   LOAD_B@X_BANK0
     BITB  #$02
     BNE   L_005A15
 L_005A1F: ; 0x005A1F, $CA1F
-    JSR   L_005A44
+    JSR   AUTO/ADV_WAIT?
     JSR   LOAD_B@X_BANK0
     BITB  #$02
     BEQ   L_005A1F
@@ -15181,33 +15194,33 @@ RTS: ; 0x005A38, $CA38
 L_005A39: ; 0x005A39, $CA39
     LDY   #$0001
 L_005A3D: ; 0x005A3D, $CA3D
-    BSR   L_005A44
+    BSR   AUTO/ADV_WAIT?
     TST   $49
     BEQ   L_005A3D
     RTS
-L_005A44: ; 0x005A44, $CA44
+AUTO/ADV_WAIT?: ; 0x005A44, $CA44
     PSHS  Y,A,CC
-L_005A46: ; 0x005A46, $CA46
+WAIT_FOR_SWITCHES_AGAIN: ; 0x005A46, $CA46
     BSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
-    TST   $49
-    BNE   L_005A55
-    LDA   #$B2
-L_005A4E: ; 0x005A4E, $CA4E
+    TST   $49 ; Test value subrtn incs.
+    BNE   LEAVE_RTN ; If not 0, leave.
+    LDA   #$B2 ; Load timer.
+MESSAGE_TIMER_LOOP: ; 0x005A4E, $CA4E
     DECA
-    BNE   L_005A4E
-    LEAY  -1,Y
-    BNE   L_005A46
-L_005A55: ; 0x005A55, $CA55
-    PULS  CC,A,Y,PC
-L_005A57: ; 0x005A57, $CA57
+    BNE   MESSAGE_TIMER_LOOP
+    LEAY  -1,Y ; Only do 1 time.
+    BNE   WAIT_FOR_SWITCHES_AGAIN
+LEAVE_RTN: ; 0x005A55, $CA55
+    PULS  CC,A,Y,PC ; Leaves
+LONG_MESSAGE_DISLAY_FAILURE?: ; 0x005A57, $CA57
     PSHS  Y,B
-    LDB   $49
-    CLR   $49
-    LDY   #$000A
-    BSR   L_005A44
-    ADDB  $49
-    STB   $49
-    PULS  B,Y,PC
+    LDB   $49 ; Save?
+    CLR   $49 ; Clear
+    LDY   #$000A ; Display message for X cycles.
+    BSR   AUTO/ADV_WAIT? ; Wait for switches?
+    ADDB  $49 ; Add 
+    STB   $49 ; Store?
+    PULS  B,Y,PC ; RTS
 WATCHDOG/READ_AUTO+ADV_SWITCHES: ; 0x005A69, $CA69
     PSHS  X,B,CC ; Save
     LDB   #$38 ; Setup watchdog.
@@ -15245,36 +15258,36 @@ L_005A9C: ; 0x005A9C, $CA9C
     CMPX  #$C010
     BNE   L_005A9C
     PULS  B,X,Y,PC
-L_005AAA: ; 0x005AAA, $CAAA
-    PSHS  X,B
-    LSRB
+ROM_BOARD_LED_FLASH?: ; 0x005AAA, $CAAA
+    PSHS  X,B ; Save
+    LSRB ; Bring 0 in.
     RORB
     RORB
+    RORB ; Shift 4x total here.
+    BPL   DONT_INC ; If B bit 2 clear originally.
+    INCB ; ++
+DONT_INC: ; 0x005AB3, $CAB3
     RORB
-    BPL   L_005AB3
-    INCB
-L_005AB3: ; 0x005AB3, $CAB3
-    RORB
-    RORB
-    LDX   #$CC00
-    JSR   JMP_STORE_B@X_BANK0
+    RORB ; Shift 6x.
+    LDX   #$CC00 ; Store to ROM_PIA_A_DATA
+    JSR   JMP_STORE_B@X_BANK0 ; Store
+    ASLB ; Shift in 3 zeros.
     ASLB
     ASLB
-    ASLB
-    ORB   #$3F
-    LDX   #$CC02
-    JSR   JMP_STORE_B@X_BANK0
+    ORB   #$3F ; Set bits.
+    LDX   #$CC02 ; Store to ROM_PIA_B_DATA
+    JSR   JMP_STORE_B@X_BANK0 ; Store
     PULS  B,X,PC
 L_005AC8: ; 0x005AC8, $CAC8
     PSHS  Y,B,A
     LDA   #$02
     LDY   #$01F4
 L_005AD0: ; 0x005AD0, $CAD0
-    JSR   L_005AAA
-    JSR   L_005A44
+    JSR   ROM_BOARD_LED_FLASH?
+    JSR   AUTO/ADV_WAIT?
     CLRB
-    JSR   L_005AAA
-    JSR   L_005A44
+    JSR   ROM_BOARD_LED_FLASH?
+    JSR   AUTO/ADV_WAIT?
     LDB   1,S
     DECA
     BNE   L_005AD0
@@ -15306,10 +15319,10 @@ L_005B0B: ; 0x005B0B, $CB0B
     ANDB  #$3F
     LDX   #$CC02
     JSR   JMP_STORE_B@X_BANK0
-    JSR   L_005A57
+    JSR   LONG_MESSAGE_DISLAY_FAILURE?
     LDB   #$3F
     JSR   JMP_STORE_B@X_BANK0
-    JSR   L_005A57
+    JSR   LONG_MESSAGE_DISLAY_FAILURE?
     PULS  B,X,PC
 L_005B23: ; 0x005B23, $CB23
     PSHS  A
