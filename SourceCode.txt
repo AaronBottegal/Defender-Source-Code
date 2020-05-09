@@ -1309,7 +1309,7 @@ CLEAR_X_TO_$C000: ; 0x000760, $D760
     CLR   PIA_ROM_DATA_A
     CLR   PIA_ROM_DATA_B
     LDX   #$C47D ; SRAM pointer
-    JSR   GET_DATA_FROM_SRAM@X_IN_B
+    JSR   GET_DATA_FROM_SRAM@X_IN_B,X++
     TFR   B>A ; Put to A
     CMPA  #$20 ; Blank? Space?
     BHI   IS_HIGHER ; If above
@@ -1480,7 +1480,7 @@ L_0008C4: ; 0x0008C4, $D8C4
     DAA
     STA   $37
     LDX   #$C47D
-    JSR   L_00284E
+    JSR   STORE_A_TO_SRAM_@X_BANKED
     LDA   $8C
     DECA
     BEQ   L_0008DB
@@ -3446,11 +3446,8 @@ L_001782: ; 0x001782, $E782
     .db $3C
     .db $00
 L_0017BE: ; 0x0017BE, $E7BE
-    .db $8E
-    .db $A0
-    .db $5F
-    .db $9F
-    .db $63
+    LDX   #$A05F
+    STX   $63
 L_0017C3: ; 0x0017C3, $E7C3
     LDA   $5D
     BEQ   L_0017C3
@@ -5524,7 +5521,7 @@ NOT_COLUMN_RUG_MATCH: ; 0x00271E, $F71E
     LBNE  COMPARE_RUG_LOOP ; No, loop.
     LEAY  -1,Y ; Rug pattern finished, minus 1 loop.
     LBNE  RUG_PATTERN_SETUP ; Repeat if not 0.
-    TFR   CC>B ; RUG PATTERN FINISHED HERE.
+    TFR   CC>B ; RUG PATTERN CONFIRMED HERE.
     TSTB ; Test CC
     BMI   RUG_POST_ENTIRE_SET ; If bit 7 set
     LDB   #$03
@@ -5533,31 +5530,31 @@ NOT_COLUMN_RUG_MATCH: ; 0x00271E, $F71E
     JMP   JUMP_RUG_FAIL? ; Exit
 RUG_POST_ENTIRE_SET: ; 0x00273D, $F73D
     BITB  #$10 ; Test for IRQ mask.
-    LBNE  RUG_PATTERN_SETUP ; IRQ masked, try again?
+    LBNE  RUG_PATTERN_SETUP ; IRQ masked, keep going. In menu call?
     LDA   #$9E ; Init A
     TFR   DP>B
     TSTB
-    BEQ   RUG_POST_ENT_DP_Z ; DP is zero.
+    BEQ   DP_IS_ZERO
 BIT_0_NOT_SET: ; 0x00274A, $F74A
     INCA ; ++
     LSRB ; Get bit off B (DP)
-    BLO   BIT_0_NOT_SET ; If bit 0 not set, go.
-RUG_POST_ENT_DP_Z: ; 0x00274E, $F74E
-    TFR   A>DP ; Write A to DP. Can be up to #$A6 here.
+    BLO   BIT_0_NOT_SET ; If bit 0 wasn't set
+DP_IS_ZERO: ; 0x00274E, $F74E
+    TFR   A>DP ; Write A to DP. 0x9E to 0xA6.
     ADDA  #$01 ; ++
     CLRB ; D=##00
     TFR   D>S ; Put S stack there.
-    JSR   SETUP_DP_52_49_36_48_59
-L_002758: ; 0x002758, $F758
+    JSR   SETUP_DP_52_49_36_48_59 ; Setup stuff...
+ROM_CHECK_START: ; 0x002758, $F758
     LDU   #$F86E ; Load U stack.
-L_00275B: ; 0x00275B, $F75B
+BANK_TEST_CHECK_LOOP: ; 0x00275B, $F75B
     CLR   BANKSWITCH ; Set to IO
     LDA   #$38 ; Set watchdog.
     STA   WATCHDOG
-    LDA   U ; Load F68E into A and B
-    LDB   U
-    BEQ   B_ENDS_UP_#$80 ; If is 0
-    ANDB  #$0F ; Get lower bits.
+    LDA   U ; Load pointed data.
+    LDB   U ; Load pointed.
+    BEQ   CORRECT_CHECKSUM ; If is 0, no check.
+    ANDB  #$0F ; Get bank bits.
     STB   BANKSWITCH ; Goto bank.
     ANDA  #$70 ; Get upper bits.
     LSRA ; Shift
@@ -5574,48 +5571,48 @@ LOOP_0X800: ; 0x002780, $F780
     LEAY  -1,Y ; --
     BNE   LOOP_0X800
     CMPB  #$80 ; If B ends up being #$80...
-    BEQ   B_ENDS_UP_#$80
-    TFR   CC>A
+    BEQ   CORRECT_CHECKSUM
+    TFR   CC>A ; Incorrect here.
     BITA  #$10 ; Test IRQ mask
-    BEQ   L_0027CE ; No IRQ Mask.
-L_002790: ; 0x002790, $F790
-    JMP   BANKSWITCH_TO_3
-B_ENDS_UP_#$80: ; 0x002793, $F793
-    LEAU  1,U
-    CMPU  #$F886
-    BNE   L_00275B
-    TFR   CC>A
-    BITA  #$10
-    BNE   L_002790
-    TFR   DP>A
-    CMPA  #$9E
-    BNE   L_0027AF
-    JSR   BANKSWITCH_TO_3
-    JSR   PALETTE_ENTRY_0x0
+    BEQ   NO_IRQ_WRONG_CHECKSUM ; No IRQ Mask.
+RTS_INTO_BANK3_FROM_CHECK: ; 0x002790, $F790
+    JMP   BANKSWITCH_TO_3 ; Go back to system menu.
+CORRECT_CHECKSUM: ; 0x002793, $F793
+    LEAU  1,U ; Ptr += 1
+    CMPU  #$F886 ; End
+    BNE   BANK_TEST_CHECK_LOOP ; Not at end.
+    TFR   CC>A ; Get CC. All passed here.
+    BITA  #$10 ; Test IRQ
+    BNE   RTS_INTO_BANK3_FROM_CHECK ; Go back into menu?
+    TFR   DP>A ; Get DP
+    CMPA  #$9E ; CMP DP to val
+    BNE   DP_ORIGINALLY_NOT_0 ; If taken, original DP!=0
+    JSR   BANKSWITCH_TO_3 ; Switch to bank.
+    JSR   ROM_CHECK_PASS_STARTUP? ; Run
     BRA   L_0027D5
-L_0027AF: ; 0x0027AF, $F7AF
-    LDB   #$40
-    BSR   L_0027B8
-    JSR   PALETTE_ENTRY_0x3
+DP_ORIGINALLY_NOT_0: ; 0x0027AF, $F7AF
+    LDB   #$40 ; LED 4+2
+    BSR   WRITE_B_TO_ROM_DATA_PIA_REGS+BANK3 ; Turn on.
+    JSR   $C003
     BRA   L_0027D5
-L_0027B8: ; 0x0027B8, $F7B8
+WRITE_B_TO_ROM_DATA_PIA_REGS+BANK3: ; 0x0027B8, $F7B8
     LDX   #$CC00
-    STB   X
-    STB   2,X
-    CLR   BANKSWITCH
-L_0027C2: ; 0x0027C2, $F7C2
+    STB   X ; Write to ROM_DATA_A
+    STB   2,X ; And B
+    CLR   BANKSWITCH ; Change to IO bank.
+DISPLAY_MESSAGE_WAIT: ; 0x0027C2, $F7C2
     LDA   #$38
-    STA   WATCHDOG
+    STA   WATCHDOG ; Clear watchdog...
     LEAX  -1,X
-    BNE   L_0027C2
-    JMP   BANKSWITCH_TO_3
-L_0027CE: ; 0x0027CE, $F7CE
-    LDB   #$80
-    BSR   L_0027B8
-    JSR   PALETTE_ENTRY_0x6
+    BNE   DISPLAY_MESSAGE_WAIT
+    JMP   BANKSWITCH_TO_3 ; Switch to bank 3, abuse RTS
+NO_IRQ_WRONG_CHECKSUM: ; 0x0027CE, $F7CE
+    LDB   #$80 ; LED 3+1
+    BSR   WRITE_B_TO_ROM_DATA_PIA_REGS+BANK3 ; Turn on.
+    JSR   JMP_SUCCESS?
 L_0027D5: ; 0x0027D5, $F7D5
-    JSR   PALETTE_ENTRY_0x9
-    JMP   MASK_IRQ_SETUP_PIA_CLR_MORE
+    JSR   JMP_SRAM_UNK
+    JMP   MASK_IRQ_SETUP_PIA_CLR_MORE ; Goto...
 STORE_B@X_BANK0: ; 0x0027DB, $F7DB
     PSHS  A,CC ; Save A,CC
     LDA   $36 ; Load bank
@@ -5650,7 +5647,7 @@ GET_DATA_FROM_SRAM: ; 0x002813, $F813
     LDA   1,X ; Get val at X+1
     ANDA  #$0F ; Bottom bits.
     PSHS  A ; Save
-    LDA   X++ ; Get val
+    LDA   X++ ; Get val, X+=2
     ASLA ; Lower bits higher.
     ASLA
     ASLA
@@ -5658,51 +5655,52 @@ GET_DATA_FROM_SRAM: ; 0x002813, $F813
     ADDA  S+ ; Get bottom bits, fix stack.
     RTS ; RTS
 GET_DATA_FROM_SRAM_@X: ; 0x002822, $F822
-    PSHS  B ; Saves B
+    PSHS  B ; Save B.
     LDB   $36 ; Get bank.
     PSHS  B ; Save
     CLR   $36 ; Bank 0.
     CLR   BANKSWITCH ; Bank 0.
-    BSR   GET_DATA_FROM_SRAM ; Get data
+    BSR   GET_DATA_FROM_SRAM ; Get data. X+=2
     PULS  B
     STB   $36 ; Restore bank from stack.
     STB   BANKSWITCH
     PULS  B,PC ; Rest+ret
 GET_DATA_FROM_SRAM@X_IN_AB: ; 0x002838, $F838
     BSR   GET_DATA_FROM_SRAM_@X
-GET_DATA_FROM_SRAM@X_IN_B: ; 0x00283A, $F83A
-    PSHS  A
+GET_DATA_FROM_SRAM@X_IN_B,X++: ; 0x00283A, $F83A
+    PSHS  A ; INFO: X+=2
     BSR   GET_DATA_FROM_SRAM_@X
     TFR   A>B
     PULS  A,PC
-L_002842: ; 0x002842, $F842
-    PSHS  A
-    STA   1,X
+STORE_A_TO_SRAM_@X: ; 0x002842, $F842
+    PSHS  A ; Store low bits.
+    STA   1,X ; above
+    LSRA ; Shift high bits low
     LSRA
     LSRA
     LSRA
-    LSRA
-    STA   X++
-    PULS  A,PC
-L_00284E: ; 0x00284E, $F84E
-    PSHS  B
-    LDB   $36
-    PSHS  B
+    STA   X++ ; Store at X
+    PULS  A,PC ; Return
+STORE_A_TO_SRAM_@X_BANKED: ; 0x00284E, $F84E
+    PSHS  B ; Save B
+    LDB   $36 ; Get bank
+    PSHS  B ; Save bank
     CLR   $36
-    CLR   BANKSWITCH
-    BSR   L_002842
-    PULS  B
+    CLR   BANKSWITCH ; Set to IO bank.
+    BSR   STORE_A_TO_SRAM_@X ; Write
+    PULS  B ; Restore bank.
     STB   $36
     STB   BANKSWITCH
-    PULS  B,PC
+    PULS  B,PC ; RTS
 L_002864: ; 0x002864, $F864
-    BSR   L_00284E
+    BSR   STORE_A_TO_SRAM_@X_BANKED
 L_002866: ; 0x002866, $F866
     PSHS  A
     TFR   B>A
-    BSR   L_00284E
+    BSR   STORE_A_TO_SRAM_@X_BANKED
     PULS  A,PC
-    .db $20
+BANK_CHECK_DATA: ; 0x00286E, $F86E
+    .db $20 ; BANK CHECK ARRAY, FMT[-AAABBBB, A=Addr*0x800+0xC000,B=Bank]
     .db $00
     .db $40
     .db $50
@@ -5725,7 +5723,7 @@ L_002866: ; 0x002866, $F866
     .db $12
     .db $00
     .db $11
-    .db $00
+    .db $00 ; END OF DATA
     .db $E5
     .db $91
     .db $00
@@ -7194,12 +7192,12 @@ L_002F9F: ; 0x002F9F, $FF9F
     .db $6E
 L_002FA1: ; 0x002FA1, $FFA1
     JMP   GET_DATA_FROM_SRAM_@X
-L_002FA4: ; 0x002FA4, $FFA4
-    JMP   GET_DATA_FROM_SRAM@X_IN_B
-L_002FA7: ; 0x002FA7, $FFA7
+JMP_GET_DATA_FROM_SRAM@X_IN_B: ; 0x002FA4, $FFA4
+    JMP   GET_DATA_FROM_SRAM@X_IN_B,X++
+JMP_GET_DATA_FROM_SRAM@X_IN_AB: ; 0x002FA7, $FFA7
     JMP   GET_DATA_FROM_SRAM@X_IN_AB
-L_002FAA: ; 0x002FAA, $FFAA
-    JMP   L_00284E
+JMP_STORE_A_TO_SRAM_@X_BANKED: ; 0x002FAA, $FFAA
+    JMP   STORE_A_TO_SRAM_@X_BANKED
 L_002FAD: ; 0x002FAD, $FFAD
     JMP   L_002866
 L_002FB0: ; 0x002FB0, $FFB0
@@ -7211,9 +7209,9 @@ L_002FB9: ; 0x002FB9, $FFB9
 JMP_CLEAR_ALL_SCREEN: ; 0x002FBC, $FFBC
     JMP   CLEAR_ALL_SCREEN
 L_002FBF: ; 0x002FBF, $FFBF
-    JMP   L_002758
+    JMP   ROM_CHECK_START
 L_002FC2: ; 0x002FC2, $FFC2
-    JMP   B_ENDS_UP_#$80
+    JMP   CORRECT_CHECKSUM
 JMP_RUG_SETUP: ; 0x002FC5, $FFC5
     JMP   RUG_PATTERN_SETUP
 L_002FC8: ; 0x002FC8, $FFC8
@@ -7466,11 +7464,11 @@ L_0031A8: ; 0x0031A8, $C1A8
     LDD   1,Y
     JSR   L_002864
     LDA   3,Y
-    JSR   L_00284E
+    JSR   STORE_A_TO_SRAM_@X_BANKED
     LDU   #$A000
 L_0031B7: ; 0x0031B7, $C1B7
     LDA   U
-    JSR   L_00284E
+    JSR   STORE_A_TO_SRAM_@X_BANKED
     LEAU  2,U
     CMPU  #$A006
     BNE   L_0031B7
@@ -13801,20 +13799,21 @@ L_004C3E: ; 0x004C3E, $CC3E
 ;Bank 3
 	.org $C000
 
-    .db $7E
-    .db $C0
-    .db $76
+ROM_CHECK_PASS_STARTUP?: ; 0x005000, $C000
+    JMP   ROM_CHECK_STARTUP_PASSED?
     JMP   L_00509C
-    JMP   L_0050B8
-    JMP   L_0050FC
+JMP_SUCCESS?: ; 0x005006, $C006
+    JMP   SUCCESS_UNK?
+JMP_SRAM_UNK: ; 0x005009, $C009
+    JMP   SRAM_SOMETHING
     JMP   L_005BE6
     JMP   L_005BE0
     JMP   L_005C2C
     JMP   L_005C20
     JMP   L_005C26
     JMP   L_005CAF
-    JMP   L_005BAF
-    JMP   L_005799
+    JMP   MOVE_@X_TO_SRAM@Y
+    JMP   SETTINGS_MENU?
     JMP   L_005127
     JMP   L_005146
 RUG_MISMATCH: ; 0x00502A, $C02A
@@ -13876,8 +13875,9 @@ GOTO_C023_B2: ; 0x00506D, $C06D
     .db $02
     RTS
     ADCB  $FF
+ROM_CHECK_STARTUP_PASSED?: ; 0x005076, $C076
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
-    LDB   #$7A
+    LDB   #$7A ; R3/7,G6/7,B2/3
     JSR   SET_COLOR_$C001
     LDU   #$C069
     LDX   #$2870
@@ -13899,10 +13899,10 @@ L_00509C: ; 0x00509C, $C09C
     LDU   #$C073
     LDX   #$3890
     JSR   GOTO_C002_B2
-    BRA   L_0050E1
-L_0050B8: ; 0x0050B8, $C0B8
+    BRA   WAS_FROM_BOOTUP
+SUCCESS_UNK?: ; 0x0050B8, $C0B8
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
-    LDB   #$57
+    LDB   #$57 ; R2/7,G5/7,B3/3
     JSR   SET_COLOR_$C001
     LDU   #$C069
     LDX   #$2860
@@ -13911,12 +13911,12 @@ L_0050B8: ; 0x0050B8, $C0B8
     LDX   #$3880
     JSR   GOTO_C002_B2
     TFR   DP>A
-    CMPA  #$9E
-    BEQ   L_0050E1
+    CMPA  #$9E ; Value if DP was 0.
+    BEQ   WAS_FROM_BOOTUP
     LDU   #$C073
     LDX   #$38A0
     JSR   GOTO_C002_B2
-L_0050E1: ; 0x0050E1, $C0E1
+WAS_FROM_BOOTUP: ; 0x0050E1, $C0E1
     LDY   #$0BB8
 L_0050E5: ; 0x0050E5, $C0E5
     JSR   LONG_MESSAGE_DISLAY_FAILURE?
@@ -13932,46 +13932,46 @@ L_0050F7: ; 0x0050F7, $C0F7
     BNE   L_0050E5
 L_0050FB: ; 0x0050FB, $C0FB
     RTS
-L_0050FC: ; 0x0050FC, $C0FC
-    ANDCC #$EF
+SRAM_SOMETHING: ; 0x0050FC, $C0FC
+    ANDCC #$EF ; Clear IRQ mask.
     LDX   #$C47F
-    JSR   L_002FA4
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
     CMPB  #$5A
-    BNE   L_00513E
+    BNE   GOTO_SETTINGS_MENU ; Go if mismatch.
     LDX   #$C400
     JSR   LOAD_B@X_BANK0
     ANDB  #$0F
-    BNE   L_005113
+    BNE   C400_NOT_0 ; Some bits set.
     RTS
-L_005113: ; 0x005113, $C113
+C400_NOT_0: ; 0x005113, $C113
     CLRB
-    JSR   JMP_STORE_B@X_BANK0
+    JSR   JMP_STORE_B@X_BANK0 ; Clear location.
     LDX   #$C47D
-    JSR   L_002FA4
-    CLRA
-    LEAX  -2,X
-    JSR   L_002FAA
-    CMPB  #$15
-    BNE   L_00512B
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B ; Get data here
+    CLRA ; Cleasr A
+    LEAX  -2,X ; Fix location.
+    JSR   JMP_STORE_A_TO_SRAM_@X_BANKED ; Clear location.
+    CMPB  #$15 ; Previous value.
+    BNE   PREV_NOT_0x15
 L_005127: ; 0x005127, $C127
     ANDCC #$7F
     BRA   L_005146
-L_00512B: ; 0x00512B, $C12B
+PREV_NOT_0x15: ; 0x00512B, $C12B
     CMPB  #$25
-    BNE   L_005132
+    BNE   PREV_NOT_0x25
     JMP   L_005CAF
-L_005132: ; 0x005132, $C132
+PREV_NOT_0x25: ; 0x005132, $C132
     CMPB  #$35
-    BNE   L_005139
+    BNE   PREV_NOT_35
     JMP   L_005BBF
-L_005139: ; 0x005139, $C139
+PREV_NOT_35: ; 0x005139, $C139
     CMPB  #$45
-    BEQ   L_00513E
-    RTS
-L_00513E: ; 0x00513E, $C13E
-    LEAS  2,S
-    JSR   L_005BCF
-    JMP   L_005799
+    BEQ   GOTO_SETTINGS_MENU
+    RTS ; Leave otherwise.
+GOTO_SETTINGS_MENU: ; 0x00513E, $C13E
+    LEAS  2,S ; Clean stack because we will not RTS.
+    JSR   INIT_SRAM
+    JMP   SETTINGS_MENU? ; Settings menu?
 L_005146: ; 0x005146, $C146
     ORCC  #$10
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
@@ -13985,7 +13985,7 @@ L_005146: ; 0x005146, $C146
     BEQ   L_0051CF
     STU   $5B
     LDB   #$08
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     LDB   #$57
     JSR   SET_COLOR_$C001
     LDU   #$C071
@@ -14026,7 +14026,7 @@ L_00519C: ; 0x00519C, $C19C
     TST   $49
     BNE   L_0051F1
     LDB   $3A
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     LDY   #$C039
     JSR   GOTO_C023_B2
     BRA   L_0051EE
@@ -14048,7 +14048,7 @@ L_0051EE: ; 0x0051EE, $C1EE
 L_0051F1: ; 0x0051F1, $C1F1
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
     CLRB
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     JSR   SET_COLOR_#$A5_$C001
     LDU   #$C079
     LDX   #$4080
@@ -14087,7 +14087,7 @@ RUG_MISMATCH_JMP: ; 0x00523D, $C23D
     JSR   SETUP_52+49+48+36+59
     JSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
     LDB   #$04
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     LDB   #$57
     JSR   SET_COLOR_$C001
     LDU   #$C073
@@ -14133,12 +14133,12 @@ L_0052A7: ; 0x0052A7, $C2A7
     LSRB
     DECA
     BNE   L_0052A7
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     JSR   L_005A0E
     TST   $49
     BNE   Y_IS_#$000A
     LDB   $3A
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     LDY   #$C045
     JSR   GOTO_C023_B2
     BRA   L_0052EF
@@ -14166,7 +14166,7 @@ Y_IS_#$000A: ; 0x0052F2, $C2F2
     CMPA  #$A2
     BNE   L_005318
     LDB   #$02
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     LDB   #$57
     JSR   SET_COLOR_$C001
     LDU   #$C081
@@ -14231,7 +14231,7 @@ L_00536B: ; 0x00536B, $C36B
     LDA   $3A
     BEQ   L_0053A1
     LDB   #$02
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     LDB   #$57
     JSR   SET_COLOR_$C001
     JSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
@@ -14257,7 +14257,7 @@ L_0053BB: ; 0x0053BB, $C3BB
 L_0053BE: ; 0x0053BE, $C3BE
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
     LDB   #$01
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     JSR   SET_COLOR_#$A5_$C001
     LDU   #$C083
     LDX   #$3880
@@ -14288,7 +14288,7 @@ RUG_MATCH_FAIL?: ; 0x005406, $C406
     CLRB
     STB   $41 ; Clear
     STB   $42 ; Set
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     JSR   SET_COLOR_#$A5_$C001 ; Red?
     LDU   #$C085 ; Str?
     LDX   #$4078 ; Screen loc?
@@ -14496,14 +14496,14 @@ L_0055A1: ; 0x0055A1, $C5A1
     LDY   #$1388
     JSR   AUTO/ADV_WAIT?
     TST   $49
-    LBNE  L_005799
+    LBNE  SETTINGS_MENU?
     JSR   LOAD_B@X_BANK0
     BITB  #$01
     BNE   L_0055C5
 L_0055BC: ; 0x0055BC, $C5BC
     JSR   L_005A0E
     TST   $49
-    LBNE  L_005799
+    LBNE  SETTINGS_MENU?
 L_0055C5: ; 0x0055C5, $C5C5
     PSHS  U,Y,X
     JSR   [U]
@@ -14805,7 +14805,7 @@ SET_COLOR_#$A5_$C001: ; 0x005791, $C791
 SET_COLOR_$C001: ; 0x005793, $C793
     LDX   #$C001
     JMP   JMP_STORE_B@X_BANK0
-L_005799: ; 0x005799, $C799
+SETTINGS_MENU?: ; 0x005799, $C799
     JSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
     JSR   CLR+READ_AUTO/ADV+CLEAR_PALETTE+DEC_COUNTER
     BSR   SET_COLOR_#$A5_$C001
@@ -14875,7 +14875,7 @@ L_005825: ; 0x005825, $C825
     CMPB  #$09
     BNE   L_005857
     LDX   #$C487
-    JSR   L_002FA4
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
     TSTB
     BEQ   L_005857
     CMPB  #$08
@@ -14956,7 +14956,7 @@ L_0058C0: ; 0x0058C0, $C8C0
     LEAU  2,S
     LDX   #$C400
     ABX
-    JSR   L_002FA4
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
     PSHS  B,A
     LDB   $3C
     INCB
@@ -15024,7 +15024,7 @@ L_005926: ; 0x005926, $C926
 L_005932: ; 0x005932, $C932
     CMPX  #$C481
     BNE   L_005951
-    JSR   L_002FA7
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_AB
     LEAX  -4,X
     EXG   A-B
     ADDA  #$10
@@ -15046,11 +15046,11 @@ L_005956: ; 0x005956, $C956
     DAA
     LEAX  -2,X
     INC   $3B
-    JMP   L_002FAA
+    JMP   JMP_STORE_A_TO_SRAM_@X_BANKED
 L_00595E: ; 0x00595E, $C95E
     CMPX  #$C481
     BNE   L_005973
-    JSR   L_002FA7
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_AB
     LEAX  -4,X
     EXG   A-B
     ADDA  #$90
@@ -15259,7 +15259,7 @@ L_005A9C: ; 0x005A9C, $CA9C
     CMPX  #$C010
     BNE   L_005A9C
     PULS  B,X,Y,PC
-ROM_BOARD_LED_FLASH?: ; 0x005AAA, $CAAA
+ROM_BOARD_LED_SOMETHING: ; 0x005AAA, $CAAA
     PSHS  X,B ; Save
     LSRB ; Bring 0 in.
     RORB
@@ -15284,10 +15284,10 @@ L_005AC8: ; 0x005AC8, $CAC8
     LDA   #$02
     LDY   #$01F4
 L_005AD0: ; 0x005AD0, $CAD0
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     JSR   AUTO/ADV_WAIT?
     CLRB
-    JSR   ROM_BOARD_LED_FLASH?
+    JSR   ROM_BOARD_LED_SOMETHING
     JSR   AUTO/ADV_WAIT?
     LDB   1,S
     DECA
@@ -15400,37 +15400,37 @@ L_005B99: ; 0x005B99, $CB99
     ABX
     LDY   #$C489
     LDB   #$06
-L_005BAF: ; 0x005BAF, $CBAF
-    PSHS  A
-L_005BB1: ; 0x005BB1, $CBB1
-    LDA   X+
-    EXG   X-Y
-    JSR   L_002FAA
-    EXG   X-Y
-    DECB
-    BNE   L_005BB1
+MOVE_@X_TO_SRAM@Y: ; 0x005BAF, $CBAF
+    PSHS  A ; Save
+LOOP_INIT_SRAM: ; 0x005BB1, $CBB1
+    LDA   X+ ; Get data from ROM pointer.
+    EXG   X-Y ; Put SRAM pointer to X
+    JSR   JMP_STORE_A_TO_SRAM_@X_BANKED ; Put to SRAM
+    EXG   X-Y ; Move back to ROM pointer in X
+    DECB ; Loop counter
+    BNE   LOOP_INIT_SRAM
     PULS  A,PC
 L_005BBF: ; 0x005BBF, $CBBF
     LDB   #$0E
-    BRA   L_005BC4
-L_005BC3: ; 0x005BC3, $CBC3
-    CLRB
-L_005BC4: ; 0x005BC4, $CBC4
-    LDX   #$C400
-    CLRA
-L_005BC8: ; 0x005BC8, $CBC8
-    JSR   L_002FAA
-    DECB
-    BNE   L_005BC8
-    RTS
-L_005BCF: ; 0x005BCF, $CBCF
-    PSHS  Y,X,B,A
-    BSR   L_005BC3
-    LDX   #$CECF
-    LDY   #$C41D
-    LDB   #$47
-    BSR   L_005BAF
-    PULS  A,B,X,Y,PC
+    BRA   CLEAR_SRAM_TO_B
+CLEAR_ALL_SRAM: ; 0x005BC3, $CBC3
+    CLRB ; Loop counter.
+CLEAR_SRAM_TO_B: ; 0x005BC4, $CBC4
+    LDX   #$C400 ; Start of SRAM
+    CLRA ; Clear
+LOOP_WRITE_A_TO_SRAM_B_TIMES: ; 0x005BC8, $CBC8
+    JSR   JMP_STORE_A_TO_SRAM_@X_BANKED ; Write location
+    DECB ; loop--
+    BNE   LOOP_WRITE_A_TO_SRAM_B_TIMES ; Loop
+    RTS ; Leave
+INIT_SRAM: ; 0x005BCF, $CBCF
+    PSHS  Y,X,B,A ; Save
+    BSR   CLEAR_ALL_SRAM ; Clear SRAM
+    LDX   #$CECF ; CMOS_RAM_INIT_DATA
+    LDY   #$C41D ; Pointer into CMOS RAM
+    LDB   #$47 ; Times to loop
+    BSR   MOVE_@X_TO_SRAM@Y ; Move data
+    PULS  A,B,X,Y,PC ; RTS
 L_005BE0: ; 0x005BE0, $CBE0
     PSHS  X,B,A
     LDA   #$01
@@ -15444,9 +15444,9 @@ L_005BE8: ; 0x005BE8, $CBE8
     ASLB
     LDX   #$C3FD
     ABX
-    JSR   L_002FA4
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
     PSHS  B
-    JSR   L_002FA4
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
     PSHS  B
     ADDA  S+
     DAA
@@ -15467,7 +15467,7 @@ L_005C0D: ; 0x005C0D, $CC0D
 L_005C16: ; 0x005C16, $CC16
     STA   $37
     LDX   #$C47D
-    JSR   L_002FAA
+    JSR   JMP_STORE_A_TO_SRAM_@X_BANKED
     PULS  A,X,PC
 L_005C20: ; 0x005C20, $CC20
     PSHS  X,B,A
@@ -15485,7 +15485,7 @@ L_005C30: ; 0x005C30, $CC30
     ASLB
     LDX   #$C487
     ABX
-    JSR   L_002FA4
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
     BSR   L_005C9F
     LDA   $39
     PSHS  B
@@ -15495,7 +15495,7 @@ L_005C30: ; 0x005C30, $CC30
     ADDA  S+
     STA   $38
     LDX   #$C493
-    JSR   L_002FA4
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
     BSR   L_005C9F
     PSHS  B
     CMPA  S+
@@ -15503,13 +15503,13 @@ L_005C30: ; 0x005C30, $CC30
     PULS  A,B,X,PC
 L_005C5B: ; 0x005C5B, $CC5B
     LDX   #$C48F
-    JSR   L_002FA4
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
     BSR   L_005C9F
     BSR   L_005C89
     PSHS  A
     STB   $38
     LDX   #$C491
-    JSR   L_002FA4
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
     LDA   $39
     BSR   L_005C9F
     BSR   L_005C89
@@ -15558,7 +15558,7 @@ L_005CAF: ; 0x005CAF, $CCAF
     LDX   #$CECF
     LDY   #$C41D
     LDB   #$30
-    JSR   L_005BAF
+    JSR   MOVE_@X_TO_SRAM@Y
     BSR   L_005CC1
     PULS  A,B,X,Y,PC
 L_005CC1: ; 0x005CC1, $CCC1
@@ -15568,7 +15568,7 @@ L_005CC1: ; 0x005CC1, $CCC1
     LDB   #$30
 L_005CCC: ; 0x005CCC, $CCCC
     LDA   Y+
-    JSR   L_002FAA
+    JSR   JMP_STORE_A_TO_SRAM_@X_BANKED
     DECB
     BNE   L_005CCC
     PULS  A,B,X,Y,PC
@@ -16077,6 +16077,7 @@ L_005CCC: ; 0x005CCC, $CCCC
     .db $2F
     .db $FF
     .db $FF
+CMOS_RAM_INIT_DATA: ; 0x005ECF, $CECF
     .db $02 ; High score table initial start. Score, BCD.
     .db $12
     .db $70
@@ -16148,7 +16149,7 @@ L_005CCC: ; 0x005CCC, $CCCC
     .db $00
     .db $00
     .db $00
-    .db $01
+    .db $01 ; END SRAM INIT DATA
     .db $04
     .db $01
     .db $02
