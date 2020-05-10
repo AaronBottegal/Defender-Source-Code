@@ -10098,25 +10098,25 @@ L_003D64: ; 0x003D64, $CD64
     .db $00
     .db $C1 ; SENTENCE INITIAL TESTS INDICATE
     .db $07
-    .db $C1
+    .db $C1 ; UNIT OK
     .db $0D
-    .db $C1
+    .db $C1 ; SENTENCE ROM
     .db $11
-    .db $C1
+    .db $C1 ; SENTENCE RAM
     .db $13
-    .db $C1
+    .db $C1 ; SENTENCE ROM FAILURE
     .db $15
-    .db $C1
+    .db $C1 ; SENTENCE RAM FAILURE
     .db $19
-    .db $C1
+    .db $C1 ; SENTENCE GAME OVER
     .db $1D
-    .db $C1
+    .db $C1 ; SENTENCE ALL ROMS OK
     .db $21
-    .db $C1
+    .db $C1 ; SENTENCE RAM TEST
     .db $27
-    .db $C1
+    .db $C1 ; SENTENCE NO RAM ERRORS DETECTED
     .db $2B
-    .db $C1
+    .db $C1 ; SENTENCE CMOS RAM FAILURE
     .db $33
     .db $C1
     .db $4D
@@ -10304,426 +10304,426 @@ RUG_STR_DATA_END?: ; 0x004087, $C087
     .db $93
     .db $C5 ; RAM
     .db $1B
-    .db $C4 ; FAILURE. END OF STRING PTRS
+    .db $C4 ; FAILURE. END OF STRING PTRS?
     .db $04
     .db $06
     .db $28
     .db $A0
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C4
+    .db $C4 ; MUST
     .db $AD
-    .db $C3
+    .db $C3 ; BE
     .db $66
-    .db $C3
+    .db $C3 ; ENTERED
     .db $F0
     .db $07
-    .db $C5
+    .db $C5 ; WITH
     .db $DA
-    .db $C3
+    .db $C3 ; COIN
     .db $98
-    .db $C3
+    .db $C3 ; DOOR
     .db $CF
-    .db $C4
+    .db $C4 ; OPEN
     .db $D8
-    .db $C3
+    .db $C3 ; CMOS
     .db $93
-    .db $C5
+    .db $C5 ; RAM
     .db $1B
-    .db $C4
+    .db $C4 ; OK
     .db $D1
-    .db $C4
+    .db $C4 ; MULTIPLE
     .db $A4
-    .db $C5
+    .db $C5 ; RAM
     .db $1B
-    .db $C4
+    .db $C4 ; FAILURE
     .db $04
     .db $03
     .db $FE
-    .db $C3
+    .db $C3 ; ,
     .db $81
     .db $04
     .db $10
     .db $02
     .db $F8
-    .db $C3
+    .db $C3 ; CMOS
     .db $93
-    .db $C5
+    .db $C5 ; RAM
     .db $1B
-    .db $C3
+    .db $C3 ; CAN
     .db $7D
-    .db $C4
+    .db $C4 ; NOT
     .db $CD
-    .db $C3
+    .db $C3 ; BE
     .db $66
-    .db $C5
+    .db $C5 ; TESTED
     .db $86
-    .db $C3
+    .db $C3 ; COLOR
     .db $9D
-    .db $C5
+    .db $C5 ; RAM
     .db $1B
-    .db $C5
+    .db $C5 ; TEST
     .db $81
     .db $04
     .db $30
     .db $02
     .db $E8
-    .db $C5
+    .db $C5 ; VERTICAL
     .db $C3
-    .db $C3
+    .db $C3 ; COLOR
     .db $9D
-    .db $C3
+    .db $C3 ; BARS
     .db $61
-    .db $C4
+    .db $C4 ; INDICATE
     .db $50
     .db $07
     .db $03
     .db $FC
-    .db $C3
+    .db $C3 ; COLOR
     .db $9D
-    .db $C5
+    .db $C5 ; RAM
     .db $1B
-    .db $C4
+    .db $C4 ; FAILURE
     .db $04
-    .db $C3
+    .db $C3 ; AUDIO
     .db $49
-    .db $C5
+    .db $C5 ; TEST
     .db $81
     .db $07
     .db $07
     .db $03
     .db $04
-    .db $C5
+    .db $C5 ; SOUND
     .db $54
-    .db $C5
+    .db $C5 ; SWITCH
     .db $7A
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C4
+    .db $C4 ; MONITOR
     .db $9C
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C4
+    .db $C4 ; PATTERNS
     .db $E5
-    .db $C3
+    .db $C3 ; AUTO
     .db $55
-    .db $C5
+    .db $C5 ; UP
     .db $C0
-    .db $C3
+    .db $C3 ; ADVANCE
     .db $36
-    .db $C5
+    .db $C5 ; RIGHT
     .db $27
-    .db $C3
+    .db $C3 ; COIN
     .db $98
-    .db $C4
+    .db $C4 ; HIGHSCORE RESET
     .db $35
-    .db $C4
+    .db $C4 ; LEFT
     .db $8B
-    .db $C3
+    .db $C3 ; COIN
     .db $98
-    .db $C3
+    .db $C3 ; CENTER
     .db $85
-    .db $C3
+    .db $C3 ; COIN
     .db $98
-    .db $C4
+    .db $C4 ; INVALID SWITCH
     .db $75
-    .db $C4
+    .db $C4 ; INVALID SWITCH
     .db $75
-    .db $C4
+    .db $C4 ; FIRE
     .db $0C
-    .db $C5
+    .db $C5 ; THRUST
     .db $9C
-    .db $C5
+    .db $C5 ; SMART
     .db $4E
-    .db $C3
+    .db $C3 ; BOMB
     .db $69
-    .db $C4
+    .db $C4 ; HYPERSPACE
     .db $45
-    .db $C5
+    .db $C5 ; TWO
     .db $B7
-    .db $C4
+    .db $C4 ; PLAYERS
     .db $F5
-    .db $C4
+    .db $C4 ; ONE
     .db $D4
-    .db $C4
+    .db $C4 ; PLAYER
     .db $EE
-    .db $C5
+    .db $C5 ; REVERSE
     .db $1F
-    .db $C3
+    .db $C3 ; DOWN
     .db $D4
-    .db $C5
+    .db $C5 ; UP
     .db $C0
-    .db $C4
+    .db $C4 ; INVALID SWITCH
     .db $75
-    .db $C4
+    .db $C4 ; INVALID SWITCH
     .db $75
-    .db $C4
+    .db $C4 ; INVALID SWITCH
     .db $75
-    .db $C4
+    .db $C4 ; INVALID SWITCH
     .db $75
-    .db $C4
+    .db $C4 ; INVALID SWITCH
     .db $75
-    .db $C4
+    .db $C4 ; INVALID SWITCH
     .db $75
-    .db $C4
+    .db $C4 ; INVALID SWITCH
     .db $75
-    .db $C5
+    .db $C5 ; PRESS
     .db $0B
-    .db $C3
+    .db $C3 ; ADVANCE
     .db $36
-    .db $C5
+    .db $C5 ; WITH
     .db $DA
-    .db $C5
+    .db $C5 ; SWITCH
     .db $7A
-    .db $C5
+    .db $C5 ; SET
     .db $45
-    .db $C4
+    .db $C4 ; FOR
     .db $11
     .db $03
     .db $FE
-    .db $C3
+    .db $C3 ; :
     .db $83
-    .db $C3
+    .db $C3 ; AUTO
     .db $55
-    .db $C4
+    .db $C4 ; FOR
     .db $11
-    .db $C3
+    .db $C3 ; AUDIT
     .db $4F
     .db $03
     .db $FE
-    .db $C3
+    .db $C3 ; ,
     .db $81
-    .db $C4
+    .db $C4 ; GAME
     .db $15
-    .db $C3
+    .db $C3 ; ADJUSTMENT
     .db $2B
-    .db $C4
+    .db $C4 ; MANUAL
     .db $95
-    .db $C4
+    .db $C4 ; FOR
     .db $11
-    .db $C5
+    .db $C5 ; ROM
     .db $2D
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C3
+    .db $C3 ; AUTO
     .db $55
-    .db $C4
+    .db $C4 ; FOR
     .db $11
-    .db $C5
+    .db $C5 ; RAM
     .db $1B
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C3
+    .db $C3 ; AUTO
     .db $55
-    .db $C5
+    .db $C5 ; TO
     .db $AD
-    .db $C3
+    .db $C3 ; EXIT
     .db $FF
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C3
+    .db $C3 ; AUTO
     .db $55
-    .db $C4
+    .db $C4 ; FOR
     .db $11
-    .db $C3
+    .db $C3 ; CMOS
     .db $93
-    .db $C5
+    .db $C5 ; RAM
     .db $1B
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C3
+    .db $C3 ; AUTO
     .db $55
-    .db $C4
+    .db $C4 ; FOR
     .db $11
-    .db $C3
+    .db $C3 ; COLOR
     .db $9D
-    .db $C5
+    .db $C5 ; RAM
     .db $1B
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C3
+    .db $C3 ; AUTO
     .db $55
-    .db $C4
+    .db $C4 ; FOR
     .db $11
-    .db $C3
+    .db $C3 ; AUDIO
     .db $49
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C3
+    .db $C3 ; AUTO
     .db $55
-    .db $C4
+    .db $C4 ; FOR
     .db $11
-    .db $C5
+    .db $C5 ; SWITCH
     .db $7A
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C4
+    .db $C4 ; MANUAL
     .db $95
-    .db $C5
+    .db $C5 ; TO
     .db $AD
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C4
+    .db $C4 ; INDIVIDUAL
     .db $59
-    .db $C5
+    .db $C5 ; SOUNDS
     .db $5A
-    .db $C3
+    .db $C3 ; AUTO
     .db $55
-    .db $C4
+    .db $C4 ; FOR
     .db $11
-    .db $C4
+    .db $C4 ; MONITOR
     .db $9C
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C4
+    .db $C4 ; PATTERNS
     .db $E5
-    .db $C4
+    .db $C4 ; MANUAL
     .db $95
-    .db $C5
+    .db $C5 ; TO
     .db $AD
-    .db $C5
+    .db $C5 ; STEP
     .db $67
-    .db $C5
+    .db $C5 ; THRU
     .db $97
-    .db $C4
+    .db $C4 ; PATTERNS
     .db $E5
-    .db $C3
+    .db $C3 ; AUTO
     .db $55
-    .db $C4
+    .db $C4 ; FOR
     .db $11
-    .db $C4
+    .db $C4 ; GAME
     .db $15
-    .db $C4
+    .db $C4 ; OVER
     .db $E0
-    .db $C4
+    .db $C4 ; MANUAL
     .db $95
-    .db $C5
+    .db $C5 ; TO
     .db $AD
-    .db $C5
+    .db $C5 ; STEP
     .db $67
-    .db $C5
+    .db $C5 ; THRU
     .db $97
-    .db $C3
+    .db $C3 ; ADJUSTMENT
     .db $2B
-    .db $C5
+    .db $C5 ; WILLIAMS
     .db $D1
-    .db $C3
+    .db $C3 ; DEFENDER
     .db $BD
-    .db $C5
+    .db $C5 ; PRESS
     .db $0B
-    .db $C3
+    .db $C3 ; ADVANCE
     .db $36
-    .db $C5
+    .db $C5 ; TO
     .db $AD
-    .db $C5
+    .db $C5 ; STEP
     .db $67
-    .db $C5
+    .db $C5 ; THRU
     .db $97
-    .db $C5
+    .db $C5 ; TEST
     .db $81
-    .db $C5
+    .db $C5 ; PRESS
     .db $0B
-    .db $C4
+    .db $C4 ; HIGHSCORE RESET
     .db $35
-    .db $C5
+    .db $C5 ; TO
     .db $AD
-    .db $C4
+    .db $C4 ; MAKE
     .db $90
-    .db $C3
+    .db $C3 ; CHANGE
     .db $8C
-    .db $C4
+    .db $C4 ; LANDER
     .db $84
     .db $07
     .db $03
     .db $06
-    .db $C4
+    .db $C4 ; 150
     .db $B9
-    .db $C4
+    .db $C4 ; MUTANT
     .db $B2
     .db $07
     .db $03
     .db $06
-    .db $C4
+    .db $C4 ; 150
     .db $B9
-    .db $C4
+    .db $C4 ; " POD"
     .db $FD
     .db $07
     .db $03
     .db $00
-    .db $C4
+    .db $C4 ; 1000
     .db $C5
-    .db $C3
+    .db $C3 ; BOMBER
     .db $6E
     .db $07
     .db $03
     .db $06
-    .db $C4
+    .db $C4 ; 250
     .db $C1
-    .db $C5
+    .db $C5 ; SWARMER
     .db $72
     .db $07
     .db $03
     .db $08
-    .db $C4
+    .db $C4 ; 150
     .db $B9
-    .db $C3
+    .db $C3 ; BAITER
     .db $5A
     .db $07
     .db $03
     .db $06
-    .db $C4
+    .db $C4 ; 200
     .db $BD
-    .db $C3
+    .db $C3 ; CREDITS:
     .db $B4
-    .db $C5
+    .db $C5 ; SCANNER
     .db $36
-    .db $C3
+    .db $C3 ; ELECTRONICS INC.
     .db $D9
     .db $07
     .db $07
     .db $03
     .db $0C
-    .db $C5
+    .db $C5 ; PRESENTS
     .db $02
-    .db $C4
+    .db $C4 ; PLAYER
     .db $EE
-    .db $C4
+    .db $C4 ; ONE
     .db $D4
-    .db $C4
+    .db $C4 ; PLAYER
     .db $EE
-    .db $C5
+    .db $C5 ; TWO
     .db $B7
-    .db $C3
+    .db $C3 ; BONUS X
     .db $75
-    .db $C5
+    .db $C5 ; PRESS
     .db $0B
-    .db $C4
+    .db $C4 ; ONE
     .db $D4
-    .db $C4
+    .db $C4 ; PLAYER
     .db $EE
-    .db $C5
+    .db $C5 ; START
     .db $61
-    .db $C5
+    .db $C5 ; PRESS
     .db $0B
-    .db $C4
+    .db $C4 ; ONE
     .db $D4
-    .db $C4
+    .db $C4 ; OR
     .db $DD
-    .db $C5
+    .db $C5 ; TWO
     .db $B7
-    .db $C4
+    .db $C4 ; PLAYER
     .db $EE
-    .db $C5
+    .db $C5 ; START
     .db $61
-    .db $C3
+    .db $C3 ; ATTACK
     .db $42
-    .db $C5
+    .db $C5 ; WAVE
     .db $CC
-    .db $C3
+    .db $C3 ; COMPLETED
     .db $A3
-    .db $C5
+    .db $C5 ; YOU
     .db $DF
-    .db $C4
+    .db $C4 ; HAVE
     .db $30
     .db $C5
     .db $11
