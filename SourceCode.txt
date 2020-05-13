@@ -45,8 +45,8 @@ BANK_VAL_DP:                             .rs 0x01 ;0x0036
 
 
 	.org $003D
-TEXT_PTR_TO_CODE:                        .rs 0x02 ;0x003D to 003E
-TEXT_PTR_TO_CODE2:                       .rs 0x02 ;0x003F to 0040
+TEXT_PTR_TO_CODE_RUN:                    .rs 0x02 ;0x003D to 003E
+TEXT_PTR_TO_CODE_FIN:                    .rs 0x02 ;0x003F to 0040
 
 	.org $004C
 TEXT_DATA_SPACING_XXYY?:                 .rs 0x02 ;0x004C to 004D
@@ -835,10 +835,10 @@ L_0003E8: ; 0x0003E8, $D3E8
 L_0003EE: ; 0x0003EE, $D3EE
     CLR   $73
     LDB   #$06
-    LDA   LOW(BANK_VAL_DP)
+    LDA   BANK_VAL_DP
     PSHS  A
     LDA   #$02
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     STA   BANKSWITCH
 L_0003FD: ; 0x0003FD, $D3FD
     LDA   U+
@@ -873,7 +873,7 @@ L_00042B: ; 0x00042B, $D42B
     DECB
     BNE   L_0003FD
     PULS  A
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     STA   BANKSWITCH
     PULS  A,PC
     LDA   $BA
@@ -1562,7 +1562,7 @@ L_0008DB: ; 0x0008DB, $D8DB
     RTS
 WATCHDOG_PTR_ETC: ; 0x0008DC, $D8DC
     PSHS  X,A
-    LDA   LOW(BANK_VAL_DP)
+    LDA   BANK_VAL_DP
     PSHS  A
 SET_XAB: ; 0x0008E2, $D8E2
     LDX   #$DF17
@@ -1570,7 +1570,7 @@ SET_XAB: ; 0x0008E2, $D8E2
     BRA   STORE_X_WATCHDOG_MORE
 L_0008EA: ; 0x0008EA, $D8EA
     PSHS  X,A
-    LDA   LOW(BANK_VAL_DP)
+    LDA   BANK_VAL_DP
     PSHS  A
     CLRA
     JSR   BANKSWITCH_TO_A
@@ -1580,14 +1580,14 @@ L_0008EA: ; 0x0008EA, $D8EA
     LDD   #$3934 ; A=Watchdog, B=Ctrl
 STORE_X_WATCHDOG_MORE: ; 0x0008FF, $D8FF
     STX   $90
-    CLR   LOW(BANK_VAL_DP)
+    CLR   BANK_VAL_DP
     CLR   BANKSWITCH
     STB   PIA_WGT_CTRL_B ; Store to widget ctrl.
     STA   WATCHDOG ; Store to watchdog.
     LDA   #$7E
     STA   $8F
     PULS  A ; Pull stack
-    STA   LOW(BANK_VAL_DP) ; Switch
+    STA   BANK_VAL_DP ; Switch
     STA   BANKSWITCH
     PULS  A,X,PC ; Restore/RTS
 L_000919: ; 0x000919, $D919
@@ -2232,7 +2232,7 @@ L_000DEC: ; 0x000DEC, $DDEC
     BSR   L_000DD5
     TFR   A>B
     CLRA
-    LDX   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    LDX   SENTENCE_CURR_SCR_LOC_XY
     JSR   PALETTE_ENTRY_0xE
     LDX   #$3D60
     LDU   #$C0FB
@@ -2247,7 +2247,7 @@ L_000DEC: ; 0x000DEC, $DDEC
     BLS   L_000E2B
     LDA   #$05
 L_000E2B: ; 0x000E2B, $DE2B
-    LDX   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    LDX   SENTENCE_CURR_SCR_LOC_XY
     JSR   PALETTE_ENTRY_0xE
     LDU   $63
     LDX   #$3CA0
@@ -2443,7 +2443,7 @@ L_000FAC: ; 0x000FAC, $DFAC
     CLR   BANKSWITCH
     LDA   #$05
     STA   PIA_ROM_CTRL_B
-    LDA   LOW(BANK_VAL_DP)
+    LDA   BANK_VAL_DP
     STA   BANKSWITCH
     LDA   S
     ANDA  #$6F
@@ -3217,7 +3217,7 @@ L_0015A8: ; 0x0015A8, $E5A8
 L_0015AB: ; 0x0015AB, $E5AB
     PSHS  U,B,A
     LDA   #$02
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     STA   BANKSWITCH
     PULS  A,B
     NOP ; Removed something?
@@ -3571,7 +3571,7 @@ L_0017FE: ; 0x0017FE, $E7FE
     STU   X
 L_00181A: ; 0x00181A, $E81A
     LDA   #$02
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     STA   BANKSWITCH
     BSR   L_001861
     JSR   L_002C66
@@ -5239,7 +5239,7 @@ L_0024BB: ; 0x0024BB, $F4BB
 L_0024BE: ; 0x0024BE, $F4BE
     LDU   $63
     STX   13,U
-    LDB   LOW(BANK_VAL_DP)
+    LDB   BANK_VAL_DP
     STB   12,U
     LDX   #$F4CC
     JMP   U=$63,A>U+4,X>U+2
@@ -5249,7 +5249,7 @@ L_0024BE: ; 0x0024BE, $F4BE
 GOTO_PAST_JSR: ; 0x0024D3, $F4D3
     LEAS  -3,S ; Save 3 bytes of stack. FORMAT: [ptr,bank]
     PSHS  U,A ; STACK S 0:A 2:U 3-5:RSV 6:RTS
-    LDA   LOW(BANK_VAL_DP) ; Get current bank.
+    LDA   BANK_VAL_DP ; Get current bank.
     STA   5,S ; Save bank up stack.
     LDU   6,S ; Pull location from.
     LDA   2,U ; Pull bank going to into A.
@@ -5282,7 +5282,7 @@ BANKSWITCH_TO_3: ; 0x002507, $F507
 BANKSWITCH_TO_1: ; 0x00250B, $F50B
     LDA   #$01
 BANKSWITCH_TO_A: ; 0x00250D, $F50D
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     STA   BANKSWITCH
     RTS
 PSH_ALL_GOTO_B2-C002: ; 0x002513, $F513
@@ -5297,10 +5297,10 @@ GOTO_B3-C00F: ; 0x00251C, $F51C
 TEXT_CHAR_TO_SCREEN: ; 0x002522, $F522
     PSHS  U,Y,X,B,A ; Save state
     TFR   D>X ; TFR location to X
-    LDA   LOW(BANK_VAL_DP) ; Get bank
+    LDA   BANK_VAL_DP ; Get bank
     PSHS  A ; Save
     LDA   #$02 ; Switch to bank 2.
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     STA   BANKSWITCH
     LDD   Y ; Get WWHH?
     LDY   2,Y ; LDY from Y
@@ -5340,16 +5340,16 @@ END_MOVE_COL: ; 0x002564, $F564
 POST_COL_DATA_MOVED: ; 0x002570, $F570
     LEAS  2,S ; Fix stack
     PULS  A ; Pull bank from.
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     STA   BANKSWITCH ; Switch to bank.
     PULS  A,B,X,Y,U,PC ; RTS
 L_00257B: ; 0x00257B, $F57B
     PSHS  U,X,B,A
     TFR   D>X
-    LDA   LOW(BANK_VAL_DP)
+    LDA   BANK_VAL_DP
     PSHS  A
     LDA   #$02
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     STA   BANKSWITCH
     LDD   Y
 L_00258C: ; 0x00258C, $F58C
@@ -5384,12 +5384,12 @@ L_0025B5: ; 0x0025B5, $F5B5
     BNE   L_0025A8
 L_0025BE: ; 0x0025BE, $F5BE
     PULS  A,B
-    STB   LOW(BANK_VAL_DP)
+    STB   BANK_VAL_DP
     STB   BANKSWITCH
     PULS  A,B,X,U,PC
 SAVE_UXBA+BANK_UNK: ; 0x0025C7, $F5C7
     PSHS  U,X,B,A
-    LDA   LOW(BANK_VAL_DP)
+    LDA   BANK_VAL_DP
     PSHS  A
     LDA   1,S ; Get value up stack.
     BRA   L_00258C
@@ -5537,7 +5537,7 @@ COMPARE_RUG: ; 0x0026BB, $F6BB
     BITA  #$10 ; Test if IRQ mask.
     BEQ   RUG_MISMATCH_IRQ_NOMASK
     LDA   #$03
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     STA   BANKSWITCH
     JMP   RUG_MISMATCH
 RUG_MISMATCH_IRQ_NOMASK: ; 0x0026D2, $F6D2
@@ -5557,7 +5557,7 @@ RUG_MATCH: ; 0x0026D7, $F6D7
     BNE   RUG_MATCH_EITHER_ACTIVE ; If either active.
 BOTH_INPUTS_ACTIVE: ; 0x0026EA, $F6EA
     LDA   #$03 ; Bank val
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     STA   BANKSWITCH
     JMP   JMP_RUG_LEAVE?
 RUG_MATCH_NO_IRQMASK: ; 0x0026F4, $F6F4
@@ -5688,30 +5688,30 @@ L_0027D5: ; 0x0027D5, $F7D5
     JMP   DEFENDER_GAME_START? ; Goto game if SRAM check didn't take over.
 STORE_B@X_BANK0: ; 0x0027DB, $F7DB
     PSHS  A,CC ; Save A,CC
-    LDA   LOW(BANK_VAL_DP) ; Load bank
+    LDA   BANK_VAL_DP ; Load bank
     PSHS  A ; Push to the stack to save.
-    CLR   LOW(BANK_VAL_DP) ; Set to bank 0
+    CLR   BANK_VAL_DP ; Set to bank 0
     CLR   BANKSWITCH
     STB   X ; Store B to X
 RESTORE_BANK+A+CC_@S: ; 0x0027E8, $F7E8
     PULS  A
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     STA   BANKSWITCH
     PULS  CC,A,PC ; Restore regs. RTS
 LOAD_B@X_BANK0: ; 0x0027F1, $F7F1
     PSHS  A,CC ; Save A,CC
-    LDA   LOW(BANK_VAL_DP)
+    LDA   BANK_VAL_DP
     PSHS  A ; Push current bank to save.
-    CLR   LOW(BANK_VAL_DP) ; Set to bank 0.
+    CLR   BANK_VAL_DP ; Set to bank 0.
     CLR   BANKSWITCH
     LDB   X ; Load B
     BRA   RESTORE_BANK+A+CC_@S ; Restore last bank
 SETUP_DP_52_49_36_48_59: ; 0x002800, $F800
     PSHS  B,A ; Save B,A
-    CLR   LOW(SENTENCE_PTR_WORD_ON) ; Clear
+    CLR   SENTENCE_PTR_WORD_ON ; Clear
     CLR   $49
     LDA   #$03
-    STA   LOW(BANK_VAL_DP) ; Bank info.
+    STA   BANK_VAL_DP ; Bank info.
     STA   $48 ; Set
     LDD   #$FFFF
     STD   $59 ; Set
@@ -5729,13 +5729,13 @@ GET_DATA_FROM_SRAM: ; 0x002813, $F813
     RTS ; RTS
 GET_DATA_FROM_SRAM_@X: ; 0x002822, $F822
     PSHS  B ; Save B.
-    LDB   LOW(BANK_VAL_DP) ; Get bank.
+    LDB   BANK_VAL_DP ; Get bank.
     PSHS  B ; Save
-    CLR   LOW(BANK_VAL_DP) ; Bank 0.
+    CLR   BANK_VAL_DP ; Bank 0.
     CLR   BANKSWITCH ; Bank 0.
     BSR   GET_DATA_FROM_SRAM ; Get data. X+=2
     PULS  B
-    STB   LOW(BANK_VAL_DP) ; Restore bank from stack.
+    STB   BANK_VAL_DP ; Restore bank from stack.
     STB   BANKSWITCH
     PULS  B,PC ; Rest+ret
 GET_DATA_FROM_SRAM@X_IN_AB: ; 0x002838, $F838
@@ -5756,13 +5756,13 @@ STORE_A_TO_SRAM_@X: ; 0x002842, $F842
     PULS  A,PC ; Return
 STORE_A_TO_SRAM_@X_BANKED: ; 0x00284E, $F84E
     PSHS  B ; Save B
-    LDB   LOW(BANK_VAL_DP) ; Get bank
+    LDB   BANK_VAL_DP ; Get bank
     PSHS  B ; Save bank
-    CLR   LOW(BANK_VAL_DP)
+    CLR   BANK_VAL_DP
     CLR   BANKSWITCH ; Set to IO bank.
     BSR   STORE_A_TO_SRAM_@X ; Write
     PULS  B ; Restore bank.
-    STB   LOW(BANK_VAL_DP)
+    STB   BANK_VAL_DP
     STB   BANKSWITCH
     PULS  B,PC ; RTS
 L_002864: ; 0x002864, $F864
@@ -7411,7 +7411,7 @@ L_003070: ; 0x003070, $C070
     .db $02
     .db $02
     LDD   #$412F
-    STD   LOW(R_0000)
+    STD   R_0000
     LDA   #$40
     STD   $02
     STD   $04
@@ -8054,7 +8054,7 @@ L_003677: ; 0x003677, $C677
     LDA   #$FB
     STA   $BA
     JSR   CLEAR_ALL_SCREEN
-    CLR   LOW(SENTENCE_PTR_WORD_ON)
+    CLR   SENTENCE_PTR_WORD_ON
     LDD   #$FFFF
     STD   $59
     LDX   #$E782
@@ -12665,18 +12665,18 @@ L_004A81: ; 0x004A81, $CA81
     LDY   #$FFB3
 L_004A87: ; 0x004A87, $CA87
     LDD   #$CAED
-    STY   LOW(TEXT_PTR_TO_CODE)
-    STD   LOW(TEXT_PTR_TO_CODE2)
-    STX   LOW(SENTENCE_CURR_SCR_LOC_XY)
-    STX   LOW(SENTENCE_CURR_SCR_LOC_CR?)
+    STY   TEXT_PTR_TO_CODE_RUN
+    STD   TEXT_PTR_TO_CODE_FIN
+    STX   SENTENCE_CURR_SCR_LOC_XY
+    STX   SENTENCE_CURR_SCR_LOC_CR?
     LDX   #$010A
-    STX   LOW(TEXT_DATA_SPACING_XXYY?)
-    CLR   LOW(SENTENCE_FLAG_58)
+    STX   TEXT_DATA_SPACING_XXYY?
+    CLR   SENTENCE_FLAG_58
     LDU   5,S
-    STU   LOW(SENTENCE_PTR_TO_WORD)
+    STU   SENTENCE_PTR_TO_WORD
     LEAU  32,U
-    STU   LOW(SENTENCE_END_PTR)
-    STU   LOW(SENTENCE_PTR_WORD_ON)
+    STU   SENTENCE_END_PTR
+    STU   SENTENCE_PTR_WORD_ON
     BRA   SKIP_SENTENCE_INIT
 TEXT_RELATED_ROUTINE?: ; 0x004AA7, $CAA7
     PSHS  U,Y,X,B,A,CC ; Save
@@ -12698,37 +12698,37 @@ L_004AC8: ; 0x004AC8, $CAC8
     LDY   #$FFB6
     LDD   #$CB5F
 SENTENCE_TO_SCREEN: ; 0x004AD1, $CAD1
-    STY   LOW(TEXT_PTR_TO_CODE) ; Store ptr to TEXT_DATA_TO_SCREEN
-    STD   LOW(TEXT_PTR_TO_CODE2) ; Store ptr to SKIP_TEXT_RTN_INIT
-    TST   LOW(SENTENCE_PTR_WORD_ON) ; Test if top byte not null
+    STY   TEXT_PTR_TO_CODE_RUN ; Store ptr to TEXT_DATA_TO_SCREEN
+    STD   TEXT_PTR_TO_CODE_FIN ; Store ptr to SKIP_SENTENCE_INIT
+    TST   SENTENCE_PTR_WORD_ON ; Test if top byte not null
     BNE   SKIP_SENTENCE_INIT ; If is set, don't init.
-    STX   LOW(SENTENCE_CURR_SCR_LOC_XY) ; Screen location current?
-    STX   LOW(SENTENCE_CURR_SCR_LOC_CR?) ; Screen location CR?
+    STX   SENTENCE_CURR_SCR_LOC_XY ; Screen location current?
+    STX   SENTENCE_CURR_SCR_LOC_CR? ; Screen location CR?
     LDX   #$010A ; Not sure of val. Add per char?
-    STX   LOW(TEXT_DATA_SPACING_XXYY?) ; Store
-    CLR   LOW(SENTENCE_FLAG_58) ; Clear
+    STX   TEXT_DATA_SPACING_XXYY? ; Store
+    CLR   SENTENCE_FLAG_58 ; Clear
     LDX   2,U ; Get end of sentence.
-    STX   LOW(SENTENCE_END_PTR) ; End of sentence.
+    STX   SENTENCE_END_PTR ; End of sentence.
     LDX   U ; Load X with beginning of sentence.
     BRA   MORE_THINGS_TO_DO ; Goto
 SKIP_SENTENCE_INIT: ; 0x004AED, $CAED
-    TST   LOW(SENTENCE_FLAG_58) ; Test
+    TST   SENTENCE_FLAG_58 ; Test
     BNE   FLAG_58_NOT_SET
-    LDX   LOW(SENTENCE_PTR_TO_WORD) ; Get word ptr
+    LDX   SENTENCE_PTR_TO_WORD ; Get word ptr
     LDB   X+ ; Load
     CMPB  #$2F ; #$2F='\0' here.
     BNE   NOT_END_OF_STRING ; Not end, put to screen.
     LDB   #$20 ; Space in ascii.
-    STB   LOW(SENTENCE_FLAG_58) ; Not sure why stored.
+    STB   SENTENCE_FLAG_58 ; Not sure why stored.
     BRA   NOT_END_OF_STRING ; Always space at end.
 FLAG_58_NOT_SET: ; 0x004AFF, $CAFF
-    CLR   LOW(SENTENCE_FLAG_58) ; clear
-    LDX   LOW(SENTENCE_PTR_WORD_ON)
+    CLR   SENTENCE_FLAG_58 ; clear
+    LDX   SENTENCE_PTR_WORD_ON
 DO_MORE_AFTER_CMD: ; 0x004B03, $CB03
-    CMPX  LOW(SENTENCE_END_PTR) ; Compare to end?
+    CMPX  SENTENCE_END_PTR ; Compare to end?
     BNE   MORE_THINGS_TO_DO
 TOP_GT|E_8: ; 0x004B07, $CB07
-    CLR   LOW(SENTENCE_PTR_WORD_ON) ; Clear setup check loc.
+    CLR   SENTENCE_PTR_WORD_ON ; Clear setup check loc.
     PULS  CC,A,B,X,Y,U ; Restore
     ORCC  #$01 ; Set carry
     RTS ; leave.
@@ -12744,11 +12744,11 @@ MORE_THINGS_TO_DO: ; 0x004B0E, $CB0E
     JSR   [A,Y] ; Run code.
     BRA   DO_MORE_AFTER_CMD
 DATA_IS_NOT_CMD: ; 0x004B23, $CB23
-    STX   LOW(SENTENCE_PTR_WORD_ON) ; Store index into sentence, aka word
-    STU   LOW(SENTENCE_PTR_TO_WORD) ; Store word ptr
+    STX   SENTENCE_PTR_WORD_ON ; Store index into sentence, aka word
+    STU   SENTENCE_PTR_TO_WORD ; Store word ptr
     BRA   SKIP_SENTENCE_INIT ; Goto
 NOT_END_OF_STRING: ; 0x004B29, $CB29
-    STX   LOW(SENTENCE_PTR_TO_WORD) ; Store index into word.
+    STX   SENTENCE_PTR_TO_WORD ; Store index into word.
     SUBB  #$20 ; B-=20
     CMPB  #$01 ; CMP 0x20-0x21
     BLS   TEXT_CASE_USE_B ; If <=21
@@ -12770,13 +12770,13 @@ TEXT_CASE_USE_B: ; 0x004B47, $CB47
     LDX   #$C5E3 ; TEXT_POINTER_START
     ABX ; Add to X
     TFR   X>Y ; Put to Y
-    LDD   LOW(SENTENCE_CURR_SCR_LOC_XY) ; Load screen location
-    LDX   LOW(TEXT_PTR_TO_CODE) ; Load ptr to code
+    LDD   SENTENCE_CURR_SCR_LOC_XY ; Load screen location
+    LDX   TEXT_PTR_TO_CODE_RUN ; Load ptr to code
     JSR   X ; JSR to ptr
     ADDA  Y ; Add to A@Y
-    ADDA  LOW(TEXT_DATA_SPACING_XXYY?) ; Add to A from mem. Minimum movement?
-    STA   LOW(SENTENCE_CURR_SCR_LOC_XY) ; Store high byte. Horizontal pos?
-    LDX   LOW(TEXT_PTR_TO_CODE2) ; Load...
+    ADDA  TEXT_DATA_SPACING_XXYY? ; Add to A from mem. Minimum movement?
+    STA   SENTENCE_CURR_SCR_LOC_XY ; Store high byte. Horizontal pos?
+    LDX   TEXT_PTR_TO_CODE_FIN ; Load...
     JMP   X ; JMP to loc.
     PULS  CC,A,B,X,Y,U ; Not gotten to? Pull state.
     ANDCC #$FE ; Clear CC.C
@@ -12800,55 +12800,55 @@ TEXT_FUNCTION_POINTERS?: ; 0x004B64, $CB64
     .db $A3
     .db $CB
     .db $AC
-TEXT_FUNC_X_TO_$4C: ; 0x004B76, $CB76
+TEXT_FUNC_CHANGE_SPACING_X: ; 0x004B76, $CB76
     LDA   X+ ; These functions called by table above front str/text routine
-    STA   LOW(TEXT_DATA_SPACING_XXYY?)
+    STA   TEXT_DATA_SPACING_XXYY?
     RTS
 TEXT_FUNC_X_TO_$4D: ; 0x004B7B, $CB7B
     LDB   X+
-    STB   $4D
+    STB   TEXT_DATA_SPACING_XXYY?+1
     RTS
 TEXT_FUNC_$4E+=@X_TO_$50: ; 0x004B80, $CB80
-    LDA   LOW(SENTENCE_CURR_SCR_LOC_CR?)
+    LDA   SENTENCE_CURR_SCR_LOC_CR?
     ADDA  X+
-    STA   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    STA   SENTENCE_CURR_SCR_LOC_XY
     RTS
 TEXT_FUNC_$50+=@X: ; 0x004B87, $CB87
-    LDA   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    LDA   SENTENCE_CURR_SCR_LOC_XY
     ADDA  X+
-    STA   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    STA   SENTENCE_CURR_SCR_LOC_XY
     RTS
 TEXT_FUNC_$4F+=@X_TO_$51: ; 0x004B8E, $CB8E
-    LDB   $4F
+    LDB   SENTENCE_CURR_SCR_LOC_CR?+1
     ADDB  X+
-    STB   $51
+    STB   SENTENCE_CURR_SCR_LOC_XY+1
     RTS
 TEXT_FUNC_$51+=@X: ; 0x004B95, $CB95
-    LDB   $51
+    LDB   SENTENCE_CURR_SCR_LOC_XY+1
     ADDB  X+
-    STB   $51
+    STB   SENTENCE_CURR_SCR_LOC_XY+1
     RTS
 TEXT_FUNC_@D_TO_$4E+$50: ; 0x004B9C, $CB9C
     LDD   X++
-    STD   LOW(SENTENCE_CURR_SCR_LOC_CR?)
-    STD   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    STD   SENTENCE_CURR_SCR_LOC_CR?
+    STD   SENTENCE_CURR_SCR_LOC_XY
     RTS
 TEXT_FUNC_$4E>$50,$51+$4D>$51: ; 0x004BA3, $CBA3
-    LDA   LOW(SENTENCE_CURR_SCR_LOC_CR?)
-    LDB   $51
-    ADDB  $4D
-    STD   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    LDA   SENTENCE_CURR_SCR_LOC_CR?
+    LDB   SENTENCE_CURR_SCR_LOC_XY+1
+    ADDB  TEXT_DATA_SPACING_XXYY?+1
+    STD   SENTENCE_CURR_SCR_LOC_XY
     RTS
 TEXT_FUNC_JSR_ADD_JMP_IDK: ; 0x004BAC, $CBAC
     LDY   X++ ; Y from X
-    STX   LOW(SENTENCE_PTR_WORD_ON) ; Store to
-    LDX   LOW(TEXT_PTR_TO_CODE) ; X from
+    STX   SENTENCE_PTR_WORD_ON ; Store to
+    LDX   TEXT_PTR_TO_CODE_RUN ; X from
     JSR   X ; JSR to
     ADDA  Y ; A+=@Y
-    ADDA  LOW(TEXT_DATA_SPACING_XXYY?) ; Add with
-    STA   LOW(SENTENCE_CURR_SCR_LOC_XY) ; Store to
+    ADDA  TEXT_DATA_SPACING_XXYY? ; Add with
+    STA   SENTENCE_CURR_SCR_LOC_XY ; Store to
     LEAS  2,S ; Clean up stack from JSR here.
-    LDX   LOW(TEXT_PTR_TO_CODE2) ; Load from
+    LDX   TEXT_PTR_TO_CODE_FIN ; Load from
     JMP   X ; Goto
 L_004BC1: ; 0x004BC1, $CBC1
     PSHS  U,Y,X,B,A,CC
@@ -12870,12 +12870,12 @@ L_004BE2: ; 0x004BE2, $CBE2
     LDY   #$FFB6
     LDU   #$CC39
 L_004BEB: ; 0x004BEB, $CBEB
-    STY   LOW(TEXT_PTR_TO_CODE)
-    STU   LOW(TEXT_PTR_TO_CODE2)
+    STY   TEXT_PTR_TO_CODE_RUN
+    STU   TEXT_PTR_TO_CODE_FIN
     LDU   $59
     CMPU  #$FFFF
     BNE   L_004C0D
-    STX   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    STX   SENTENCE_CURR_SCR_LOC_XY
     STD   $59
     BNE   L_004C03
     LDD   #$0FFF
@@ -12893,7 +12893,7 @@ L_004C0D: ; 0x004C0D, $CC0D
     CMPA  #$F0
     BNE   L_004C1C
     PULS  CC,A,B,X,Y,U
-    LDX   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    LDX   SENTENCE_CURR_SCR_LOC_XY
     ORCC  #$01
     RTS
 L_004C1C: ; 0x004C1C, $CC1C
@@ -12901,16 +12901,16 @@ L_004C1C: ; 0x004C1C, $CC1C
     LSRA
     LDX   #$C5FB
     LEAY  A,X
-    LDD   LOW(SENTENCE_CURR_SCR_LOC_XY)
-    LDX   LOW(TEXT_PTR_TO_CODE)
+    LDD   SENTENCE_CURR_SCR_LOC_XY
+    LDX   TEXT_PTR_TO_CODE_RUN
     JSR   X
     ADDA  Y
-    ADDA  LOW(TEXT_DATA_SPACING_XXYY?)
-    STA   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    ADDA  TEXT_DATA_SPACING_XXYY?
+    STA   SENTENCE_CURR_SCR_LOC_XY
     LDD   $59
     BSR   L_004C3E
     STD   $59
-    LDX   LOW(TEXT_PTR_TO_CODE2)
+    LDX   TEXT_PTR_TO_CODE_FIN
     JMP   X
     PULS  CC,A,B,X,Y,U
     ANDCC #$FE
@@ -14095,7 +14095,7 @@ L_00519C: ; 0x00519C, $C19C
     INCB
     STB   $3A
     JSR   L_005B23
-    LDX   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    LDX   SENTENCE_CURR_SCR_LOC_XY
     JSR   L_00504A
     JSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
     JSR   L_002FC2
@@ -14204,7 +14204,7 @@ L_00527D: ; 0x00527D, $C27D
     ASLB
     ADDB  $3A
     CLRA
-    LDX   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    LDX   SENTENCE_CURR_SCR_LOC_XY
     JSR   L_00504A
     JSR   L_005A0E
     TST   $49
@@ -14540,7 +14540,7 @@ L_005541: ; 0x005541, $C541
     JSR   LOAD_B@X_BANK0
     TSTB
     BPL   L_005501
-    LDX   LOW(SENTENCE_CURR_SCR_LOC_XY)
+    LDX   SENTENCE_CURR_SCR_LOC_XY
     CLRA
     LDB   $3C
     JSR   L_00504A
@@ -15377,12 +15377,12 @@ L_005AD0: ; 0x005AD0, $CAD0
     PULS  A,B,Y
 SETUP_52+49+48+36+59: ; 0x005AE4, $CAE4
     PSHS  B,A
-    CLR   LOW(SENTENCE_PTR_WORD_ON)
+    CLR   SENTENCE_PTR_WORD_ON
     CLR   $49
     LDA   #$01
     STA   $48
     LDA   #$03
-    STA   LOW(BANK_VAL_DP)
+    STA   BANK_VAL_DP
     LDD   #$FFFF
     STD   $59
     PULS  A,B,PC
@@ -15428,11 +15428,11 @@ L_005B3B: ; 0x005B3B, $CB3B
     LDD   #$0000
     LDX   #$0000
 L_005B43: ; 0x005B43, $CB43
-    STX   LOW(TEXT_PTR_TO_CODE)
+    STX   TEXT_PTR_TO_CODE_RUN
     LEAX  3840,X
 L_005B49: ; 0x005B49, $CB49
     STD   --X
-    CMPX  LOW(TEXT_PTR_TO_CODE)
+    CMPX  TEXT_PTR_TO_CODE_RUN
     BNE   L_005B49
     LEAX  2304,X
     TSTA
@@ -15451,13 +15451,13 @@ L_005B67: ; 0x005B67, $CB67
     LDX   #$0000
     LDY   #$C9E0
 L_005B71: ; 0x005B71, $CB71
-    STX   LOW(TEXT_PTR_TO_CODE)
+    STX   TEXT_PTR_TO_CODE_RUN
     LEAX  3840,X
     LDA   Y+
     TFR   A>B
 L_005B7B: ; 0x005B7B, $CB7B
     STD   --X
-    CMPX  LOW(TEXT_PTR_TO_CODE)
+    CMPX  TEXT_PTR_TO_CODE_RUN
     BNE   L_005B7B
     LEAX  2304,X
     TSTA
@@ -16510,7 +16510,7 @@ L_006047: ; 0x006047, $C047
     LDD   $09
     STD   $03
     LDA   $0F
-    STA   LOW(R_0000)
+    STA   R_0000
     LDA   $0D
     STA   $01
     LDA   $11
@@ -16532,7 +16532,7 @@ L_00606D: ; 0x00606D, $C06D
 L_006072: ; 0x006072, $C072
     LDD   $03
     STD   $0B
-    LDA   LOW(R_0000)
+    LDA   R_0000
     STA   $10
     LDA   $01
     STA   $0E
@@ -16555,7 +16555,7 @@ L_006092: ; 0x006092, $C092
     ROLA
     ASLB
     ROLA
-    STA   LOW(R_0000)
+    STA   R_0000
     BEQ   L_0060C2
     BMI   L_0060B4
 L_0060A4: ; 0x0060A4, $C0A4
@@ -16563,7 +16563,7 @@ L_0060A4: ; 0x0060A4, $C0A4
     ADDD  #$0020
     STD   $15
     JSR   L_0061CD
-    DEC   LOW(R_0000)
+    DEC   R_0000
     BNE   L_0060A4
     BRA   L_0060C2
 L_0060B4: ; 0x0060B4, $C0B4
@@ -16571,7 +16571,7 @@ L_0060B4: ; 0x0060B4, $C0B4
     SUBD  #$0020
     STD   $15
     JSR   L_00612C
-    INC   LOW(R_0000)
+    INC   R_0000
     BNE   L_0060B4
 L_0060C2: ; 0x0060C2, $C0C2
     LDD   $20
@@ -17566,14 +17566,14 @@ L_00634D: ; 0x00634D, $C34D
 L_0065D0: ; 0x0065D0, $C5D0
     PULS  A,B
     STD   9,U
-    STX   LOW(R_0000)
+    STX   R_0000
     LDD   #$0808
     STD   $04
     LDD   #$1732
     STD   $06
     LDY   #$B300
 L_0065E4: ; 0x0065E4, $C5E4
-    LDA   LOW(R_0000)
+    LDA   R_0000
     CLRB
     STD   2,Y
     LDA   $01
