@@ -45,13 +45,13 @@ BANK_VAL_DP:                             .rs 0x01 ;0x0036
 
 
 	.org $003D
-TEXT_PTR_TO_CODE_RUN:                    .rs 0x02 ;0x003D to 003E
-TEXT_PTR_TO_CODE_FIN:                    .rs 0x02 ;0x003F to 0040
+TEXT_PTR_TO_CODE_JSR:                    .rs 0x02 ;0x003D to 003E
+TEXT_PTR_TO_CODE_JMP:                    .rs 0x02 ;0x003F to 0040
 
 	.org $004C
 TEXT_DATA_SPACING_XXYY?:                 .rs 0x02 ;0x004C to 004D
-SENTENCE_CURR_SCR_LOC_CR?:               .rs 0x02 ;0x004E to 004F
-SENTENCE_CURR_SCR_LOC_XY:                .rs 0x02 ;0x0050 to 0051
+SENTENCE_CURR_SCR_LOC_CR_XXYY?:          .rs 0x02 ;0x004E to 004F
+SENTENCE_CURR_SCR_LOC_XXYY:              .rs 0x02 ;0x0050 to 0051
 SENTENCE_PTR_WORD_ON:                    .rs 0x02 ;0x0052 to 0053
 SENTENCE_PTR_TO_WORD:                    .rs 0x01 ;0x0054
 
@@ -63,6 +63,7 @@ SENTENCE_END_PTR:                        .rs 0x01 ;0x0056
 	.org $0058
 SENTENCE_FLAG_58:                        .rs 0x01 ;0x0058
 
+TEXT_PTR_UNK:                            .rs 0x02 ;0x0059 to 005A
 
 	.org $01ED
 R_01ED:                                  .rs 0x01 ;0x01ED
@@ -2232,7 +2233,7 @@ L_000DEC: ; 0x000DEC, $DDEC
     BSR   L_000DD5
     TFR   A>B
     CLRA
-    LDX   SENTENCE_CURR_SCR_LOC_XY
+    LDX   SENTENCE_CURR_SCR_LOC_XXYY
     JSR   PALETTE_ENTRY_0xE
     LDX   #$3D60
     LDU   #$C0FB
@@ -2247,7 +2248,7 @@ L_000DEC: ; 0x000DEC, $DDEC
     BLS   L_000E2B
     LDA   #$05
 L_000E2B: ; 0x000E2B, $DE2B
-    LDX   SENTENCE_CURR_SCR_LOC_XY
+    LDX   SENTENCE_CURR_SCR_LOC_XXYY
     JSR   PALETTE_ENTRY_0xE
     LDU   $63
     LDX   #$3CA0
@@ -5714,7 +5715,7 @@ SETUP_DP_52_49_36_48_59: ; 0x002800, $F800
     STA   BANK_VAL_DP ; Bank info.
     STA   $48 ; Set
     LDD   #$FFFF
-    STD   $59 ; Set
+    STD   TEXT_PTR_UNK ; Set
     PULS  A,B,PC ; Get reg, RTS.
 GET_DATA_FROM_SRAM: ; 0x002813, $F813
     LDA   1,X ; Get val at X+1
@@ -8056,7 +8057,7 @@ L_003677: ; 0x003677, $C677
     JSR   CLEAR_ALL_SCREEN
     CLR   SENTENCE_PTR_WORD_ON
     LDD   #$FFFF
-    STD   $59
+    STD   TEXT_PTR_UNK
     LDX   #$E782
     LDA   #$00
     JSR   L_000055
@@ -10021,10 +10022,10 @@ L_003D64: ; 0x003D64, $CD64
     JMP   L_004AB2
     JMP   L_004ABD
     JMP   L_004AC8
-    JMP   L_004BC1
-    JMP   L_004BCC
-    JMP   L_004BD7
-    JMP   L_004BE2
+    JMP   TEXT_RTN_UNK_1
+    JMP   TEXT_RTN_UNK_2
+    JMP   TEXT_RTN_UNK_3
+    JMP   TEXT_RTN_UNK_4
     JMP   L_004A79
     JMP   L_004A81
     JMP   L_004A51
@@ -10098,7 +10099,7 @@ L_003D64: ; 0x003D64, $CD64
     .db $00
     .db $C1 ; SENTENCE INITIAL TESTS INDICATE
     .db $07
-    .db $C1 ; UNIT OK
+    .db $C1 ; SENTENCE UNIT OK
     .db $0D
     .db $C1 ; SENTENCE ROM
     .db $11
@@ -10118,55 +10119,55 @@ L_003D64: ; 0x003D64, $CD64
     .db $2B
     .db $C1 ; SENTENCE CMOS RAM FAILURE
     .db $33
-    .db $C1
+    .db $C1 ; SENTENCE CMOS RAM OK
     .db $4D
-    .db $C1
+    .db $C1 ; SENTENCE MULTIPLE RAM FAILURE
     .db $53
-    .db $C1
+    .db $C1 ; SENTENCE COLOR RAM TEST
     .db $6D
 RUG_STR_DATA_UNK: ; 0x004085, $C085
-    .db $C1 ; INITIAL TESTS INDICATE
+    .db $C1 ; SENTENCE AUDIO TEST
     .db $88
 RUG_STR_DATA_END?: ; 0x004087, $C087
-    .db $C1
+    .db $C1 ; SENTENCE SWITCH TEST
     .db $92
-    .db $C1
+    .db $C1 ; SENTENCE MONITOR TEST
     .db $96
-    .db $C1
+    .db $C1 ; SENTENCE AUTO UP
     .db $9C
-    .db $C1
+    .db $C1 ; SENTENCE ADVANCE
     .db $A0
-    .db $C1
+    .db $C1 ; SENTENCE RIGHT COIN
     .db $A2
-    .db $C1
+    .db $C1 ; SENTENCE HIGHSCORE RESET
     .db $A6
-    .db $C1
+    .db $C1 ; SENTENCE LEFT COIN
     .db $A8
-    .db $C1
+    .db $C1 ; SENTENCE CENTER COIN
     .db $AC
-    .db $C1
+    .db $C1 ; SENTENCE INVALID SWITCH
     .db $B0
-    .db $C1
+    .db $C1 ; SENTENCE INVALID SWITCH
     .db $B2
-    .db $C1
+    .db $C1 ; SENTENCE FIRE
     .db $B4
-    .db $C1
+    .db $C1 ; SENTENCE THRUST
     .db $B6
-    .db $C1
+    .db $C1 ; SENTENCE SMART BOMB
     .db $B8
-    .db $C1
+    .db $C1 ; SENTENCE HYPERSPACE
     .db $BC
-    .db $C1
+    .db $C1 ; SENTENCE TWO PLAYERS
     .db $BE
-    .db $C1
+    .db $C1 ; SENTENCE ONE PLAYER
     .db $C2
-    .db $C1
+    .db $C1 ; SENTENCE REVERSE
     .db $C6
-    .db $C1
+    .db $C1 ; SENTENCE DOWN
     .db $C8
-    .db $C1
+    .db $C1 ; SENTENCE UP
     .db $CA
-    .db $C1
+    .db $C1 ; SENTENCE INVALID SWITCH XALOT
     .db $CC
     .db $C1
     .db $CE
@@ -10180,79 +10181,79 @@ RUG_STR_DATA_END?: ; 0x004087, $C087
     .db $D6
     .db $C1
     .db $D8
-    .db $C1
+    .db $C1 ; SENTENCE PRESS ADVANCE WITH SWITCH SET FOR [CMD]:
     .db $DA
-    .db $C1
+    .db $C1 ; SENTENCE AUTO FOR AUDIT, GAME ADJUSTMENT
     .db $EA
-    .db $C1
+    .db $C1 ; SENTENCE MANUAL FOR ROM TEST
     .db $F8
-    .db $C2
+    .db $C2 ; SENTENCE AUTO FOR RAM TEST
     .db $00
-    .db $C2
+    .db $C2 ; SENTENCE AUTO TO EXIT TEST
     .db $08
-    .db $C2
+    .db $C2 ; SENTENCE AUTO FOR CMOS RAM TEST
     .db $10
-    .db $C2
+    .db $C2 ; SENTENCE AUTO FOR COLOR RAM TEST
     .db $1A
-    .db $C2
+    .db $C2 ; SENTENCE AUTO FOR AUDIO TEST
     .db $24
-    .db $C2
+    .db $C2 ; SENTENCE AUTO FOR SWITCH TEST
     .db $2C
-    .db $C2
+    .db $C2 ; SENTENCE MANUAL TO TEST INDIVIDUAL SOUNDS
     .db $34
-    .db $C2
+    .db $C2 ; SENTENCE AUTO FOR MONITOR TEST PATTERNS
     .db $3E
-    .db $C2
+    .db $C2 ; SENTENCE MANUAL TO STEP THRU PATTERNS
     .db $48
-    .db $C2
+    .db $C2 ; SENTENCE AUTO FOR GAME OVER
     .db $52
-    .db $C2
+    .db $C2 ; SENTENCE MANUAL TO STEP THRU ADJUSTMENT
     .db $5A
-    .db $C2
+    .db $C2 ; SENTENCE WILLIAMS DEFENDER
     .db $64
-    .db $C2
+    .db $C2 ; SENTENCE PRESS ADVANCE TO STEP THRU TEST
     .db $68
-    .db $C2
+    .db $C2 ; SENTENCE PRESS HIGHSCORE RESET TO MAKE CHANGE
     .db $74
-    .db $C2
+    .db $C2 ; SENTENCE LANDER 100
     .db $7E
-    .db $C2
+    .db $C2 ; SENTENCE MUTANT 150
     .db $85
-    .db $C2
+    .db $C2 ; SENTENCE " POD" 1000
     .db $8C
-    .db $C2
+    .db $C2 ; SENTENCE BOMBER 250
     .db $93
-    .db $C2
+    .db $C2 ; SENTENCE SWARMER 150
     .db $9A
-    .db $C2
+    .db $C2 ; SENTENCE BAITER 200
     .db $A1
-    .db $C2
+    .db $C2 ; SENTENCE CREDITS:
     .db $A8
-    .db $C2
+    .db $C2 ; SENTENCE SCANNER
     .db $AA
-    .db $C2
+    .db $C2 ; SENTENCE ELECTRONICS INC. [CMDS] PRESENTS
     .db $AC
-    .db $C2
+    .db $C2 ; PLAYER ONE
     .db $B4
-    .db $C2
+    .db $C2 ; PLAYER TWO
     .db $B8
-    .db $C2
+    .db $C2 ; BONUS X
     .db $BC
-    .db $C2
+    .db $C2 ; SENTENCE PRESS ONE PLAYER START
     .db $BE
-    .db $C2
+    .db $C2 ; SENTENCE PRESS ONE OR TWO PLAYER START
     .db $C6
-    .db $C2
+    .db $C2 ; SENTENCE ATTACK WAVE
     .db $D2
-    .db $C2
+    .db $C2 ; SENTENCE COMPLETED
     .db $D6
-    .db $C2
+    .db $C2 ; SENTENCE YOU HAVE COMPLETED...
     .db $D8
-    .db $C3
+    .db $C3 ; SENTENCE PTR TO A000, A002, A004
     .db $01
-    .db $C3
+    .db $C3 ; SENTENCE HALL OF FAME
     .db $0B
-    .db $C3
+    .db $C3 ; SENTENCE PTR TO A006, A008, A00C
     .db $21
     .db $C3 ; TEXT PTRS. ADJUSTMENT
     .db $2B
@@ -12636,11 +12637,11 @@ TEXT_GRAPHICS_INFO: ; 0x0045E3, $C5E3
     .db $84
     .db $FF
 L_004A51: ; 0x004A51, $CA51
-    PSHS  U,Y,X
-    LDU   #$C0D9
+    PSHS  U,Y,X ; Save...
+    LDU   #$C0D9 ; PTR
     BRA   L_004A5D
 ANOTHER_RUG_FAIL_TEXT?: ; 0x004A58, $CA58
-    PSHS  U,Y,X
+    PSHS  U,Y,X ; Save...
     LDU   #$C0BB
 L_004A5D: ; 0x004A5D, $CA5D
     LDX   #$18CE
@@ -12665,10 +12666,10 @@ L_004A81: ; 0x004A81, $CA81
     LDY   #$FFB3
 L_004A87: ; 0x004A87, $CA87
     LDD   #$CAED
-    STY   TEXT_PTR_TO_CODE_RUN
-    STD   TEXT_PTR_TO_CODE_FIN
-    STX   SENTENCE_CURR_SCR_LOC_XY
-    STX   SENTENCE_CURR_SCR_LOC_CR?
+    STY   TEXT_PTR_TO_CODE_JSR
+    STD   TEXT_PTR_TO_CODE_JMP
+    STX   SENTENCE_CURR_SCR_LOC_XXYY
+    STX   SENTENCE_CURR_SCR_LOC_CR_XXYY?
     LDX   #$010A
     STX   TEXT_DATA_SPACING_XXYY?
     CLR   SENTENCE_FLAG_58
@@ -12680,37 +12681,37 @@ L_004A87: ; 0x004A87, $CA87
     BRA   SKIP_SENTENCE_INIT
 TEXT_RELATED_ROUTINE?: ; 0x004AA7, $CAA7
     PSHS  U,Y,X,B,A,CC ; Save
-    LDY   #$FFB3 ; Set, ptr to TEXT_DATA_TO_SCREEN
-    LDD   #$CAED ; Set, ptr to SKIP_TEXT_RTN_INIT
+    LDY   #$FFB3 ; Set, ptr to JMP to TEXT_CHAR_TO_SCREEN($F522)
+    LDD   #$CAED ; Set, ptr to SKIP_SENTENCE_INIT
     BRA   SENTENCE_TO_SCREEN
 L_004AB2: ; 0x004AB2, $CAB2
     PSHS  U,Y,X,B,A,CC
-    LDY   #$FFB6
+    LDY   #$FFB6 ; PTR to JMP, still unknown.
     LDD   #$CAED
     BRA   SENTENCE_TO_SCREEN
 L_004ABD: ; 0x004ABD, $CABD
     PSHS  U,Y,X,B,A,CC
     LDY   #$FFB3
-    LDD   #$CB5F
+    LDD   #$CB5F ; PTR to 4B5F, Pulls state, clears a CC bit, RTS's.
     BRA   SENTENCE_TO_SCREEN
 L_004AC8: ; 0x004AC8, $CAC8
-    PSHS  U,Y,X,B,A,CC
+    PSHS  U,Y,X,B,A,CC ; Save stuff
     LDY   #$FFB6
     LDD   #$CB5F
 SENTENCE_TO_SCREEN: ; 0x004AD1, $CAD1
-    STY   TEXT_PTR_TO_CODE_RUN ; Store ptr to TEXT_DATA_TO_SCREEN
-    STD   TEXT_PTR_TO_CODE_FIN ; Store ptr to SKIP_SENTENCE_INIT
+    STY   TEXT_PTR_TO_CODE_JSR ; Store ptr to TEXT_DATA_TO_SCREEN
+    STD   TEXT_PTR_TO_CODE_JMP ; Store ptr to SKIP_SENTENCE_INIT
     TST   SENTENCE_PTR_WORD_ON ; Test if top byte not null
     BNE   SKIP_SENTENCE_INIT ; If is set, don't init.
-    STX   SENTENCE_CURR_SCR_LOC_XY ; Screen location current?
-    STX   SENTENCE_CURR_SCR_LOC_CR? ; Screen location CR?
+    STX   SENTENCE_CURR_SCR_LOC_XXYY ; Screen location current?
+    STX   SENTENCE_CURR_SCR_LOC_CR_XXYY? ; Screen location CR?
     LDX   #$010A ; Not sure of val. Add per char?
     STX   TEXT_DATA_SPACING_XXYY? ; Store
     CLR   SENTENCE_FLAG_58 ; Clear
     LDX   2,U ; Get end of sentence.
     STX   SENTENCE_END_PTR ; End of sentence.
     LDX   U ; Load X with beginning of sentence.
-    BRA   MORE_THINGS_TO_DO ; Goto
+    BRA   MORE_THINGS_TO_DO ; Do things.
 SKIP_SENTENCE_INIT: ; 0x004AED, $CAED
     TST   SENTENCE_FLAG_58 ; Test
     BNE   FLAG_58_NOT_SET
@@ -12730,12 +12731,12 @@ DO_MORE_AFTER_CMD: ; 0x004B03, $CB03
 TOP_GT|E_8: ; 0x004B07, $CB07
     CLR   SENTENCE_PTR_WORD_ON ; Clear setup check loc.
     PULS  CC,A,B,X,Y,U ; Restore
-    ORCC  #$01 ; Set carry
+    ORCC  #$01 ; Set CC.c
     RTS ; leave.
 MORE_THINGS_TO_DO: ; 0x004B0E, $CB0E
     LDU   X++ ; Loads sentence word ptr.
     BMI   DATA_IS_NOT_CMD ; If top bit set. In ROM test?
-    LEAX  -1,X ; Not ROM, command, minus 1 index because not two bytes.
+    LEAX  -1,X ; Not PTR, command, minus 1 because CMD is byte.
     TFR   U>D ; Save U to D
     CMPA  #$08 ; Top byte
     BHI   TOP_GT|E_8 ; Leaves
@@ -12770,18 +12771,18 @@ TEXT_CASE_USE_B: ; 0x004B47, $CB47
     LDX   #$C5E3 ; TEXT_POINTER_START
     ABX ; Add to X
     TFR   X>Y ; Put to Y
-    LDD   SENTENCE_CURR_SCR_LOC_XY ; Load screen location
-    LDX   TEXT_PTR_TO_CODE_RUN ; Load ptr to code
+    LDD   SENTENCE_CURR_SCR_LOC_XXYY ; Load screen location
+    LDX   TEXT_PTR_TO_CODE_JSR ; Load ptr to code
     JSR   X ; JSR to ptr
     ADDA  Y ; Add to A@Y
     ADDA  TEXT_DATA_SPACING_XXYY? ; Add to A from mem. Minimum movement?
-    STA   SENTENCE_CURR_SCR_LOC_XY ; Store high byte. Horizontal pos?
-    LDX   TEXT_PTR_TO_CODE_FIN ; Load...
+    STA   SENTENCE_CURR_SCR_LOC_XXYY ; Store high byte. Horizontal pos?
+    LDX   TEXT_PTR_TO_CODE_JMP ; Load...
     JMP   X ; JMP to loc.
     PULS  CC,A,B,X,Y,U ; Not gotten to? Pull state.
     ANDCC #$FE ; Clear CC.C
     RTS ; RTS
-TEXT_FUNCTION_POINTERS?: ; 0x004B64, $CB64
+TEXT_FUNCTION_POINTERS: ; 0x004B64, $CB64
     .db $CB ; FORMAT: [ptr]
     .db $76
     .db $CB
@@ -12804,119 +12805,119 @@ TEXT_FUNC_CHANGE_SPACING_X: ; 0x004B76, $CB76
     LDA   X+ ; These functions called by table above front str/text routine
     STA   TEXT_DATA_SPACING_XXYY?
     RTS
-TEXT_FUNC_X_TO_$4D: ; 0x004B7B, $CB7B
+TEXT_FUNC_CHANGE_SPACING_Y: ; 0x004B7B, $CB7B
     LDB   X+
     STB   TEXT_DATA_SPACING_XXYY?+1
     RTS
-TEXT_FUNC_$4E+=@X_TO_$50: ; 0x004B80, $CB80
-    LDA   SENTENCE_CURR_SCR_LOC_CR?
+TEXT_FUNC_CR.X+DATA_TO_POSX: ; 0x004B80, $CB80
+    LDA   SENTENCE_CURR_SCR_LOC_CR_XXYY?
     ADDA  X+
-    STA   SENTENCE_CURR_SCR_LOC_XY
+    STA   SENTENCE_CURR_SCR_LOC_XXYY
     RTS
-TEXT_FUNC_$50+=@X: ; 0x004B87, $CB87
-    LDA   SENTENCE_CURR_SCR_LOC_XY
+TEXT_FUNC_POS.X+=DATA: ; 0x004B87, $CB87
+    LDA   SENTENCE_CURR_SCR_LOC_XXYY
     ADDA  X+
-    STA   SENTENCE_CURR_SCR_LOC_XY
+    STA   SENTENCE_CURR_SCR_LOC_XXYY
     RTS
-TEXT_FUNC_$4F+=@X_TO_$51: ; 0x004B8E, $CB8E
-    LDB   SENTENCE_CURR_SCR_LOC_CR?+1
+TEXT_FUNC_CR.Y+DATA_TO_POSY: ; 0x004B8E, $CB8E
+    LDB   SENTENCE_CURR_SCR_LOC_CR_XXYY?+1
     ADDB  X+
-    STB   SENTENCE_CURR_SCR_LOC_XY+1
+    STB   SENTENCE_CURR_SCR_LOC_XXYY+1
     RTS
-TEXT_FUNC_$51+=@X: ; 0x004B95, $CB95
-    LDB   SENTENCE_CURR_SCR_LOC_XY+1
+TEXT_FUNC_POS.Y+=DATA: ; 0x004B95, $CB95
+    LDB   SENTENCE_CURR_SCR_LOC_XXYY+1
     ADDB  X+
-    STB   SENTENCE_CURR_SCR_LOC_XY+1
+    STB   SENTENCE_CURR_SCR_LOC_XXYY+1
     RTS
-TEXT_FUNC_@D_TO_$4E+$50: ; 0x004B9C, $CB9C
+TEXT_FUNC_DATA_TO_CR+POS: ; 0x004B9C, $CB9C
     LDD   X++
-    STD   SENTENCE_CURR_SCR_LOC_CR?
-    STD   SENTENCE_CURR_SCR_LOC_XY
+    STD   SENTENCE_CURR_SCR_LOC_CR_XXYY?
+    STD   SENTENCE_CURR_SCR_LOC_XXYY
     RTS
-TEXT_FUNC_$4E>$50,$51+$4D>$51: ; 0x004BA3, $CBA3
-    LDA   SENTENCE_CURR_SCR_LOC_CR?
-    LDB   SENTENCE_CURR_SCR_LOC_XY+1
+TEXT_FUNC_CR: ; 0x004BA3, $CBA3
+    LDA   SENTENCE_CURR_SCR_LOC_CR_XXYY?
+    LDB   SENTENCE_CURR_SCR_LOC_XXYY+1
     ADDB  TEXT_DATA_SPACING_XXYY?+1
-    STD   SENTENCE_CURR_SCR_LOC_XY
+    STD   SENTENCE_CURR_SCR_LOC_XXYY
     RTS
 TEXT_FUNC_JSR_ADD_JMP_IDK: ; 0x004BAC, $CBAC
     LDY   X++ ; Y from X
-    STX   SENTENCE_PTR_WORD_ON ; Store to
-    LDX   TEXT_PTR_TO_CODE_RUN ; X from
-    JSR   X ; JSR to
+    STX   SENTENCE_PTR_WORD_ON ; Store stream ptr.
+    LDX   TEXT_PTR_TO_CODE_JSR ; X from var.
+    JSR   X ; JSR to code...
     ADDA  Y ; A+=@Y
-    ADDA  TEXT_DATA_SPACING_XXYY? ; Add with
-    STA   SENTENCE_CURR_SCR_LOC_XY ; Store to
+    ADDA  TEXT_DATA_SPACING_XXYY? ; Add spacing, too.
+    STA   SENTENCE_CURR_SCR_LOC_XXYY ; Store to POS.X
     LEAS  2,S ; Clean up stack from JSR here.
-    LDX   TEXT_PTR_TO_CODE_FIN ; Load from
+    LDX   TEXT_PTR_TO_CODE_JMP ; Load from
     JMP   X ; Goto
-L_004BC1: ; 0x004BC1, $CBC1
+TEXT_RTN_UNK_1: ; 0x004BC1, $CBC1
+    PSHS  U,Y,X,B,A,CC ; Save state.
+    LDY   #$FFB3 ; JMP to TEXT_CHAR_TO_SCREEN
+    LDU   #$CC0F ; PTR to AND #$F0 below
+    BRA   TEXT_RTN_UNK_BASE
+TEXT_RTN_UNK_2: ; 0x004BCC, $CBCC
+    PSHS  U,Y,X,B,A,CC ; Save state.
+    LDY   #$FFB6 ; PTR to JMP to unknown code.
+    LDU   #$CC0F ; PTR to CMPA #$F0 below.
+    BRA   TEXT_RTN_UNK_BASE
+TEXT_RTN_UNK_3: ; 0x004BD7, $CBD7
+    PSHS  U,Y,X,B,A,CC ; Save state
+    LDY   #$FFB3 ; JMP to TEXT_CHAR_TO_SCREEN
+    LDU   #$CC39 ; PTR to restore and RTS
+    BRA   TEXT_RTN_UNK_BASE
+TEXT_RTN_UNK_4: ; 0x004BE2, $CBE2
     PSHS  U,Y,X,B,A,CC
-    LDY   #$FFB3
-    LDU   #$CC0F
-    BRA   L_004BEB
-L_004BCC: ; 0x004BCC, $CBCC
-    PSHS  U,Y,X,B,A,CC
-    LDY   #$FFB6
-    LDU   #$CC0F
-    BRA   L_004BEB
-L_004BD7: ; 0x004BD7, $CBD7
-    PSHS  U,Y,X,B,A,CC
-    LDY   #$FFB3
-    LDU   #$CC39
-    BRA   L_004BEB
-L_004BE2: ; 0x004BE2, $CBE2
-    PSHS  U,Y,X,B,A,CC
-    LDY   #$FFB6
-    LDU   #$CC39
-L_004BEB: ; 0x004BEB, $CBEB
-    STY   TEXT_PTR_TO_CODE_RUN
-    STU   TEXT_PTR_TO_CODE_FIN
-    LDU   $59
-    CMPU  #$FFFF
-    BNE   L_004C0D
-    STX   SENTENCE_CURR_SCR_LOC_XY
-    STD   $59
-    BNE   L_004C03
-    LDD   #$0FFF
-    BRA   L_004C0B
-L_004C03: ; 0x004C03, $CC03
-    BITA  #$F0
-    BNE   L_004C0B
-    BSR   L_004C3E
-    BRA   L_004C03
-L_004C0B: ; 0x004C0B, $CC0B
-    STD   $59
-L_004C0D: ; 0x004C0D, $CC0D
-    LDD   $59
-    ANDA  #$F0
+    LDY   #$FFB6 ; PTR to JMP to unknown code.
+    LDU   #$CC39 ; PTR to restore and RTS
+TEXT_RTN_UNK_BASE: ; 0x004BEB, $CBEB
+    STY   TEXT_PTR_TO_CODE_JSR ; Store to JSR
+    STU   TEXT_PTR_TO_CODE_JMP ; Store to JMP.
+    LDU   TEXT_PTR_UNK
+    CMPU  #$FFFF ; Is..
+    BNE   TEXT_PTR_NOT_FFFF ; != to FF, go here.
+    STX   SENTENCE_CURR_SCR_LOC_XXYY ; Put stream to location, temp.
+    STD   TEXT_PTR_UNK ; Put D to PTR?
+    BNE   BIT_STUFF_IDK ; Get jumped in the middle of maybe?
+    LDD   #$0FFF ; Just do it once?
+    BRA   STD_UNK
+BIT_STUFF_IDK: ; 0x004C03, $CC03
+    BITA  #$F0 ; Test top bits.
+    BNE   STD_UNK ; If any bits set, taken.
+    BSR   MANIPULATE_D ; D << 4, D|= 0x000F
+    BRA   BIT_STUFF_IDK
+STD_UNK: ; 0x004C0B, $CC0B
+    STD   TEXT_PTR_UNK ; Store D
+TEXT_PTR_NOT_FFFF: ; 0x004C0D, $CC0D
+    LDD   TEXT_PTR_UNK ; Load D
+    ANDA  #$F0 ; Test top bits.
     CMPA  #$F0
-    BNE   L_004C1C
-    PULS  CC,A,B,X,Y,U
-    LDX   SENTENCE_CURR_SCR_LOC_XY
-    ORCC  #$01
-    RTS
-L_004C1C: ; 0x004C1C, $CC1C
+    BNE   NOT_0xF0 ; Not 0xF0
+    PULS  CC,A,B,X,Y,U ; Pull state
+    LDX   SENTENCE_CURR_SCR_LOC_XXYY ; Get stream from temp.
+    ORCC  #$01 ; CC.C = 1
+    RTS ; Leave
+NOT_0xF0: ; 0x004C1C, $CC1C
+    LSRA ; A>>2...
     LSRA
-    LSRA
-    LDX   #$C5FB
-    LEAY  A,X
-    LDD   SENTENCE_CURR_SCR_LOC_XY
-    LDX   TEXT_PTR_TO_CODE_RUN
-    JSR   X
-    ADDA  Y
-    ADDA  TEXT_DATA_SPACING_XXYY?
-    STA   SENTENCE_CURR_SCR_LOC_XY
-    LDD   $59
-    BSR   L_004C3E
-    STD   $59
-    LDX   TEXT_PTR_TO_CODE_FIN
-    JMP   X
-    PULS  CC,A,B,X,Y,U
-    ANDCC #$FE
-    RTS
-L_004C3E: ; 0x004C3E, $CC3E
-    ASLB
+    LDX   #$C5FB ; PTR to...
+    LEAY  A,X ; Y from X+A
+    LDD   SENTENCE_CURR_SCR_LOC_XXYY ; Load pos
+    LDX   TEXT_PTR_TO_CODE_JSR ; Load JSR
+    JSR   X ; Do JSR
+    ADDA  Y ; Add A@Y
+    ADDA  TEXT_DATA_SPACING_XXYY? ; Add to spacing X
+    STA   SENTENCE_CURR_SCR_LOC_XXYY ; Store to POS.X
+    LDD   TEXT_PTR_UNK ; Get unk
+    BSR   MANIPULATE_D ; Manipulate
+    STD   TEXT_PTR_UNK ; Store
+    LDX   TEXT_PTR_TO_CODE_JMP ; Get code to jump to.
+    JMP   X ; Jump to var.
+    PULS  CC,A,B,X,Y,U ; Pull saved
+    ANDCC #$FE ; Clear CC.C
+    RTS ; RTS
+MANIPULATE_D: ; 0x004C3E, $CC3E
+    ASLB ; D << 4
     ROLA
     ASLB
     ROLA
@@ -12924,7 +12925,7 @@ L_004C3E: ; 0x004C3E, $CC3E
     ROLA
     ASLB
     ROLA
-    ORB   #$0F
+    ORB   #$0F ; D |= 0x000F
     RTS
     .db $00
     .db $00
@@ -14095,7 +14096,7 @@ L_00519C: ; 0x00519C, $C19C
     INCB
     STB   $3A
     JSR   L_005B23
-    LDX   SENTENCE_CURR_SCR_LOC_XY
+    LDX   SENTENCE_CURR_SCR_LOC_XXYY
     JSR   L_00504A
     JSR   WATCHDOG/READ_AUTO+ADV_SWITCHES
     JSR   L_002FC2
@@ -14204,7 +14205,7 @@ L_00527D: ; 0x00527D, $C27D
     ASLB
     ADDB  $3A
     CLRA
-    LDX   SENTENCE_CURR_SCR_LOC_XY
+    LDX   SENTENCE_CURR_SCR_LOC_XXYY
     JSR   L_00504A
     JSR   L_005A0E
     TST   $49
@@ -14540,7 +14541,7 @@ L_005541: ; 0x005541, $C541
     JSR   LOAD_B@X_BANK0
     TSTB
     BPL   L_005501
-    LDX   SENTENCE_CURR_SCR_LOC_XY
+    LDX   SENTENCE_CURR_SCR_LOC_XXYY
     CLRA
     LDB   $3C
     JSR   L_00504A
@@ -15384,7 +15385,7 @@ SETUP_52+49+48+36+59: ; 0x005AE4, $CAE4
     LDA   #$03
     STA   BANK_VAL_DP
     LDD   #$FFFF
-    STD   $59
+    STD   TEXT_PTR_UNK
     PULS  A,B,PC
 CLEAR_COLOR_PALETTE: ; 0x005AF9, $CAF9
     PSHS  X,B ; Save
@@ -15428,11 +15429,11 @@ L_005B3B: ; 0x005B3B, $CB3B
     LDD   #$0000
     LDX   #$0000
 L_005B43: ; 0x005B43, $CB43
-    STX   TEXT_PTR_TO_CODE_RUN
+    STX   TEXT_PTR_TO_CODE_JSR
     LEAX  3840,X
 L_005B49: ; 0x005B49, $CB49
     STD   --X
-    CMPX  TEXT_PTR_TO_CODE_RUN
+    CMPX  TEXT_PTR_TO_CODE_JSR
     BNE   L_005B49
     LEAX  2304,X
     TSTA
@@ -15451,13 +15452,13 @@ L_005B67: ; 0x005B67, $CB67
     LDX   #$0000
     LDY   #$C9E0
 L_005B71: ; 0x005B71, $CB71
-    STX   TEXT_PTR_TO_CODE_RUN
+    STX   TEXT_PTR_TO_CODE_JSR
     LEAX  3840,X
     LDA   Y+
     TFR   A>B
 L_005B7B: ; 0x005B7B, $CB7B
     STD   --X
-    CMPX  TEXT_PTR_TO_CODE_RUN
+    CMPX  TEXT_PTR_TO_CODE_JSR
     BNE   L_005B7B
     LEAX  2304,X
     TSTA
