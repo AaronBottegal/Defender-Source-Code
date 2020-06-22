@@ -820,8 +820,8 @@ B_NOW_NEGATIVE: ; 0x000396, $D396
     JSR   SMARTBOMBS_TO_SCREEN
     LDD   #$D4B0 ; Idk why
     JSR   MOD_UNK
-    LDB   #$05
-    JSR   GOTO_B3-C00F
+    LDB   #$05 ; Score keep entry.
+    JSR   GOTO_B3-C00F_BOOKKEEP_UPDATE_+1 ; Track
 D_IS_ZERO: ; 0x0003C5, $D3C5
     BSR   L_0003D9
     PULS  A,B,X,Y,U ; Why not also pull PC???
@@ -1614,7 +1614,7 @@ COMMIT_WATCHDOG+SETUP: ; 0x0008FF, $D8FF
     PULS  A,X,PC ; Restore regs+RTS
 L_000919: ; 0x000919, $D919
     LDB   #$07
-    JSR   GOTO_B3-C00F
+    JSR   GOTO_B3-C00F_BOOKKEEP_UPDATE_+1
 L_00091E: ; 0x00091E, $D91E
     JSR   SETUP_POOLS
     JSR   FIND_IDK
@@ -2174,7 +2174,7 @@ L_000D74: ; 0x000D74, $DD74
     CMPA  #$F0
     BLS   L_000D81
     LDB   #$06
-    JSR   GOTO_B3-C00F
+    JSR   GOTO_B3-C00F_BOOKKEEP_UPDATE_+1
     CLRA
 L_000D81: ; 0x000D81, $DD81
     STA   $A024
@@ -5314,9 +5314,9 @@ PSH_ALL_GOTO_B2-C002: ; 0x002513, $F513
     BSR   BANKSWITCH_TO_2
     JSR   $C002
     PULS  CC,A,B,DP,X,Y,U,PC
-GOTO_B3-C00F: ; 0x00251C, $F51C
+GOTO_B3-C00F_BOOKKEEP_UPDATE_+1: ; 0x00251C, $F51C
     BSR   BANKSWITCH_TO_3
-    JMP   $C00F
+    JMP   JMP_BOOKKEEP_UPDATE_+1
     RTS
 GFX_BANK2_CHR_TO_SCREEN: ; 0x002522, $F522
     PSHS  U,Y,X,B,A ; Save state
@@ -13916,8 +13916,10 @@ JMP_BOOTUP_ROM_FAILURE: ; 0x005006, $C006
     JMP   BOOTUP_ROM_FAILURE
 JMP_SRAM_CHECK_UNK: ; 0x005009, $C009
     JMP   SRAM_CHECK_UNK
-    JMP   L_005BE6
-    JMP   L_005BE0
+JMP_BOOKKEEP_UPDATE_+A: ; 0x00500C, $C00C
+    JMP   BOOKKEEP_UPDATE_+A
+JMP_BOOKKEEP_UPDATE_+1: ; 0x00500F, $C00F
+    JMP   BOOKKEEP_UPDATE_+1
     JMP   L_005C2C
     JMP   L_005C20
     JMP   L_005C26
@@ -15548,32 +15550,32 @@ INIT_SRAM: ; 0x005BCF, $CBCF
     LDB   #$47 ; Times to loop
     BSR   MOVE_@X_TO_SRAM@Y ; Move data
     PULS  A,B,X,Y,PC ; RTS
-L_005BE0: ; 0x005BE0, $CBE0
-    PSHS  X,B,A
-    LDA   #$01
+BOOKKEEP_UPDATE_+1: ; 0x005BE0, $CBE0
+    PSHS  X,B,A ; Save
+    LDA   #$01 ; Adding
     BRA   L_005BE8
-L_005BE6: ; 0x005BE6, $CBE6
-    PSHS  X,B,A
+BOOKKEEP_UPDATE_+A: ; 0x005BE6, $CBE6
+    PSHS  X,B,A ; Save
 L_005BE8: ; 0x005BE8, $CBE8
-    ANDB  #$07
-    BEQ   L_005C0B
-    ASLB
-    ASLB
-    LDX   #$C3FD
-    ABX
-    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
-    PSHS  B
-    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
-    PSHS  B
-    ADDA  S+
-    DAA
-    EXG   A-B
-    PULS  A
-    ADCA  #$00
-    DAA
-    LEAX  -4,X
-    JSR   JMP_STORE_D_TO_SRAM[X]
-L_005C0B: ; 0x005C0B, $CC0B
+    ANDB  #$07 ; And B
+    BEQ   RTS_BOOKKEEP ; Invalid if 0?
+    ASLB ; <<1
+    ASLB ; <<1, *4 total
+    LDX   #$C3FD ; SRAM index.
+    ABX ; Add B to.
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B ; Get data in B
+    PSHS  B ; Save
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B ; Get data in B
+    PSHS  B ; Save
+    ADDA  S+ ; Add A to second.
+    DAA ; Adjust
+    EXG   A-B ; Rotate because no DAB instruction.
+    PULS  A ; Pull A
+    ADCA  #$00 ; Add carry.
+    DAA ; Adjust.
+    LEAX  -4,X ; Original X ptr.
+    JSR   JMP_STORE_D_TO_SRAM[X] ; Store D to.
+RTS_BOOKKEEP: ; 0x005C0B, $CC0B
     PULS  A,B,X,PC
 L_005C0D: ; 0x005C0D, $CC0D
     PSHS  X,A
@@ -15598,7 +15600,7 @@ L_005C2C: ; 0x005C2C, $CC2C
     PSHS  X,B,A
     LDB   #$01
 L_005C30: ; 0x005C30, $CC30
-    JSR   L_005BE0
+    JSR   BOOKKEEP_UPDATE_+1
     ASLB
     LDX   #$C487
     ABX
@@ -15638,7 +15640,7 @@ L_005C7C: ; 0x005C7C, $CC7C
     ADDA  S+
     DAA
     LDB   #$04
-    JSR   L_005BE6
+    JSR   BOOKKEEP_UPDATE_+A
     JSR   L_005C0D
     PULS  A,B,X,PC
 L_005C89: ; 0x005C89, $CC89
