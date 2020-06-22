@@ -133,6 +133,10 @@ R_A063:                                  .rs 0x01 ;0xA063
 R_A077_S_TEMP?:                          .rs 0x01 ;0xA077
 
 
+	.org $A08C
+R_A08C_PLAYERS_CNT_1/2?:                 .rs 0x01 ;0xA08C
+
+
 	.org $A08F
 IRQ_CMD_LOC:                             .rs 0x03 ;0xA08F to A091
 
@@ -321,19 +325,19 @@ R_A1C6:                                  .rs 0x01 ;0xA1C6
 	.org $A1C8
 R_A1C8:                                  .rs 0x01 ;0xA1C8
 
-R_A1C9:                                  .rs 0x01 ;0xA1C9
+R_A1C9_P1_SHIPS:                         .rs 0x01 ;0xA1C9
 
 
 	.org $A1CB
-R_A1CB:                                  .rs 0x01 ;0xA1CB
+R_A1CB_P1_SMARTBOMBS:                    .rs 0x01 ;0xA1CB
 
 
 	.org $A206
-R_A206:                                  .rs 0x01 ;0xA206
+R_A206_P2_SHIPS:                         .rs 0x01 ;0xA206
 
 
 	.org $A208
-R_A208:                                  .rs 0x01 ;0xA208
+R_A208_P2_SMARTBOMBS:                    .rs 0x01 ;0xA208
 
 
 	.org $BDD0
@@ -498,37 +502,37 @@ L_0000F2: ; 0x0000F2, $D0F2
     LEAY  2,Y ; Y+=2
 DONT_Y+=2: ; 0x000102, $D102
     LDS   2,Y ; Get S from Y+2
-    ADDB  #$08 ; Add B...
+    ADDB  #$08 ; Add height
     TFR   D>U ; D is location?
     BRA   GFX_MOVE_4X8
-    PSHS  X,DP
-    ADDB  #$08
-    TFR   D>U
-    LDD   #$0000
-    LDX   #$0000
-    LEAY  X
-    TFR   A>DP
-    ANDCC #$00
-    BRA   GFX_SET_4X8
-    PSHS  X,DP
-    ADDB  #$08
-    TFR   D>U
-    LDD   #$0000
-    LDX   #$0000
-    LEAY  X
-    TFR   A>DP
-    ANDCC #$00
-    PSHU  Y,X,DP,B,A,CC
+    PSHS  X,DP ; Save
+    ADDB  #$08 ; Height
+    TFR   D>U ; Pos to U
+    LDD   #$0000 ; Clear
+    LDX   #$0000 ; Clear
+    LEAY  X ; Clear Y
+    TFR   A>DP ; Clear
+    ANDCC #$00 ; Clear
+    BRA   GFX_SET_4X8 ; Set to clear
+    PSHS  X,DP ; Save
+    ADDB  #$08 ; Add height
+    TFR   D>U ; Pos to U
+    LDD   #$0000 ; Clear
+    LDX   #$0000 ; Clear
+    LEAY  X ; Clear
+    TFR   A>DP ; Clear
+    ANDCC #$00 ; Clear
+    PSHU  Y,X,DP,B,A,CC ; Clear, 10X8?
     LEAU  264,U ; POSX++
-    BRA   GFX_SET_8X8
-    PSHS  X,DP
-    STS   R_A077_S_TEMP?
-    BHS   L_000142
-    LEAY  2,Y
-L_000142: ; 0x000142, $D142
-    LDS   2,Y
-    ADDB  #$08
-    TFR   D>U
+    BRA   GFX_SET_8X8 ; Do rest
+    PSHS  X,DP ; Save
+    STS   R_A077_S_TEMP? ; Save
+    BHS   SKIP_Y+=2
+    LEAY  2,Y ; Y+=2
+SKIP_Y+=2: ; 0x000142, $D142
+    LDS   2,Y ; Stack from Y+2
+    ADDB  #$08 ; Height
+    TFR   D>U ; Pos to U
 GFX_MOVE_8X8: ; 0x000149, $D149
     PULS  CC,A,B,DP,X,Y
     PSHU  Y,X,DP,B,A,CC
@@ -759,7 +763,7 @@ GFX_CLEAR_12X6: ; 0x000350, $D350
     LDX   #$0000 ; Clear
     LEAY  X ; Clear
     BRA   GFX_CLR_12X6 ; Do.
-L_000360: ; 0x000360, $D360
+SCORE?_ADD_UNK: ; 0x000360, $D360
     PSHS  U,Y,X,B,A ; Save
     ORCC  #$01 ; Set CC.c
     ROL   $A08A ; Bring in 1.
@@ -799,23 +803,23 @@ B_NOW_NEGATIVE: ; 0x000396, $D396
     LDD   $A0AB ; Get D
     BEQ   D_IS_ZERO ; D is 0.
     LEAX  1,X ; X+1
-    LEAY  3,X ; Y+3
+    LEAY  3,X ; Y = X+3
     BSR   IF_X[0].W!=Y[0].W_CMP_X+2_Y+2
     BLO   D_IS_ZERO ; If OBJX state is lower than OBJY?
-    LDA   1,Y
-    ADDA  $A0AC
-    DAA
-    STA   1,Y
-    LDA   Y
-    ADCA  $A0AB
-    DAA
-    STA   Y
-    INC   6,X
-    INC   8,X
-    JSR   L_000629
-    JSR   L_000680
-    LDD   #$D4B0
-    JSR   L_00054D
+    LDA   1,Y ; Get val
+    ADDA  $A0AC ; Add with val
+    DAA ; Adjust
+    STA   1,Y ; Store back
+    LDA   Y ; Get val
+    ADCA  $A0AB ; Add with carry
+    DAA ; Adjust
+    STA   Y ; Store back
+    INC   6,X ; Inc ships.
+    INC   8,X ; Inc smartbombs.
+    JSR   DISP_SHIPS_ALL_PLAYERS
+    JSR   SMARTBOMBS_TO_SCREEN
+    LDD   #$D4B0 ; Idk why
+    JSR   MOD_UNK
     LDB   #$05
     JSR   GOTO_B3-C00F
 D_IS_ZERO: ; 0x0003C5, $D3C5
@@ -826,11 +830,11 @@ IF_X[0].W!=Y[0].W_CMP_X+2_Y+2: ; 0x0003CA, $D3CA
     PSHS  B,A ; Save
     LDD   X ; Load D from X
     CMPD  Y ; Compare to Y
-    BNE   RTS
-    LDA   2,X ; Compare bytes. OBJ[2] is state?
-    CMPA  2,Y
+    BNE   RTS ; RTS, figured.
+    LDA   2,X ; Compare score digits 2 instead.
+    CMPA  2,Y ; Compare
 RTS: ; 0x0003D7, $D3D7
-    PULS  A,B,PC
+    PULS  A,B,PC ; RTS, Code handles next branch.
 L_0003D9: ; 0x0003D9, $D3D9
     LDA   $A08B
 L_0003DB: ; 0x0003DB, $D3DB
@@ -932,7 +936,7 @@ L_000481: ; 0x000481, $D481
     LDA   $A07E
     BNE   L_00046B
     LDD   #$D4AB
-    JSR   L_00054D
+    JSR   MOD_UNK
     JSR   BANKSWITCH_TO_3
     JSR   [9,U]
     BRA   L_00046B
@@ -1088,21 +1092,21 @@ L_000539: ; 0x000539, $D539
     ANDB  #$3F
     STB   PIA_ROM_DATA_B
     PULS  CC,A,B,PC
-L_00054D: ; 0x00054D, $D54D
-    PSHS  X,B,A,CC
-    CLR   $A0AD
-    TFR   D>X
-    LDA   X
-    CMPA  $A0B2
-    BLO   L_000566
-    STA   $A0B2
-    LEAX  -2,X
-    ORCC  #$10
-    STX   $A0B0
+MOD_UNK: ; 0x00054D, $D54D
+    PSHS  X,B,A,CC ; Save
+    CLR   $A0AD ; Clear loc.
+    TFR   D>X ; X=D
+    LDA   X ; Get A from X
+    CMPA  $A0B2 ; If A _ $A0B2
+    BLO   RTS ; <, RTS'S
+    STA   $A0B2 ; If higher
+    LEAX  -2,X ; Sub 2 from D
+    ORCC  #$10 ; Mask IRQ
+    STX   $A0B0 ; Store X to.
     LDD   #$0101
-    STD   $A0B3
-L_000566: ; 0x000566, $D566
-    PULS  CC,A,B,X,PC
+    STD   $A0B3 ; Store val
+RTS: ; 0x000566, $D566
+    PULS  CC,A,B,X,PC ; RTS
 L_000568: ; 0x000568, $D568
     LDA   $A0B3
     BEQ   L_000580
@@ -1217,83 +1221,83 @@ L_000614: ; 0x000614, $D614
     BSR   L_0005E5
 L_000628: ; 0x000628, $D628
     RTS
-L_000629: ; 0x000629, $D629
-    PSHS  U,Y,X,B,A
-    LDX   #$0F14
-    LDA   R_A1C9
-    BSR   L_000642
-    LDA   $A08C
-    DECA
-    BEQ   L_000640
+DISP_SHIPS_ALL_PLAYERS: ; 0x000629, $D629
+    PSHS  U,Y,X,B,A ; Save
+    LDX   #$0F14 ; Scr pos, X:30,Y14
+    LDA   R_A1C9_P1_SHIPS ; Load ship count?
+    BSR   DISPLAY_SHIPS ; Disp
+    LDA   R_A08C_PLAYERS_CNT_1/2?
+    DECA ; See if 1
+    BEQ   RTS_SHIPS ; Was 1, leave.
     LDX   #$7114
-    LDA   R_A206
-    BSR   L_000642
-L_000640: ; 0x000640, $D640
-    PULS  A,B,X,Y,U,PC
-L_000642: ; 0x000642, $D642
-    CMPA  #$05
-    BLS   L_000648
-    LDA   #$05
-L_000648: ; 0x000648, $D648
-    PSHS  A
-    LDD   #$2006
-    JSR   SAVE_UXBA+BANK_UNK
-    LDA   S
-    BEQ   L_000663
-    LDY   #$F9D5
-    TFR   X>D
-L_00065A: ; 0x00065A, $D65A
+    LDA   R_A206_P2_SHIPS
+    BSR   DISPLAY_SHIPS ; Disp
+RTS_SHIPS: ; 0x000640, $D640
+    PULS  A,B,X,Y,U,PC ; RTS
+DISPLAY_SHIPS: ; 0x000642, $D642
+    CMPA  #$05 ; If A _ 5
+    BLS   DONT_CAP_COUNT ; <= 5, taken.
+    LDA   #$05 ; Cap at 5 ships
+DONT_CAP_COUNT: ; 0x000648, $D648
+    PSHS  A ; Save val
+    LDD   #$2006 ; WWHH, Clear rectangle.
+    JSR   CLEAR_SCREEN_FLEX_SETUP ; Clear it.
+    LDA   S ; Get count.
+    BEQ   RTS ; Leave if no ships to put on.
+    LDY   #$F9D5 ; PTR to CHR
+    TFR   X>D ; Position to proper reg.
+LOOP_DISPLAY_SHIPS: ; 0x00065A, $D65A
     JSR   GFX_BANK2_CHR_TO_SCREEN
-    ADDA  #$06
-    DEC   S
-    BNE   L_00065A
-L_000663: ; 0x000663, $D663
-    PULS  A,PC
+    ADDA  #$06 ; Add X off.
+    DEC   S ; One less.
+    BNE   LOOP_DISPLAY_SHIPS ; Display loop.
+RTS: ; 0x000663, $D663
+    PULS  A,PC ; RTS
 L_000665: ; 0x000665, $D665
     PSHS  U,Y,X,B,A
     LDD   #$4020
     LDX   #$3008
-    JSR   SAVE_UXBA+BANK_UNK
+    JSR   CLEAR_SCREEN_FLEX_SETUP
     BSR   L_0006BC
-    BSR   L_000629
-    BSR   L_000680
-    LDA   $A08C
+    BSR   DISP_SHIPS_ALL_PLAYERS
+    BSR   SMARTBOMBS_TO_SCREEN
+    LDA   R_A08C_PLAYERS_CNT_1/2?
 L_000678: ; 0x000678, $D678
     JSR   L_0003DB
     DECA
     BNE   L_000678
     PULS  A,B,X,Y,U,PC
-L_000680: ; 0x000680, $D680
+SMARTBOMBS_TO_SCREEN: ; 0x000680, $D680
     PSHS  U,Y,X,B,A
-    LDX   #$291B
-    LDA   R_A1CB
-    BSR   L_000699
-    LDA   $A08C
-    DECA
-    BEQ   L_000697
-    LDX   #$8B1B
-    LDA   R_A208
-    BSR   L_000699
-L_000697: ; 0x000697, $D697
+    LDX   #$291B ; Pos P1
+    LDA   R_A1CB_P1_SMARTBOMBS ; Get count.
+    BSR   DISPLAY_SMARTBOMBS_SUB
+    LDA   R_A08C_PLAYERS_CNT_1/2? ; Player count
+    DECA ; DEC
+    BEQ   RTS_SMARTBOMBS ; Is only 1 player, leave.
+    LDX   #$8B1B ; Pos P2
+    LDA   R_A208_P2_SMARTBOMBS ; Count
+    BSR   DISPLAY_SMARTBOMBS_SUB
+RTS_SMARTBOMBS: ; 0x000697, $D697
     PULS  A,B,X,Y,U,PC
-L_000699: ; 0x000699, $D699
-    CMPA  #$03
-    BLS   L_00069F
-    LDA   #$03
-L_00069F: ; 0x00069F, $D69F
-    PSHS  A
-    LDD   #$030B
-    JSR   SAVE_UXBA+BANK_UNK
-    LDA   S
-    BEQ   L_0006BA
-    LDY   #$F9D9
-    TFR   X>D
-L_0006B1: ; 0x0006B1, $D6B1
-    JSR   GFX_BANK2_CHR_TO_SCREEN
-    ADDB  #$04
-    DEC   S
-    BNE   L_0006B1
-L_0006BA: ; 0x0006BA, $D6BA
+DISPLAY_SMARTBOMBS_SUB: ; 0x000699, $D699
+    CMPA  #$03 ; If A _ 3
+    BLS   DONT_CAP_SMARTBOMBS ; <=, skip cap.
+    LDA   #$03 ; Cap
+DONT_CAP_SMARTBOMBS: ; 0x00069F, $D69F
+    PSHS  A ; Save count.
+    LDD   #$030B ; Clear WWHH
+    JSR   CLEAR_SCREEN_FLEX_SETUP ; Clear
+    LDA   S ; Load count
+    BEQ   ALL_SMARTBOMBS_DISPLAYED
+    LDY   #$F9D9 ; PTR to BMP for Smartbombs.
+    TFR   X>D ; Pos X to correct reg for sub.
+LOOP_MORE_SMARTBOMBS: ; 0x0006B1, $D6B1
+    JSR   GFX_BANK2_CHR_TO_SCREEN ; Display
+    ADDB  #$04 ; Add Y pos.
+    DEC   S ; Dec count.
+    BNE   LOOP_MORE_SMARTBOMBS
+ALL_SMARTBOMBS_DISPLAYED: ; 0x0006BA, $D6BA
     PULS  A,PC
 L_0006BC: ; 0x0006BC, $D6BC
     LDD   #$5555
@@ -1334,7 +1338,7 @@ DECIDE_X_A1C2|A1FF_SUB: ; 0x000702, $D702
     LDX   #$A1FF ; Change X if not 0.
 RTS_PULA: ; 0x00070B, $D70B
     PULS  A,PC ; RTS
-DECIDE_X_A1C2|A1FF: ; 0x00070D, $D70D
+DECIDE_X_A1C2|A1FF_FROM_A: ; 0x00070D, $D70D
     PSHS  A
     BRA   DECIDE_X_A1C2|A1FF_SUB
 RANDOM_VALUE_FWD+IN_A: ; 0x000711, $D711
@@ -1507,7 +1511,7 @@ L_000838: ; 0x000838, $D838
     BEQ   L_00084B
     LDD   #$D4BD
 L_000846: ; 0x000846, $D846
-    JSR   L_00054D
+    JSR   MOD_UNK
     BSR   L_000861
 L_00084B: ; 0x00084B, $D84B
     JMP   L_00000A
@@ -1534,7 +1538,7 @@ L_000861: ; 0x000861, $D861
     LDA   #$01
     STA   $A08B
     STA   $A025
-    CLR   $A08C
+    CLR   R_A08C_PLAYERS_CNT_1/2?
     LDX   #$A1C2
 L_000881: ; 0x000881, $D881
     CLR   X+
@@ -1543,9 +1547,9 @@ L_000881: ; 0x000881, $D881
     LDX   #$C485
     JSR   GET_DATA_FROM_SRAM[X]_IN_A
     ANDA  #$0F
-    STA   R_A1C9
+    STA   R_A1C9_P1_SHIPS
     LDB   #$0A
-    STD   R_A1CB
+    STD   R_A1CB_P1_SMARTBOMBS
     CLR   $A039
     NOP
     LDX   #$A1C2
@@ -1565,14 +1569,14 @@ L_0008B2: ; 0x0008B2, $D8B2
     LDA   #$00
     JSR   SETUP_$A061_IDK
 L_0008C4: ; 0x0008C4, $D8C4
-    INC   $A08C
+    INC   R_A08C_PLAYERS_CNT_1/2?
     LDA   $A037
     ADDA  #$99
     DAA
     STA   $A037
     LDX   #$C47D
     JSR   STORE_A_TO_SRAM[X]_BANKED
-    LDA   $A08C
+    LDA   R_A08C_PLAYERS_CNT_1/2?
     DECA
     BEQ   L_0008DB
     JSR   L_000665
@@ -1715,7 +1719,7 @@ L_00096E: ; 0x00096E, $D96E
     JSR   SETUP_$A061_IDK
     LDA   $A025
     BEQ   L_000A1F
-    LDB   $A08C
+    LDB   R_A08C_PLAYERS_CNT_1/2?
     DECB
     BEQ   L_000A1F
     LDU   #$C0EF
@@ -1759,10 +1763,10 @@ L_000A46: ; 0x000A46, $DA46
     STD   $A022
     LDX   $A0BF
     LDD   #$0806
-    JSR   SAVE_UXBA+BANK_UNK
+    JSR   CLEAR_SCREEN_FLEX_SETUP
     JSR   L_000BB6
     LDD   #$D4B5
-    JSR   L_00054D
+    JSR   MOD_UNK
     LDY   #$F9C1
     LDA   $A0BB
     BPL   L_000A6B
@@ -1820,11 +1824,11 @@ L_000ADE: ; 0x000ADE, $DADE
     LDX   $A08D
     LDB   7,X
     BNE   L_000B15
-    LDB   $A08C
+    LDB   R_A08C_PLAYERS_CNT_1/2?
     DECB
     BEQ   L_000B2C
     EORA  #$03
-    JSR   DECIDE_X_A1C2|A1FF
+    JSR   DECIDE_X_A1C2|A1FF_FROM_A
     LDB   7,X
     BEQ   L_000B2C
     LDU   #$C0EF
@@ -1844,11 +1848,11 @@ L_000B15: ; 0x000B15, $DB15
     LDA   $A08B
 L_000B17: ; 0x000B17, $DB17
     INCA
-    CMPA  $A08C
+    CMPA  R_A08C_PLAYERS_CNT_1/2?
     BLS   L_000B1E
     LDA   #$01
 L_000B1E: ; 0x000B1E, $DB1E
-    JSR   DECIDE_X_A1C2|A1FF
+    JSR   DECIDE_X_A1C2|A1FF_FROM_A
     LDB   7,X
     BEQ   L_000B17
     STA   $A08B
@@ -2288,7 +2292,7 @@ L_000E55: ; 0x000E55, $DE55
     ASLB
     ASLB
     ASLB
-    JSR   L_000360
+    JSR   SCORE?_ADD_UNK
     STX   7,U
     LDA   #$04
     LDX   #$DE66
@@ -3160,7 +3164,7 @@ L_001507: ; 0x001507, $E507
     STD   256,Y
     JMP   L_001493
     LDD   #$0025
-    JSR   L_000360
+    JSR   SCORE?_ADD_UNK
     DEC   $A099
     JSR   L_0000F2
     JSR   L_0023FE
@@ -3178,7 +3182,7 @@ L_001507: ; 0x001507, $E507
     STD   2,X
     JSR   L_002C63
     LDD   #$D4E4
-    JMP   L_00054D
+    JMP   MOD_UNK
     .db $5E ; Data?
 SETUP_A1A2_POOL: ; 0x00154B, $E54B
     LDX   #$A1A2 ; Ptr?
@@ -3227,7 +3231,7 @@ L_00158A: ; 0x00158A, $E58A
     BHS   L_0015A8
     INC   $A0B5
     LDD   #$D51B
-    JSR   L_00054D
+    JSR   MOD_UNK
     LDX   $A0C1
     LDA   $A0BB
     BPL   L_0015C1
@@ -3683,9 +3687,9 @@ L_0018BE: ; 0x0018BE, $E8BE
     BEQ   L_00191C
     INC   $A09A
     DEC   9,X
-    JSR   L_000680
+    JSR   SMARTBOMBS_TO_SCREEN
     LDD   #$D4D2
-    JSR   L_00054D
+    JSR   MOD_UNK
 L_0018D8: ; 0x0018D8, $E8D8
     LDX   $A065
 L_0018DA: ; 0x0018DA, $E8DA
@@ -3943,7 +3947,7 @@ L_001A80: ; 0x001A80, $EA80
     JSR   L_001EBA
     BEQ   L_001AD5
     LDD   #$D52F
-    JSR   L_00054D
+    JSR   MOD_UNK
 L_001AD5: ; 0x001AD5, $EAD5
     LDU   2,X
     LEAU  10,U
@@ -4112,9 +4116,9 @@ L_001BE7: ; 0x001BE7, $EBE7
     STU   2,X
     JSR   L_002C63
     LDD   #$0115
-    JSR   L_000360
+    JSR   SCORE?_ADD_UNK
     LDD   #$D516
-    JMP   L_00054D
+    JMP   MOD_UNK
 L_001C17: ; 0x001C17, $EC17
     LDX   7,U
     LDB   R_A10C
@@ -4192,7 +4196,7 @@ L_001C86: ; 0x001C86, $EC86
     ROLA
     STD   14,X
     LDD   #$D534
-    JSR   L_00054D
+    JSR   MOD_UNK
     CLRB
     LDA   $A0C0
     SUBA  12,X
@@ -4325,7 +4329,7 @@ L_001D77: ; 0x001D77, $ED77
     STD   10,X
     JSR   L_002C63
     LDD   #$D4E4
-    JMP   L_00054D
+    JMP   MOD_UNK
     LDU   6,X
     BEQ   L_001D70
     LDA   $A0DE
@@ -4334,7 +4338,7 @@ L_001D77: ; 0x001D77, $ED77
     CMPD  #$F24C
     BEQ   L_001DB7
     LDD   #$D4DA
-    JSR   L_00054D
+    JSR   MOD_UNK
     PSHS  X
     LDX   #$EE73
     LDA   #$00
@@ -4408,7 +4412,7 @@ L_001E10: ; 0x001E10, $EE10
     LDA   A,X
     STA   $A026
     LDD   #$D4E4
-    JSR   L_00054D
+    JSR   MOD_UNK
     LDX   #$EE44
     LDA   #$02
 L_001E3D: ; 0x001E3D, $EE3D
@@ -4429,7 +4433,7 @@ L_001E3D: ; 0x001E3D, $EE3D
     CMPA  #$10
     BNE   L_001E05
     LDD   #$D4C7
-    JSR   L_00054D
+    JSR   MOD_UNK
     JMP   L_00000A
     JSR   L_000095
     ADCB  L_000DED
@@ -4441,7 +4445,7 @@ L_001E3D: ; 0x001E3D, $EE3D
     CMPX  R_0000
     LDD   #$0150
 L_001E7F: ; 0x001E7F, $EE7F
-    JSR   L_000360
+    JSR   SCORE?_ADD_UNK
     LDY   7,U
     LDD   $A0C7
     STD   14,X
@@ -4518,7 +4522,7 @@ L_001EFE: ; 0x001EFE, $EEFE
     BSR   L_001EBA
     BEQ   L_001F14
     LDD   #$D525
-    JSR   L_00054D
+    JSR   MOD_UNK
 L_001F14: ; 0x001F14, $EF14
     RTS
 L_001F15: ; 0x001F15, $EF15
@@ -4758,7 +4762,7 @@ L_0020BE: ; 0x0020BE, $F0BE
     STD   16,X
     STD   16,Y
     LDD   #$D50C
-    JSR   L_00054D
+    JSR   MOD_UNK
     LDD   #$ED91
     STD   8,Y
     LDU   R_A063
@@ -4772,7 +4776,7 @@ L_0020BE: ; 0x0020BE, $F0BE
     JMP   U=$63,A>U+4,X>U+2
 L_0020FB: ; 0x0020FB, $F0FB
     LDD   #$D511
-    JSR   L_00054D
+    JSR   MOD_UNK
     LDX   7,U
     LDY   9,U
     LDD   [11,U]
@@ -4880,7 +4884,7 @@ L_0021BF: ; 0x0021BF, $F1BF
     JSR   L_001EBA
     BEQ   L_0021D8
     LDD   #$D52A
-    JSR   L_00054D
+    JSR   MOD_UNK
 L_0021D8: ; 0x0021D8, $F1D8
     LDA   #$03
     LDX   #$F15E
@@ -4897,7 +4901,7 @@ L_0021D8: ; 0x0021D8, $F1D8
     LDU   9,U
     STU   7,X
     LDD   #$D4E9
-    JSR   L_00054D
+    JSR   MOD_UNK
     LDD   #$0000
     STD   16,U
     STX   6,U
@@ -4966,7 +4970,7 @@ L_00227C: ; 0x00227C, $F27C
     LDD   #$ED70
     STD   8,X
     LDD   #$D4DF
-    JSR   L_00054D
+    JSR   MOD_UNK
     JMP   L_00000A
 L_00229D: ; 0x00229D, $F29D
     STA   $A073
@@ -5185,11 +5189,11 @@ L_002420: ; 0x002420, $F420
     PSHS  U,B,A
     LDU   4,S
     PULU  A,B
-    JSR   L_000360
+    JSR   SCORE?_ADD_UNK
     BSR   L_002434
     PULU  A,B
     STU   4,S
-    JSR   L_00054D
+    JSR   MOD_UNK
     PULS  A,B,U,PC
 L_002434: ; 0x002434, $F434
     PSHS  U,Y,X,B,A
@@ -5246,7 +5250,7 @@ L_002489: ; 0x002489, $F489
     LDX   #$711C
 L_0024A2: ; 0x0024A2, $F4A2
     LDD   #$1808
-    JSR   SAVE_UXBA+BANK_UNK
+    JSR   CLEAR_SCREEN_FLEX_SETUP
     LDA   #$08
     LDX   #$F4B0
     JMP   U=$63,A>U+4,X>U+2
@@ -5372,9 +5376,9 @@ GFX_BANK2_CHR_CLEAR: ; 0x00257B, $F57B
     STA   CURRENT_BANK ; Store val.
     STA   BANKSWITCH ; Switch
     LDD   Y ; Load with Y ptr, WWHH?
-L_00258C: ; 0x00258C, $F58C
+CLR_SCRN_SLOW_X=POS,A=W,B=H: ; 0x00258C, $F58C
     LDU   #$0000 ; Clearing value.
-    PSHS  B ; Save loaded B
+    PSHS  B ; Save loaded B, height
     BITB  #$01 ; Test bottom bit.
     BNE   B_BOUNDARY ; Is on byte boundary.
 W_BOUNDARY: ; 0x002595, $F595
@@ -5383,11 +5387,11 @@ LOOP_CLEAR_W: ; 0x002597, $F597
     STU   B,X ; Clear X[B]
     SUBB  #$02 ; Wrote 2 rows.
     BPL   LOOP_CLEAR_W
-    LDB   S ; Get B from stack.
+    LDB   S ; Reset Y addition.
     LEAX  256,X ; Next col.
     DECA ; Dec A
     BNE   W_BOUNDARY ; Not done.
-    BRA   EXIT_RTN ; Exit
+    BRA   EXIT_RESTORE_BANK ; Exit
 B_BOUNDARY: ; 0x0025A8, $F5A8
     DECB ; One byte clearing.
     CLR   B,X ; Clear
@@ -5402,17 +5406,17 @@ ONE_GOOD_ENOUGH: ; 0x0025B5, $F5B5
     LEAX  256,X ; Next col.
     DECA ; More width?
     BNE   B_BOUNDARY ; Yes, loop this.
-EXIT_RTN: ; 0x0025BE, $F5BE
-    PULS  A,B ; Pull A=Y Off, B=Bank from.
+EXIT_RESTORE_BANK: ; 0x0025BE, $F5BE
+    PULS  A,B ; Pull A=Y Off, B=Bank from. Expected.
     STB   CURRENT_BANK ; Store bank.
     STB   BANKSWITCH
     PULS  A,B,X,U,PC ; Restore state, RTS.
-SAVE_UXBA+BANK_UNK: ; 0x0025C7, $F5C7
-    PSHS  U,X,B,A
-    LDA   CURRENT_BANK
+CLEAR_SCREEN_FLEX_SETUP: ; 0x0025C7, $F5C7
+    PSHS  U,X,B,A ; Save. X=POS,A=W,B=H,U gets clobbered so save too.
+    LDA   CURRENT_BANK ; RTN expects this.
     PSHS  A
-    LDA   1,S ; Get value up stack.
-    BRA   L_00258C
+    LDA   1,S ; Get A pushed onto stack originally.
+    BRA   CLR_SCRN_SLOW_X=POS,A=W,B=H
 CLEAR_ALL_SCREEN: ; 0x0025D1, $F5D1
     PSHS  U,Y,X,B,A
     LDU   #$9C00
@@ -6153,11 +6157,13 @@ INIT_DATA_FOR_7F5: ; 0x0028BE, $F8BE
     .db $8E
     .db $D2
     .db $DF
-    .db $05
+BMP_SHIP: ; 0x0029D5, $F9D5
+    .db $05 ; Player ship.
     .db $04
     .db $CF
     .db $20
-    .db $03
+BMP_SMARTBOMB: ; 0x0029D9, $F9D9
+    .db $03 ; Smartbomb graphic here.
     .db $03
     .db $CF
     .db $34
@@ -7300,7 +7306,7 @@ JMP_GFX_BANK2_CHR_TO_SCREEN: ; 0x002FB3, $FFB3
 JMP_GFX_BANK2_CHR_CLEAR: ; 0x002FB6, $FFB6
     JMP   GFX_BANK2_CHR_CLEAR ; Clears bank 2 char from screen.
 L_002FB9: ; 0x002FB9, $FFB9
-    JMP   SAVE_UXBA+BANK_UNK
+    JMP   CLEAR_SCREEN_FLEX_SETUP
 JMP_CLEAR_ALL_SCREEN: ; 0x002FBC, $FFBC
     JMP   CLEAR_ALL_SCREEN
 JMP_ROM_CHECK_START: ; 0x002FBF, $FFBF
@@ -7321,7 +7327,7 @@ JMP_STORE_B@X_BANK0: ; 0x002FD4, $FFD4
 LOAD_B@X_BANK0: ; 0x002FD7, $FFD7
     JMP   LOAD_B[X]_BANK0
 L_002FDA: ; 0x002FDA, $FFDA
-    JMP   L_00054D
+    JMP   MOD_UNK
 L_002FDD: ; 0x002FDD, $FFDD
     .db $D4
     .db $EE
@@ -7517,7 +7523,7 @@ L_003156: ; 0x003156, $C156
 L_003158: ; 0x003158, $C158
     LDX   #$46AC
     LDD   #$1408
-    JSR   SAVE_UXBA+BANK_UNK
+    JSR   CLEAR_SCREEN_FLEX_SETUP
     LDU   #$C0FF
     JSR   JMP_GOTO_PAST_JSR
     .db $C0
@@ -8390,7 +8396,7 @@ L_003919: ; 0x003919, $C919
     STA   R_A16A
     JMP   L_00000A
 L_003936: ; 0x003936, $C936
-    LDA   $A08C
+    LDA   R_A08C_PLAYERS_CNT_1/2?
 L_003938: ; 0x003938, $C938
     BEQ   L_003940
     JSR   L_0003DB
