@@ -92,6 +92,10 @@ R_9C40:                                  .rs 0x01 ;0x9C40
 R_A002:                                  .rs 0x01 ;0xA002
 
 
+	.org $A013
+STACK_SAVE_LOC:                          .rs 0x01 ;0xA013
+
+
 	.org $A036
 CURRENT_BANK:                            .rs 0x01 ;0xA036
 
@@ -133,7 +137,11 @@ R_A063:                                  .rs 0x01 ;0xA063
 R_A077_S_TEMP?:                          .rs 0x01 ;0xA077
 
 
-	.org $A07B
+	.org $A079
+PIA_ROM_DATA_A_RAM_COPY:                 .rs 0x01 ;0xA079
+
+PIA_ROM_DATA_A_RAM_COPY_OLD:             .rs 0x01 ;0xA07A
+
 WGT_DATA_A_RAM_COPY:                     .rs 0x01 ;0xA07B
 
 WGT_DATA_A_RAM_COPY_OLD:                 .rs 0x01 ;0xA07C
@@ -150,6 +158,22 @@ IRQ_CMD_LOC:                             .rs 0x03 ;0xA08F to A091
 
 	.org $A097
 R_A097:                                  .rs 0x01 ;0xA097
+
+
+	.org $A0A2
+INVERTED_VIDEO_BITS?:                    .rs 0x01 ;0xA0A2
+
+
+	.org $A0AB
+R_A0AB:                                  .rs 0x01 ;0xA0AB
+
+
+	.org $A0C5
+PLAYER.VPOS:                             .rs 0x01 ;0xA0C5
+
+
+	.org $A0CA
+PLAYER_V_MOMENTUM:                       .rs 0x01 ;0xA0CA
 
 
 	.org $A0ED
@@ -788,7 +812,7 @@ SCORE?_ADD_UNK: ; 0x000360, $D360
     ASLB
     ROLA ; 4x
 SKIP_B(F0)_TO_A(0F): ; 0x000375, $D375
-    JSR   DECIDE_X_A1C2|A1FF_FROM_$A08B ; Player 1 or 2?
+    JSR   GET_PLAYER_PTR_FROM_A08B ; Player 1 or 2?
     STD   $A073 ; Store D to loc.
     LDB   #$03 ; Load B
     SUBB  S+ ; Sub B from on stack, clean up stack too?
@@ -808,7 +832,7 @@ LOOP_STILL_POSITIVE: ; 0x000388, $D388
     DECB ; Minus another
     BPL   LOOP_STILL_POSITIVE ; If still not negative, loop.
 B_NOW_NEGATIVE: ; 0x000396, $D396
-    LDD   $A0AB ; Get D
+    LDD   R_A0AB ; Get D
     BEQ   D_IS_ZERO ; D is 0.
     LEAX  1,X ; X+1
     LEAY  3,X ; Y = X+3
@@ -819,7 +843,7 @@ B_NOW_NEGATIVE: ; 0x000396, $D396
     DAA ; Adjust
     STA   1,Y ; Store back
     LDA   Y ; Get val
-    ADCA  $A0AB ; Add with carry
+    ADCA  R_A0AB ; Add with carry
     DAA ; Adjust
     STA   Y ; Store back
     INC   6,X ; Inc ships.
@@ -845,15 +869,15 @@ RTS: ; 0x0003D7, $D3D7
     PULS  A,B,PC ; RTS, Code handles next branch.
 SCORE_TO_SCREEN: ; 0x0003D9, $D3D9
     LDA   $A08B ; Load val
-L_0003DB: ; 0x0003DB, $D3DB
-    PSHS  A ; Save it
+PLAYER_SCORE_TO_SCREEN: ; 0x0003DB, $D3DB
+    PSHS  A ; Use passed value.
     DECA ; Dec val
-    BNE   VAL_STILL_>0
-    LDX   #$0F1C ; Pos?
+    BNE   PLAYER_TWO_HANDLER ; Do player 2.
+    LDX   #$0F1C ; Pos
     LDU   #$A1C3 ; Data ptr
     BRA   USE_REGS ; Use these.
-VAL_STILL_>0: ; 0x0003E8, $D3E8
-    LDX   #$711C ; Pos?
+PLAYER_TWO_HANDLER: ; 0x0003E8, $D3E8
+    LDX   #$711C ; Pos
     LDU   #$A200 ; Data ptr
 USE_REGS: ; 0x0003EE, $D3EE
     CLR   $A073 ; Clear displayed flag.
@@ -913,7 +937,7 @@ SCORE_CHR_POST: ; 0x00042B, $D42B
     STA   PIA_ROM_CTRL_B ; Store to CTRL.
     LDA   PIA_ROM_DATA_B ; Get. Idk why
     JSR   BANKSWITCH_TO_3 ; Goto bank 3, menu routines.
-    LDA   $A079 ; Get
+    LDA   PIA_ROM_DATA_A_RAM_COPY ; Get
     LSRA ; Shift.
     BLO   L_000468 ; If shifted off 1,do this instead.
     JMP   JMP_FAILED_W/_AUTO_NOT_PRESSED ; Goto.
@@ -1090,8 +1114,8 @@ USE_XB_PROVIDED: ; 0x000481, $D481
     .db $18
     .db $0C
     .db $00
-WRITE_ROM_PIA_DATA_REGS_FROM_AB: ; 0x000539, $D539
-    PSHS  B,A,CC ; Save.
+WRITE_ROM_PIA_DATA_REGS_W/_#$3F_AND_B: ; 0x000539, $D539
+    PSHS  B,A,CC ; Save. This rtn does sounds maybe?
     ORCC  #$FF ; Mask IRQ's
     CLR   BANKSWITCH ; IO bank.
     LDA   #$3F ; Write val
@@ -1115,44 +1139,44 @@ MOD_UNK: ; 0x00054D, $D54D
     STD   $A0B3 ; Set these?
 RTS: ; 0x000566, $D566
     PULS  CC,A,B,X,PC ; RTS
-L_000568: ; 0x000568, $D568
-    LDA   $A0B3
-    BEQ   L_000580
-    DEC   $A0B3
-    BNE   L_0005A8
-    LDX   $A0B0
-    DEC   $A0B4
-    BNE   L_0005A2
-    LEAX  3,X
-    STX   $A0B0
-    LDA   X
-    BNE   L_0005A0
-    STA   $A0B2
-L_000580: ; 0x000580, $D580
-    LDA   WGT_DATA_A_RAM_COPY
-    BITA  #$02
-    BNE   L_000590
-    LDA   $A0AD
-    BEQ   L_0005A8
-    CLR   $A0AD
-    LDB   #$0F
-    BRA   L_0005A6
-L_000590: ; 0x000590, $D590
-    LDA   $A0AD
-    BNE   L_0005A8
-    LDA   $A0BA
-    BITA  #$98
-    BNE   L_0005A8
-    LDB   #$16
-    STB   $A0AD
-    BRA   L_0005A6
-L_0005A0: ; 0x0005A0, $D5A0
-    STA   $A0B4
-L_0005A2: ; 0x0005A2, $D5A2
+IDK+THRUST+MORE: ; 0x000568, $D568
+    LDA   $A0B3 ; Load timer
+    BEQ   SOMETHING_TO_DO_WITH_THRUST ; if 0 skip
+    DEC   $A0B3 ; Dec if not 0
+    BNE   L_0005A8 ; Goto if not done.
+    LDX   $A0B0 ; Load 
+    DEC   $A0B4 ; Dec
+    BNE   D_FROM_X+1 ; If not 0, do this. Sets timer it seems.
+    LEAX  3,X ; X+=3
+    STX   $A0B0 ; Store X back
+    LDA   X ; Load A from X ptr
+    BNE   STORE_A_TO_$B4 ; If != 0, goto.
+    STA   $A0B2 ; Store to otherwise.
+SOMETHING_TO_DO_WITH_THRUST: ; 0x000580, $D580
+    LDA   WGT_DATA_A_RAM_COPY ; Get inputs on wigit A
+    BITA  #$02 ; Test thrust pressed
+    BNE   THRUST_NOT_PRESSED ; Thrust not pressed, goto.
+    LDA   $A0AD ; Load
+    BEQ   L_0005A8 ; If 0, goto.
+    CLR   $A0AD ; Clear otherwise.
+    LDB   #$0F ; Load B
+    BRA   WRITE_ROM_PIA_WITH_B_RTN ; Always goto.
+THRUST_NOT_PRESSED: ; 0x000590, $D590
+    LDA   $A0AD ; Load val
+    BNE   L_0005A8 ; If != 0, goto
+    LDA   $A0BA ; Load val
+    BITA  #$98 ; Test IDK
+    BNE   L_0005A8 ; If none set, goto
+    LDB   #$16 ; Load B
+    STB   $A0AD ; Store to
+    BRA   WRITE_ROM_PIA_WITH_B_RTN ; Goto
+STORE_A_TO_$B4: ; 0x0005A0, $D5A0
+    STA   $A0B4 ; Store A
+D_FROM_X+1: ; 0x0005A2, $D5A2
     LDD   1,X ; Get data from X+1
-    STA   $A0B3 ; Store to
-L_0005A6: ; 0x0005A6, $D5A6
-    BSR   WRITE_ROM_PIA_DATA_REGS_FROM_AB ; Write it
+    STA   $A0B3 ; Store A loaded here
+WRITE_ROM_PIA_WITH_B_RTN: ; 0x0005A6, $D5A6
+    BSR   WRITE_ROM_PIA_DATA_REGS_W/_#$3F_AND_B ; Write it
 L_0005A8: ; 0x0005A8, $D5A8
     LDA   PIA_ROM_CTRL_A ; Get CTRL
     BITA  #$40 ; Test C2
@@ -1161,20 +1185,20 @@ L_0005A8: ; 0x0005A8, $D5A8
     STA   $A07E ; Store
 C2_CLEAR: ; 0x0005B3, $D5B3
     LDA   $A07E ; Get value
-    BEQ   7E_ZERO
-    DEC   $A07E ; Dec if not 0.
+    BEQ   7E_ZERO ; If 0, goto
+    DEC   $A07E ; Dec otherwise
 7E_ZERO: ; 0x0005B9, $D5B9
-    LDA   $A07F
-    BEQ   7F_ZERO
-    DEC   $A07F
+    LDA   $A07F ; Load
+    BEQ   7F_ZERO ; If 0, goto
+    DEC   $A07F ; Dec otherwise.
 7F_ZERO: ; 0x0005BF, $D5BF
-    LDA   $A081
-    BEQ   81_ZERO
-    DEC   $A081
+    LDA   $A081 ; Load
+    BEQ   81_ZERO ; If 0, goto
+    DEC   $A081 ; Dec otherwise
 81_ZERO: ; 0x0005C5, $D5C5
-    LDA   $A080
-    BEQ   80_ZERO
-    DEC   $A080
+    LDA   $A080 ; Load
+    BEQ   80_ZERO ; If 0, goto
+    DEC   $A080 ; Dec otherwise
 80_ZERO: ; 0x0005CB, $D5CB
     LDA   WGT_DATA_A_RAM_COPY ; Get copy
     ORA   WGT_DATA_A_RAM_COPY_OLD ; OR with old.
@@ -1186,9 +1210,9 @@ C2_CLEAR: ; 0x0005B3, $D5B3
     LDB   PIA_WGT_DATA_B ; Move
     STB   WGT_DATA_B_RAM_COPY
     ANDA  WGT_DATA_A_RAM_COPY ; AND with new, gets newly pressed.
-    BEQ   NO_NEW_PRESSED ; No new
+    BEQ   CHECK_COINDOOR_INPUT ; No new
     LDU   #$F882 ; Change U...
-L_0005E5: ; 0x0005E5, $D5E5
+FILL_IN_$82-$88: ; 0x0005E5, $D5E5
     CLRB ; Clear
 LOOP_ADD_4: ; 0x0005E6, $D5E6
     ADDB  #$04 ; Add B
@@ -1196,38 +1220,38 @@ LOOP_ADD_4: ; 0x0005E6, $D5E6
     BHS   LOOP_ADD_4 ; If C = 0, loop.
     LEAU  B,U ; U += B
     PULU  A,B,X ; Fill in A,B,X from U
-    LDU   $A082 ; Load U
+    LDU   $A082 ; Load U from addr
     BNE   U_IS_VALID ; If U != 0
-    STD   $A082 ; Seed this on NULL.
+    STD   $A082 ; Ret this on null.
     STX   $A084
-    RTS
+    RTS ; Rts
 U_IS_VALID: ; 0x0005F8, $D5F8
-    STD   $A086 ; See this otherwise.
+    STD   $A086 ; Ret this otherwise.
     STX   $A088
-    RTS
-NO_NEW_PRESSED: ; 0x0005FD, $D5FD
-    LDA   $A079
-    ORA   $A07A
-    COMA
-    LDB   $A079
-    STB   $A07A
-    LDB   PIA_ROM_DATA_A
-    ANDB  #$3F
-    STB   $A079
-    BITA  $A079
-    BEQ   L_000628
-    LDX   #$0078
-L_000614: ; 0x000614, $D614
-    LEAX  -1,X
-    BNE   L_000614
-    LDB   PIA_ROM_DATA_A
-    ANDB  $A079
-    STB   $A079
-    ANDA  $A079
-    BEQ   L_000628
-    LDU   #$F8A2
-    BSR   L_0005E5
-L_000628: ; 0x000628, $D628
+    RTS ; Rts
+CHECK_COINDOOR_INPUT: ; 0x0005FD, $D5FD
+    LDA   PIA_ROM_DATA_A_RAM_COPY ; Load A with all pressed last 2 reads.
+    ORA   PIA_ROM_DATA_A_RAM_COPY_OLD
+    COMA ; Invert, 1's are newly pressed now.
+    LDB   PIA_ROM_DATA_A_RAM_COPY ; Move last to old
+    STB   PIA_ROM_DATA_A_RAM_COPY_OLD
+    LDB   PIA_ROM_DATA_A ; Get current buttons.
+    ANDB  #$3F ; Get only the buttons.
+    STB   PIA_ROM_DATA_A_RAM_COPY ; Update this
+    BITA  PIA_ROM_DATA_A_RAM_COPY ; Test if any are newly pressed that we need to catch.
+    BEQ   RTS ; If no matches on newly pressed.
+    LDX   #$0078 ; Time to wait.
+WAIT_FOR_X_TO_0: ; 0x000614, $D614
+    LEAX  -1,X ; X--
+    BNE   WAIT_FOR_X_TO_0 ; Loop
+    LDB   PIA_ROM_DATA_A ; Get data again
+    ANDB  PIA_ROM_DATA_A_RAM_COPY ; Get bits pressed both times.
+    STB   PIA_ROM_DATA_A_RAM_COPY ; Replace
+    ANDA  PIA_ROM_DATA_A_RAM_COPY ; See if any buttons newly pressed.
+    BEQ   RTS ; No, RTS
+    LDU   #$F8A2 ; PTR to data
+    BSR   FILL_IN_$82-$88
+RTS: ; 0x000628, $D628
     RTS
 DISP_SHIPS_ALL_PLAYERS: ; 0x000629, $D629
     PSHS  U,Y,X,B,A ; Save
@@ -1261,20 +1285,20 @@ LOOP_DISPLAY_SHIPS: ; 0x00065A, $D65A
     BNE   LOOP_DISPLAY_SHIPS ; Display loop.
 RTS: ; 0x000663, $D663
     PULS  A,PC ; RTS
-L_000665: ; 0x000665, $D665
+DISPLAY_SETUP: ; 0x000665, $D665
     PSHS  U,Y,X,B,A
-    LDD   #$4020
-    LDX   #$3008
-    JSR   CLEAR_SCREEN_FLEX_SETUP
-    BSR   SCANNER_TO_SCREEN
-    BSR   DISP_SHIPS_ALL_PLAYERS
-    BSR   SMARTBOMBS_TO_SCREEN
-    LDA   R_A08C_PLAYERS_CNT_1/2?
-L_000678: ; 0x000678, $D678
-    JSR   L_0003DB
+    LDD   #$4020 ; POS
+    LDX   #$3008 ; XXYY
+    JSR   CLEAR_SCREEN_FLEX_SETUP ; Clear area.
+    BSR   SCANNER_TO_SCREEN ; Put scanner to screen.
+    BSR   DISP_SHIPS_ALL_PLAYERS ; Ships.
+    BSR   SMARTBOMBS_TO_SCREEN ; Smartbombs.
+    LDA   R_A08C_PLAYERS_CNT_1/2? ; Load which player?
+SCORE_LOOP: ; 0x000678, $D678
+    JSR   PLAYER_SCORE_TO_SCREEN ; Put that player to screen.
     DECA
-    BNE   L_000678
-    PULS  A,B,X,Y,U,PC
+    BNE   SCORE_LOOP ; Loop again.
+    PULS  A,B,X,Y,U,PC ; RTS
 SMARTBOMBS_TO_SCREEN: ; 0x000680, $D680
     PSHS  U,Y,X,B,A
     LDX   #$291B ; Pos P1
@@ -1336,7 +1360,7 @@ LOOP_WHITE_PART: ; 0x0006EF, $D6EF
     CMPX  #$5407 ; End X
     BNE   LOOP_WHITE_PART ; Not done, loop.
     RTS
-DECIDE_X_A1C2|A1FF_FROM_$A08B: ; 0x0006FE, $D6FE
+GET_PLAYER_PTR_FROM_A08B: ; 0x0006FE, $D6FE
     PSHS  A ; Save A
     LDA   $A08B ; Get A
 DECIDE_X_A1C2|A1FF_SUB: ; 0x000702, $D702
@@ -1346,7 +1370,7 @@ DECIDE_X_A1C2|A1FF_SUB: ; 0x000702, $D702
     LDX   #$A1FF ; Change X if not 0.
 RTS_PULA: ; 0x00070B, $D70B
     PULS  A,PC ; RTS
-DECIDE_X_A1C2|A1FF_FROM_A: ; 0x00070D, $D70D
+DECIDE_PLAYER_PTR_FROM_A: ; 0x00070D, $D70D
     PSHS  A
     BRA   DECIDE_X_A1C2|A1FF_SUB
 RANDOM_VALUE_FWD+IN_A: ; 0x000711, $D711
@@ -1429,7 +1453,7 @@ COMMIT_B_AS_IS: ; 0x000785, $D785
     STD   $A0A1 ; Store to...
     CLR   $A0A3 ; NULL?
     LDB   #$FF ; D=A0FF
-    STD   $A079 ; Store...
+    STD   PIA_ROM_DATA_A_RAM_COPY ; Store...
     JSR   SAVE_BANK+SET_WATCHDOG_NONFLIPPED ; Set screen+other
     JSR   BANKSWITCH_TO_3 ; Goto bank
     JSR   JMP_TO_HIGHSCORES_TO_RAM ; Move initial to RAM.
@@ -1441,11 +1465,11 @@ COMMIT_B_AS_IS: ; 0x000785, $D785
     JSR   SETUP_$A061_IDK ; Sets up something.
     COM   $A0BA
     ANDCC #$00 ; Unmask IRQ's
-    JMP   L_0017BE
+    JMP   MOVE_A05F_TO_A063 ; Jumps to...
 SETUP_POOLS: ; 0x0007B6, $D7B6
     BSR   SETUP_$A026_WITH_DATA
-    JSR   RANDOMNESS_POOL?
-    JSR   STARS_UNK
+    JSR   RANDOMNESS_32_OF_0,1,10,11
+    JSR   STARS_INIT
     BSR   SETUP_LIST_NO_INTERRUPTS
     JSR   SETUP_A1A2_POOL
     JMP   SETUP_POOL_4162
@@ -1495,100 +1519,100 @@ LIST_23B_LOOP: ; 0x00080E, $D80E
     BNE   LIST_23B_LOOP ; Loop
     CLRA ; Clear D
     CLRB
-    STD   X ; NULL CURR.next
+    STD   X ; NULL OBJ.next
     STD   $A06B ; Null
     STD   $A065 ; Null
     STD   $A06D ; Null
     PULS  CC,A,B,X,PC ; RTS
-L_000825: ; 0x000825, $D825
+GOTO_B1_C000: ; 0x000825, $D825
     JSR   BANKSWITCH_TO_1
-    JMP   PALETTE_ENTRY_0x0
-L_00082B: ; 0x00082B, $D82B
-    LDX   #$C495
-    JSR   GET_DATA_FROM_SRAM[X]_IN_A
-    DECA
-    BNE   L_000838
-    LDA   #$02
-    STA   $A037
-L_000838: ; 0x000838, $D838
+    JMP   $C000
+SRAM_C495_TO_RAM: ; 0x00082B, $D82B
+    LDX   #$C495 ; Ptr
+    JSR   GET_DATA_FROM_SRAM[X]_IN_A ; Get data
+    DECA ; Sub 1
+    BNE   RTS ; Use val if not 0.
+    LDA   #$02 ; Default
+    STA   $A037 ; Store
+RTS: ; 0x000838, $D838
     RTS
-    LDA   $A0BA
-    BPL   L_00084B
-    BSR   L_00082B
-    LDA   $A037
-    BEQ   L_00084B
-    LDD   #$D4BD
-L_000846: ; 0x000846, $D846
-    JSR   MOD_UNK
+    LDA   $A0BA ; Load
+    BPL   LIST_RTN_INSTEAD ; If positive, do list rtn.
+    BSR   SRAM_C495_TO_RAM ; Put to RAM
+    LDA   $A037 ; Load
+    BEQ   LIST_RTN_INSTEAD ; If 0, do instead.
+    LDD   #$D4BD ; Ptr to data table idk yet.
+JSR_UNK_BSR_IDK: ; 0x000846, $D846
+    JSR   MOD_UNK ; Mod stuff.
     BSR   L_000861
-L_00084B: ; 0x00084B, $D84B
-    JMP   LIST_RTN_0x00000A_IDK
-    LDA   $A0BA
-    BPL   L_00084B
-    BSR   L_00082B
-    LDA   $A037
-    CMPA  #$02
-    BLO   L_00084B
+LIST_RTN_INSTEAD: ; 0x00084B, $D84B
+    JMP   LIST_RTN_0x00000A_IDK ; Lots goes here.
+    LDA   $A0BA ; Load val
+    BPL   LIST_RTN_INSTEAD ; If positive, AKA not pointing to ROM?
+    BSR   SRAM_C495_TO_RAM ; Put to RAM
+    LDA   $A037 ; Load A
+    CMPA  #$02 ; If _ #$02
+    BLO   LIST_RTN_INSTEAD ; <, goto
     BSR   L_000861
-    LDD   #$D4C2
-    BRA   L_000846
+    LDD   #$D4C2 ; Idk why val.
+    BRA   JSR_UNK_BSR_IDK ; Mod and list.
 L_000861: ; 0x000861, $D861
-    CLR   $A038
+    CLR   $A038 ; Clear
     NOP
-    LDA   $A0B7
-    BEQ   L_0008DB
+    LDA   $A0B7 ; Load
+    BEQ   RTS ; RTS if 0.
     LDA   $A0BA
-    BPL   L_0008C4
-    JSR   FIND_IDK
-    JSR   CLEAR_ALL_SCREEN
+    BPL   UI_UPDATE_STUFF ; If is positive, goto.
+    JSR   FIND_IDK ; Find something.
+    JSR   CLEAR_ALL_SCREEN ; Clear the entire screen.
     LDA   #$7F
-    STA   $A0BA
+    STA   $A0BA ; Store
     LDA   #$01
-    STA   $A08B
+    STA   $A08B ; Store
     STA   $A025
-    CLR   R_A08C_PLAYERS_CNT_1/2?
-    LDX   #$A1C2
-L_000881: ; 0x000881, $D881
-    CLR   X+
-    CMPX  #$A23C
-    BNE   L_000881
-    LDX   #$C485
-    JSR   GET_DATA_FROM_SRAM[X]_IN_A
-    ANDA  #$0F
-    STA   R_A1C9_P1_SHIPS
-    LDB   #$0A
-    STD   R_A1CB_P1_SMARTBOMBS
-    CLR   $A039
-    NOP
-    LDX   #$A1C2
-    JSR   L_000E7C
-    LDX   #$C481
-    JSR   GET_DATA_FROM_SRAM[X]_IN_AB
-    STD   $A0AB
-    STD   R_A1C6
-    CLR   R_A1C8
-    LDX   #$A1C2
-L_0008B2: ; 0x0008B2, $D8B2
-    LDA   X+
-    STA   60,X
-    CMPX  #$A1FF
-    BNE   L_0008B2
-    LDX   #$D919
-    LDA   #$00
-    JSR   SETUP_$A061_IDK
-L_0008C4: ; 0x0008C4, $D8C4
-    INC   R_A08C_PLAYERS_CNT_1/2?
-    LDA   $A037
-    ADDA  #$99
-    DAA
-    STA   $A037
-    LDX   #$C47D
-    JSR   STORE_A_TO_SRAM[X]_BANKED
-    LDA   R_A08C_PLAYERS_CNT_1/2?
-    DECA
-    BEQ   L_0008DB
-    JSR   L_000665
-L_0008DB: ; 0x0008DB, $D8DB
+    CLR   R_A08C_PLAYERS_CNT_1/2? ; Is 0.
+    LDX   #$A1C2 ; Load ptr to player data?
+CLEAR_DATA_LOOP: ; 0x000881, $D881
+    CLR   X+ ; Clear
+    CMPX  #$A23C ; End of player data?
+    BNE   CLEAR_DATA_LOOP ; Loop
+    LDX   #$C485 ; SRAM PTR, initial ships.
+    JSR   GET_DATA_FROM_SRAM[X]_IN_A ; Get data
+    ANDA  #$0F ; Get bottom bits just to make sure corruption isn't too rewarding.
+    STA   R_A1C9_P1_SHIPS ; Store to P1 ships.
+    LDB   #$0A ; Idk val.
+    STD   R_A1CB_P1_SMARTBOMBS ; Ships and smartbomb count always same, B is IDK.
+    CLR   $A039 ; Clear
+    NOP ; NOP
+    LDX   #$A1C2 ; Ptr to P1 data?
+    JSR   PLAYER_COMMIT_IDK_UNK
+    LDX   #$C481 ; Get SRAM
+    JSR   GET_DATA_FROM_SRAM[X]_IN_AB ; Get data in.
+    STD   R_A0AB ; Store to, word.
+    STD   R_A1C6 ; Store to, word.
+    CLR   R_A1C8 ; Clear BYTE.
+    LDX   #$A1C2 ; PTR to P1 data
+LOOP_COPY_P1_DATA_TO_P2: ; 0x0008B2, $D8B2
+    LDA   X+ ; Get data in player.
+    STA   60,X ; Store to player 2. Off by 1 because of X+ above.
+    CMPX  #$A1FF ; Compare to end P1 data.
+    BNE   LOOP_COPY_P1_DATA_TO_P2
+    LDX   #$D919 ; Ptr to bookkeep 7 below.
+    LDA   #$00 ; Idk val
+    JSR   SETUP_$A061_IDK ; Do this.
+UI_UPDATE_STUFF: ; 0x0008C4, $D8C4
+    INC   R_A08C_PLAYERS_CNT_1/2? ; Inc players in game.
+    LDA   $A037 ; Load A
+    ADDA  #$99 ; Add 99...
+    DAA ; Adjust...
+    STA   $A037 ; Store back.
+    LDX   #$C47D ; Ptr
+    JSR   STORE_A_TO_SRAM[X]_BANKED ; Put A here???
+    LDA   R_A08C_PLAYERS_CNT_1/2? ; Load players?
+    DECA ; Dec
+    BEQ   RTS ; If was 0 originally, RTS.
+    JSR   DISPLAY_SETUP ; Update display if not.
+RTS: ; 0x0008DB, $D8DB
     RTS
 SAVE_BANK+SET_WATCHDOG_NONFLIPPED: ; 0x0008DC, $D8DC
     PSHS  X,A ; Save
@@ -1597,7 +1621,7 @@ SAVE_BANK+SET_WATCHDOG_NONFLIPPED: ; 0x0008DC, $D8DC
 SET_WATCHDOG_NONFLIPPED: ; 0x0008E2, $D8E2
     LDX   #$DF17 ; IRQ handler.
     LDD   #$383C ; A=Watchdog, B=Ctrl (C2 SET HIGH, OUTPUT REG)
-    BRA   COMMIT_WATCHDOG+SETUP
+    BRA   SETUP_IRQ_RTN+WATCHDOG+WIDGET_B_CTRL+BANK@S
 SET_WATCHDOG_GAMEPLAY?: ; 0x0008EA, $D8EA
     PSHS  X,A ; Save
     LDA   CURRENT_BANK ; Get bank.
@@ -1608,7 +1632,7 @@ SET_WATCHDOG_GAMEPLAY?: ; 0x0008EA, $D8EA
     BPL   SET_WATCHDOG_NONFLIPPED ; If WGT_DATA_B7 not set, load P1 data.
     LDX   #$DFC3 ; IRQ handler.
     LDD   #$3934 ; A=Watchdog (Flipped screen) and CTRL (C2 SET LOW, OUTPUT REG)
-COMMIT_WATCHDOG+SETUP: ; 0x0008FF, $D8FF
+SETUP_IRQ_RTN+WATCHDOG+WIDGET_B_CTRL+BANK@S: ; 0x0008FF, $D8FF
     STX   IRQ_CMD_LOC+1 ; Set up IRQ RTN.
     CLR   CURRENT_BANK ; Switch to bank 0
     CLR   BANKSWITCH ; Actually.
@@ -1620,33 +1644,33 @@ COMMIT_WATCHDOG+SETUP: ; 0x0008FF, $D8FF
     STA   CURRENT_BANK ; Restore.
     STA   BANKSWITCH
     PULS  A,X,PC ; Restore regs+RTS
-L_000919: ; 0x000919, $D919
+UPDATE_BOOKKEEP_7+MORE: ; 0x000919, $D919
     LDB   #$07
     JSR   GOTO_B3-C00F_BOOKKEEP_UPDATE_+1
 L_00091E: ; 0x00091E, $D91E
     JSR   SETUP_POOLS
     JSR   FIND_IDK
-    LDA   #$7F
+    LDA   #$7F ; Store to
     STA   $A0BA
-    LDX   R_A063
-    CMPX  $A05F
-    BNE   L_000932
-    LDX   X
-    BEQ   L_000942
-L_000932: ; 0x000932, $D932
-    LDA   #$0F
-    LDX   #$D93A
-    JMP   U=$63,A>U+4,X>U+2
-    LDA   $A07F
-    ORA   $A080
-    ORA   $A07F
-    BNE   L_000932
+    LDX   R_A063 ; Get
+    CMPX  $A05F ; If X _ $A05F
+    BNE   SKIP_X_MOVE ; !=, goto
+    LDX   X ; Move to next obj.
+    BEQ   L_000942 ; If NULL, goto
+SKIP_X_MOVE: ; 0x000932, $D932
+    LDA   #$0F ; Load A
+    LDX   #$D93A ; Load X
+    JMP   U=$63,A>U+4,X>U+2 ; Leaves
+    LDA   $A07F ; Load val
+    ORA   $A080 ; Combine
+    ORA   $A07F ; NOP, can be removed.
+    BNE   SKIP_X_MOVE ; If any set, goto.
 L_000942: ; 0x000942, $D942
     JSR   LIST_INIT_STUFF
     LDX   #$D950
     LDA   #$00
     JSR   SETUP_$A061_IDK
-    JMP   L_0017BE
+    JMP   MOVE_A05F_TO_A063
     CLRA
     JSR   BANKSWITCH_TO_A
     LDA   PIA_WGT_DATA_B
@@ -1660,7 +1684,7 @@ L_000942: ; 0x000942, $D942
 L_000966: ; 0x000966, $D966
     BSR   SET_WATCHDOG_GAMEPLAY?
 L_000968: ; 0x000968, $D968
-    LDA   #$FF
+    LDA   #$FF ; Set all buttons to on.
     STA   WGT_DATA_A_RAM_COPY
     STA   WGT_DATA_A_RAM_COPY_OLD
 L_00096E: ; 0x00096E, $D96E
@@ -1683,7 +1707,7 @@ L_00096E: ; 0x00096E, $D96E
     CLR   $A099
     LDX   #$A11A
     STX   $A09B
-    JSR   DECIDE_X_A1C2|A1FF_FROM_$A08B
+    JSR   GET_PLAYER_PTR_FROM_A08B
     STX   $A08D
     LDA   8,X
     ANDA  #$07
@@ -1691,7 +1715,7 @@ L_00096E: ; 0x00096E, $D96E
     LDA   A,U
     STA   $A02B
     DEC   7,X
-    JSR   L_000665
+    JSR   DISPLAY_SETUP
     LDD   #$2080
     STD   $A0C1
     STD   $A0BF
@@ -1701,12 +1725,12 @@ L_00096E: ; 0x00096E, $D96E
     ADDD  $A020
     STD   $A0CC
     LDD   #$8000
-    STD   $A0C5
+    STD   PLAYER.VPOS
     CLRA
     CLRB
     STD   $A0C7
     STA   $A0C9
-    STD   $A0CA
+    STD   PLAYER_V_MOMENTUM
     LDX   #$E9E3
     LDA   #$00
     JSR   SETUP_$A061_IDK
@@ -1822,7 +1846,7 @@ L_000AA8: ; 0x000AA8, $DAA8
     JSR   SCORE_TO_SCREEN
     CLR   $A0B3
     LDB   #$13
-    JSR   WRITE_ROM_PIA_DATA_REGS_FROM_AB
+    JSR   WRITE_ROM_PIA_DATA_REGS_W/_#$3F_AND_B
     JSR   L_000DAE
     BNE   L_000ADE
     JSR   L_000DEC
@@ -1836,7 +1860,7 @@ L_000ADE: ; 0x000ADE, $DADE
     DECB
     BEQ   L_000B2C
     EORA  #$03
-    JSR   DECIDE_X_A1C2|A1FF_FROM_A
+    JSR   DECIDE_PLAYER_PTR_FROM_A
     LDB   7,X
     BEQ   L_000B2C
     LDU   #$C0EF
@@ -1860,12 +1884,12 @@ L_000B17: ; 0x000B17, $DB17
     BLS   L_000B1E
     LDA   #$01
 L_000B1E: ; 0x000B1E, $DB1E
-    JSR   DECIDE_X_A1C2|A1FF_FROM_A
+    JSR   DECIDE_PLAYER_PTR_FROM_A
     LDB   7,X
     BEQ   L_000B17
     STA   $A08B
     INC   $A025
-    JMP   L_000919
+    JMP   UPDATE_BOOKKEEP_7+MORE
 L_000B2C: ; 0x000B2C, $DB2C
     LDU   #$C075
     LDX   #$3E80
@@ -1874,11 +1898,11 @@ L_000B2C: ; 0x000B2C, $DB2C
     JSR   PSH_ALL_GOTO_B2-C002
     CLR   $A0B3
     LDB   #$13
-    JSR   WRITE_ROM_PIA_DATA_REGS_FROM_AB
+    JSR   WRITE_ROM_PIA_DATA_REGS_W/_#$3F_AND_B
     LDA   #$28
     LDX   #$DB48
     JMP   U=$63,A>U+4,X>U+2
-    JMP   L_000825
+    JMP   GOTO_B1_C000
     ASR   $A007
     ASR   $A00F
     SWI1
@@ -2191,7 +2215,7 @@ L_000D81: ; 0x000D81, $DD81
     BNE   L_000D96
     LDB   #$02
     LDY   #$A0FB
-    JSR   L_000EEC
+    JSR   PLAYER_DATA_MANIP_IDK
     LDA   #$28
     STA   7,U
 L_000D96: ; 0x000D96, $DD96
@@ -2219,19 +2243,19 @@ L_000DAE: ; 0x000DAE, $DDAE
     ADDA  R_A115
     ADDA  $A0FE
     RTS
-L_000DC2: ; 0x000DC2, $DDC2
-    PSHS  B
-    CLRB
-L_000DC5: ; 0x000DC5, $DDC5
-    CMPA  #$10
-    BLO   L_000DCF
-    ADDB  #$0A
-    SUBA  #$10
-    BRA   L_000DC5
-L_000DCF: ; 0x000DCF, $DDCF
-    PSHS  B
-    ADDA  S+
-    PULS  B,PC
+A_ADJUST_PER_#$10: ; 0x000DC2, $DDC2
+    PSHS  B ; Save B
+    CLRB ; Clear
+LOOP_A_SUB: ; 0x000DC5, $DDC5
+    CMPA  #$10 ; If A _ #$10
+    BLO   A_<_#$10 ; <, goto.
+    ADDB  #$0A ; B+=#$0A for every A >= #$10
+    SUBA  #$10 ; A -= #$10
+    BRA   LOOP_A_SUB ; Loop again
+A_<_#$10: ; 0x000DCF, $DDCF
+    PSHS  B ; B to stack
+    ADDA  S+ ; Add A to B, clean up B push.
+    PULS  B,PC ; Restore, RTS.
 L_000DD5: ; 0x000DD5, $DDD5
     PSHS  B
     TFR   A>B
@@ -2310,97 +2334,97 @@ L_000E55: ; 0x000E55, $DE55
     BNE   L_000E3B
 L_000E6C: ; 0x000E6C, $DE6C
     LDX   $A08D
-    JSR   L_000E7C
+    JSR   PLAYER_COMMIT_IDK_UNK
     LDA   #$80
     LDX   #$DE79
     JMP   U=$63,A>U+4,X>U+2
     JMP   [13,U]
-L_000E7C: ; 0x000E7C, $DE7C
-    PSHS  U,X,B,A
-    INC   8,X
+PLAYER_COMMIT_IDK_UNK: ; 0x000E7C, $DE7C
+    PSHS  U,X,B,A ; Save
+    INC   8,X ; Inc PTR+X
     LDX   #$C49D
-    JSR   GET_DATA_FROM_SRAM[X]_IN_A
-    STA   $A073
-    LDX   2,S
-    TSTA
-    BEQ   L_000E99
-    LDA   8,X
-L_000E8F: ; 0x000E8F, $DE8F
-    SUBA  $A073
-    BLO   L_000E99
-    BNE   L_000E8F
-    LDA   #$0A
+    JSR   GET_DATA_FROM_SRAM[X]_IN_A ; Get data from.
+    STA   $A073 ; Store to.
+    LDX   2,S ; Restore X passed.
+    TSTA ; Test SRAM loaded.
+    BEQ   BANK_7_STUFF? ; If we loaded 0, go here.
+    LDA   8,X ; Load val.
+LOOP_SUB: ; 0x000E8F, $DE8F
+    SUBA  $A073 ; Sub with loaded value.
+    BLO   BANK_7_STUFF? ; If we went negative with the subtract.
+    BNE   LOOP_SUB ; If it's not 0, try again.
+    LDA   #$0A ; Store
     STA   10,X
-L_000E99: ; 0x000E99, $DE99
-    JSR   BANKSWITCH_TO_7
-    LDA   8,X
-    PSHS  A
-    CMPA  #$04
-    BLS   L_000EA6
-    LDA   #$04
-L_000EA6: ; 0x000EA6, $DEA6
-    LDU   $C011
-    ADDA  #$03
-    LEAX  11,X
-L_000EAD: ; 0x000EAD, $DEAD
-    LDB   A,U
-    STB   X+
-    LEAU  8,U
-    CMPU  $C013
-    BNE   L_000EAD
-    PULS  A
-    SUBA  #$04
-    BHS   L_000EC0
-    CLRA
-L_000EC0: ; 0x000EC0, $DEC0
-    STA   $A073
-    LDX   #$C497
-    JSR   GET_DATA_FROM_SRAM[X]_IN_AB
-    JSR   L_000DC2
-    ADDA  $A073
-    STA   $A073
-    BEQ   L_000EEA
-    TFR   B>A
-    JSR   L_000DC2
-    CMPA  $A073
-    BHS   L_000EDC
-    STA   $A073
-L_000EDC: ; 0x000EDC, $DEDC
-    LDA   $A073
-L_000EDE: ; 0x000EDE, $DEDE
-    LDB   #$03
-    JSR   DECIDE_X_A1C2|A1FF_FROM_$A08B
-    LEAY  11,X
-    BSR   L_000EEC
-    DECA
-    BNE   L_000EDE
-L_000EEA: ; 0x000EEA, $DEEA
+BANK_7_STUFF?: ; 0x000E99, $DE99
+    JSR   BANKSWITCH_TO_7 ; Goto bank.
+    LDA   8,X ; Load val.
+    PSHS  A ; Save
+    CMPA  #$04 ; Compare to 4
+    BLS   DONT_CAP_AT_4
+    LDA   #$04 ; Cap
+DONT_CAP_AT_4: ; 0x000EA6, $DEA6
+    LDU   DATA_USED_IN_$D000_CODE ; Load PTR from bank 7.
+    ADDA  #$03 ; A+=3
+    LEAX  11,X ; X+=11
+LOOP_MOVE: ; 0x000EAD, $DEAD
+    LDB   A,U ; Get B from U[A]
+    STB   X+ ; Store to X
+    LEAU  8,U ; U+=8
+    CMPU  DATA_USED_IN_$D000_CODE_END ; See if at end.
+    BNE   LOOP_MOVE ; Loop if not there.
+    PULS  A ; Restore A.
+    SUBA  #$04 ; A-=4
+    BHS   STILL_POSITIVE
+    CLRA ; Clear if went negative.
+STILL_POSITIVE: ; 0x000EC0, $DEC0
+    STA   $A073 ; Store to.
+    LDX   #$C497 ; SRAM PTR
+    JSR   GET_DATA_FROM_SRAM[X]_IN_AB ; Get word
+    JSR   A_ADJUST_PER_#$10 ; Add...
+    ADDA  $A073 ; Add A with this.
+    STA   $A073 ; Store to.
+    BEQ   RTS ; If == 0, goto.
+    TFR   B>A ; Put B to A.
+    JSR   A_ADJUST_PER_#$10 ; Do rtn too.
+    CMPA  $A073 ; If A _ Other
+    BHS   SKIP_COMMIT ; >=, skip.
+    STA   $A073 ; Commit higher.
+SKIP_COMMIT: ; 0x000EDC, $DEDC
+    LDA   $A073 ; Load highest.
+LOOP_MORE_A: ; 0x000EDE, $DEDE
+    LDB   #$03 ; Idk val
+    JSR   GET_PLAYER_PTR_FROM_A08B ; Get player X ptr
+    LEAY  11,X ; Y = ptr+11
+    BSR   PLAYER_DATA_MANIP_IDK ; Player data manipulation, unk function.
+    DECA ; A--
+    BNE   LOOP_MORE_A ; Do more.
+RTS: ; 0x000EEA, $DEEA
     PULS  A,B,X,U,PC
-L_000EEC: ; 0x000EEC, $DEEC
-    PSHS  Y,X,A
-    JSR   BANKSWITCH_TO_7
-    LDX   $C011
-L_000EF4: ; 0x000EF4, $DEF4
-    LDA   B,X
-    BMI   L_000F02
-    ADDA  Y
-    BLO   L_000F0C
-    CMPA  X
-    BHI   L_000F0C
-    BRA   L_000F0A
-L_000F02: ; 0x000F02, $DF02
-    ADDA  Y
-    BHS   L_000F0C
-    CMPA  1,X
-    BLO   L_000F0C
-L_000F0A: ; 0x000F0A, $DF0A
-    STA   Y
-L_000F0C: ; 0x000F0C, $DF0C
-    LEAY  1,Y
-    LEAX  8,X
-    CMPX  $C013
-    BNE   L_000EF4
-    PULS  A,X,Y,PC
+PLAYER_DATA_MANIP_IDK: ; 0x000EEC, $DEEC
+    PSHS  Y,X,A ; Save
+    JSR   BANKSWITCH_TO_7 ; Bank 7
+    LDX   DATA_USED_IN_$D000_CODE ; Get data ptr.
+LOOP_X_PTR: ; 0x000EF4, $DEF4
+    LDA   B,X ; Get data at PTR+B
+    BMI   DATA_NOT_MINUS ; If negative, goto.
+    ADDA  Y ; Add player data.
+    BLO   NEXT_ITTERATION ; If overflow, taken.
+    CMPA  X ; Compare to data pointed to.
+    BHI   NEXT_ITTERATION ; If A >, do.
+    BRA   COMMIT_TO_PLAYER ; Always do this instead.
+DATA_NOT_MINUS: ; 0x000F02, $DF02
+    ADDA  Y ; Add player data.
+    BHS   NEXT_ITTERATION ; If no overflow, goto.
+    CMPA  1,X ; Compare to ptr+1
+    BLO   NEXT_ITTERATION ; If ptr+1 is lower, taken.
+COMMIT_TO_PLAYER: ; 0x000F0A, $DF0A
+    STA   Y ; If it's higher, store to player data.
+NEXT_ITTERATION: ; 0x000F0C, $DF0C
+    LEAY  1,Y ; Player ptr++
+    LEAX  8,X ; X+=8
+    CMPX  DATA_USED_IN_$D000_CODE_END ; See if end.
+    BNE   LOOP_X_PTR ; Loop if not end.
+    PULS  A,X,Y,PC ; RTS, Restore.
 P1_RELATED_CODE?_UNK_PTR'D_TO: ; 0x000F17, $DF17
     CLR   BANKSWITCH
     LDA   #$A0
@@ -2412,29 +2436,29 @@ P1_RELATED_CODE?_UNK_PTR'D_TO: ; 0x000F17, $DF17
     CMPA  #$80
     BLO   L_000F5D
     LDA   $A092
-    BNE   L_000FAC
+    BNE   LEAVE_IRQ_RTN
     INC   $A092
-    JSR   L_000568
-    JSR   L_001263
-    JSR   L_00107E
+    JSR   IDK+THRUST+MORE
+    JSR   MOVEMENT_STUFF_PLAYERS+IDK
+    JSR   CLEAR_A_LOT
     LDA   VIDEO_COUNTER_BITS
     SUBA  #$08
     CMPA  #$A8
     BLS   L_000F47
     LDA   #$A8
 L_000F47: ; 0x000F47, $DF47
-    STA   $A0A2
+    STA   INVERTED_VIDEO_BITS?
     LDA   #$02
     STA   BANKSWITCH
-    LDD   $A0A2
+    LDD   INVERTED_VIDEO_BITS?
     JSR   L_00139F
-    LDD   $A0A2
+    LDD   INVERTED_VIDEO_BITS?
     JSR   L_001213
     JSR   L_001453
-    BRA   L_000FAC
+    BRA   LEAVE_IRQ_RTN
 L_000F5D: ; 0x000F5D, $DF5D
     LDB   $A092
-    BEQ   L_000FAC
+    BEQ   LEAVE_IRQ_RTN
     CLR   $A092
     INC   $A05D
     LDB   #$38
@@ -2454,7 +2478,7 @@ L_000F5D: ; 0x000F5D, $DF5D
     LDX   $A028
     PSHU  X,B,A
 L_000F89: ; 0x000F89, $DF89
-    JSR   NO_NEW_PRESSED
+    JSR   CHECK_COINDOOR_INPUT
     LDA   #$07
     STA   BANKSWITCH
     LDA   $A0BA
@@ -2469,91 +2493,91 @@ L_000F9A: ; 0x000F9A, $DF9A
     LDD   $A0A1
     JSR   L_00139F
     JSR   L_001376
-L_000FAC: ; 0x000FAC, $DFAC
-    ORCC  #$FF
-    CLR   BANKSWITCH
-    LDA   #$05
-    STA   PIA_ROM_CTRL_B
-    LDA   CURRENT_BANK
-    STA   BANKSWITCH
-    LDA   S
-    ANDA  #$6F
-    STA   S
-    PULS  CC,A,B,DP,X,Y,U,PC
-P2_RELATED_CODE?_UNK_PTR'D_TO: ; 0x000FC3, $DFC3
-    CLR   BANKSWITCH
-    LDA   #$A0
+LEAVE_IRQ_RTN: ; 0x000FAC, $DFAC
+    ORCC  #$FF ; Mask interrupts.
+    CLR   BANKSWITCH ; Set to IO
+    LDA   #$05 ; CTRL, C1 enable
+    STA   PIA_ROM_CTRL_B ; COUNT_240_IRQ enable.
+    LDA   CURRENT_BANK ; Load bank was.
+    STA   BANKSWITCH ; Restore.
+    LDA   S ; Get CC on stack.
+    ANDA  #$6F ; Clear Entire+IRQ mask.
+    STA   S ; Put that back.
+    PULS  CC,A,B,DP,X,Y,U,PC ; RTI manually since we unset entire?
+DYNAMIC_IRQ_RTN_MAIN: ; 0x000FC3, $DFC3
+    CLR   BANKSWITCH ; Set to IO
+    LDA   #$A0 ; DP
     TFR   A>DP
-    LDA   #$04
-    STA   PIA_ROM_CTRL_B
-    LDA   PIA_ROM_DATA_B
-    LDA   VIDEO_COUNTER_BITS
-    CMPA  #$58
-    BLO   L_001005
-    LDB   $A092
-    BNE   L_000FAC
-    INC   $A092
-    COMA
-    NOP
-    STA   $A0A2
-    JSR   NO_NEW_PRESSED
+    LDA   #$04 ; Sets no interrupts from, DDR Output
+    STA   PIA_ROM_CTRL_B ; Store, reading port data.
+    LDA   PIA_ROM_DATA_B ; Clear IRQ from ROM PIA.
+    LDA   VIDEO_COUNTER_BITS ; Get video counter.
+    CMPA  #$58 ; If _ #$58
+    BLO   VIDEO_COUNTER_BITS_UNDER_#$58 ; <, goto.
+    LDB   $A092 ; Get val
+    BNE   LEAVE_IRQ_RTN ; If != 0, goto.
+    INC   $A092 ; Inc if 0
+    COMA ; Invert video bits.
+    NOP ; Nop
+    STA   INVERTED_VIDEO_BITS? ; Store inverted here.
+    JSR   CHECK_COINDOOR_INPUT ; Do coin door input
     LDA   #$07
+    STA   BANKSWITCH ; Bankswitch to 7
+    LDA   $A0BA ; Val
+    BITA  #$02 ; If bit 2...
+    BNE   SKIP_JSR ; Is set, goto...
+    JSR   JMP_TO_IRQ_TASK_UNK ; Do this if set.
+SKIP_JSR: ; 0x000FF4, $DFF4
+    LDA   #$02 ; Bank 2
     STA   BANKSWITCH
-    LDA   $A0BA
-    BITA  #$02
-    BNE   L_000FF4
-    JSR   PALETTE_ENTRY_0x3
-L_000FF4: ; 0x000FF4, $DFF4
-    LDA   #$02
-    STA   BANKSWITCH
-    LDD   $A0A1
+    LDD   $A0A1 ; Load val
     JSR   L_001213
-    LDD   $A0A1
+    LDD   $A0A1 ; Load val
     JSR   L_00139F
-    BRA   L_000FAC
-L_001005: ; 0x001005, $E005
+    BRA   LEAVE_IRQ_RTN ; Leaves
+VIDEO_COUNTER_BITS_UNDER_#$58: ; 0x001005, $E005
     LDB   $A092
-    BEQ   L_000FAC
-    CLR   $A092
-    INC   $A05D
-    LDB   #$39
-    STB   WATCHDOG
-    CMPA  #$04
-    BHI   L_001031
-    LDU   #$C010
-    LDD   $A030
-    LDX   $A032
-    LDY   $A034
-    PSHU  Y,X,B,A
-    LDD   $A02A
-    LDX   $A02C
-    LDY   $A02E
-    PSHU  Y,X,B,A
-    LDD   $A026
-    LDX   $A028
-    PSHU  X,B,A
-L_001031: ; 0x001031, $E031
-    JSR   L_000568
-    JSR   L_001263
-    JSR   L_00107E
+    BEQ   LEAVE_IRQ_RTN ; Leaves if 0
+    CLR   $A092 ; Clear
+    INC   $A05D ; Inc
+    LDB   #$39 ; Always flipped?
+    STB   WATCHDOG ; Store
+    CMPA  #$04 ; Video counter bits.
+    BHI   VIDEO_COUNTER_>_4 ; If > 4, goto.
+    LDU   #$C010 ; Ptr
+    LDD   $A030 ; Load
+    LDX   $A032 ; Load
+    LDY   $A034 ; Load
+    PSHU  Y,X,B,A ; Push all loaded to stack
+    LDD   $A02A ; Load
+    LDX   $A02C ; Load
+    LDY   $A02E ; Load
+    PSHU  Y,X,B,A ; Push all to stack.
+    LDD   $A026 ; Load
+    LDX   $A028 ; Load
+    PSHU  X,B,A ; Push to stack.
+VIDEO_COUNTER_>_4: ; 0x001031, $E031
+    JSR   IDK+THRUST+MORE
+    JSR   MOVEMENT_STUFF_PLAYERS+IDK
+    JSR   CLEAR_A_LOT
     LDA   #$02
     STA   BANKSWITCH
-    LDD   $A0A2
+    LDD   INVERTED_VIDEO_BITS?
     JSR   L_001213
-    LDD   $A0A2
+    LDD   INVERTED_VIDEO_BITS?
     JSR   L_00139F
     JSR   L_001453
     JSR   L_001376
-    JMP   L_000FAC
-STARS_UNK: ; 0x001052, $E052
+    JMP   LEAVE_IRQ_RTN
+STARS_INIT: ; 0x001052, $E052
     LDX   #$AF9D ; Ptr to stars data.
-    LDB   #$10 ; Move
-    STB   $A0AE
+    LDB   #$10 ; Num stars?
+    STB   $A0AE ; Idk why
     CLRB
 LOOP_MORE_STARS: ; 0x00105A, $E05A
     JSR   RANDOM_VALUE_FWD+IN_A ; Get val.
     CMPA  #$9C ; If _ #$9C
-    BHS   LOOP_MORE_STARS ; >=, don't store to X.
+    BHS   LOOP_MORE_STARS ; >=, get another number.
     STA   X ; <9C gets stored.
 TRY_NEW_RANDOM_VAL: ; 0x001063, $E063
     JSR   RANDOM_VALUE_FWD+IN_A ; Get val.
@@ -2562,37 +2586,37 @@ TRY_NEW_RANDOM_VAL: ; 0x001063, $E063
     CMPA  #$2A ; If _ #$2A
     BLS   TRY_NEW_RANDOM_VAL ; <=, get another.
     STA   1,X ; Store to X[1]
-    STB   2,X ; Store to X[2]
-    ADDB  #$11 ; Add with value.
-    ANDB  #$77 ; Limit bits.
-    LEAX  4,X ; X+=4
-    CMPX  #$AFDD ; Not star data now.
-    BNE   LOOP_MORE_STARS
-RTS_STARS_UTIL: ; 0x00107D, $E07D
-    RTS
-L_00107E: ; 0x00107E, $E07E
-    LDA   $A0BA
-    BITA  #$20
-    BNE   RTS_STARS_UTIL
-    LDX   #$AF9D
-    LDD   $A020
-    ANDB  #$80
-    STD   $A06F
-    LDD   $A022
-    ANDB  #$80
-    SUBD  $A06F
-    ASLB
+    STB   2,X ; Store to X[2]Cleared
+    ADDB  #$11 ; Add with value
+    ANDB  #$77 ; Limit bits on each nibble.
+    LEAX  4,X ; X+=4, next star.
+    CMPX  #$AFDD ; End star data
+    BNE   LOOP_MORE_STARS ; Do more.
+RTS_STARS: ; 0x00107D, $E07D
+    RTS ; RTS
+CLEAR_A_LOT: ; 0x00107E, $E07E
+    LDA   $A0BA ; Load
+    BITA  #$20 ; Test bit
+    BNE   RTS_STARS ; If not set, RTS
+    LDX   #$AF9D ; Load
+    LDD   $A020 ; Load val
+    ANDB  #$80 ; Clear bottom 7
+    STD   $A06F ; Store
+    LDD   $A022 ; Load
+    ANDB  #$80 ; Clear bottom 7
+    SUBD  $A06F ; Sub with
+    ASLB ; B << 1 into A
     ROLA
-    STA   $A06F
-    LDB   #$F0
-    LDA   $A021
-    BITA  #$40
-    BNE   L_0010A0
-    COMB
-L_0010A0: ; 0x0010A0, $E0A0
-    STB   $A071
-    CLRA
-    STA   [X]
+    STA   $A06F ; Store to
+    LDB   #$F0 ; Load
+    LDA   $A021 ; Load
+    BITA  #$40 ; Test bit
+    BNE   SKIP_INVERT_B 
+    COMB ; B = #$0F
+SKIP_INVERT_B : ; 0x0010A0, $E0A0
+    STB   $A071 ; Store B
+    CLRA ; Clear
+    STA   [X] ; Write indir 16 times
     STA   [4,X]
     STA   [8,X]
     STA   [12,X]
@@ -2608,7 +2632,7 @@ L_0010A0: ; 0x0010A0, $E0A0
     STA   [52,X]
     STA   [56,X]
     STA   [60,X]
-    LDB   $A0AE
+    LDB   $A0AE ; Get B
 L_0010D4: ; 0x0010D4, $E0D4
     LDA   X
     ADDA  $A06F
@@ -2799,159 +2823,159 @@ L_001258: ; 0x001258, $E258
 L_00125E: ; 0x00125E, $E25E
     LDD   $A0BF
     JMP   GFX_CLEAR_16X6
-L_001263: ; 0x001263, $E263
-    LDA   $A0BA
-    BITA  #$40
-    LBNE  L_001375
-    CLR   $A06F
-    LDD   $A0C7
-    COMA
+MOVEMENT_STUFF_PLAYERS+IDK: ; 0x001263, $E263
+    LDA   $A0BA ; Load val
+    BITA  #$40 ; Test bit
+    LBNE  RTS ; RTS if set.
+    CLR   $A06F ; Clear
+    LDD   $A0C7 ; Load
+    COMA ; Invert
     COMB
-    ADDD  #$0001
-    BPL   L_001278
-    COM   $A06F
-L_001278: ; 0x001278, $E278
-    ASLB
+    ADDD  #$0001 ; +1
+    BPL   SKIP_INVERT_A ; If positive
+    COM   $A06F ; Invert again
+SKIP_INVERT_A: ; 0x001278, $E278
+    ASLB ; B << 2 into A
     ROLA
     ASLB
     ROLA
-    ADDD  $A0C8
-    STD   $A0C8
-    LDA   $A06F
-    ADCA  $A0C7
-    STA   $A0C7
-    LDD   $A0C7
-    LDA   WGT_DATA_A_RAM_COPY
-    BITA  #$02
-    BEQ   L_0012A0
-    CLR   $A06F
-    LDD   $A0BD
-    BPL   L_001296
-    COM   $A06F
-L_001296: ; 0x001296, $E296
-    ADDD  $A0C8
-    STD   $A0C8
-    LDA   $A06F
-    ADCA  $A0C7
-    STA   $A0C7
-L_0012A0: ; 0x0012A0, $E2A0
-    LDD   $A0C7
-    ASRA
+    ADDD  $A0C8 ; Add to
+    STD   $A0C8 ; Store
+    LDA   $A06F ; Load
+    ADCA  $A0C7 ; Add with carry
+    STA   $A0C7 ; Store
+    LDD   $A0C7 ; Load into D
+    LDA   WGT_DATA_A_RAM_COPY ; Get input
+    BITA  #$02 ; Test if thrust
+    BEQ   THRUST_NOT_PRESSED ; If 1, taken
+    CLR   $A06F ; Clear
+    LDD   $A0BD ; Load
+    BPL   SKIP_INVERT_A ; If positive, goto
+    COM   $A06F ; Invert
+SKIP_INVERT_A: ; 0x001296, $E296
+    ADDD  $A0C8 ; Add with
+    STD   $A0C8 ; Store to
+    LDA   $A06F ; Load
+    ADCA  $A0C7 ; Add with carry
+    STA   $A0C7 ; Store to
+THRUST_NOT_PRESSED: ; 0x0012A0, $E2A0
+    LDD   $A0C7 ; Get word
+    ASRA ; A >> into B
     RORB
-    ASRA
+    ASRA ; A >> into B
     RORB
-    CLRA
-    ASRB
-    RORA
-    STA   $A094
-    STB   $A093
-    LDA   $A0BD
-    BMI   L_0012B8
-    LDA   #$20
-    TSTB
-    BMI   L_0012BD
-    BRA   L_0012C1
-L_0012B8: ; 0x0012B8, $E2B8
-    LDA   #$70
-    TSTB
-    BMI   L_0012C1
-L_0012BD: ; 0x0012BD, $E2BD
-    CLR   $A094
-    CLR   $A093
-L_0012C1: ; 0x0012C1, $E2C1
-    LDB   $A094
-    ADDA  $A093
-    STA   $A093
-    SUBD  $A0C3
-    BEQ   L_0012F1
-    BLO   L_0012DF
-    CMPD  #$0100
-    BLS   L_0012F1
-    LDD   #$0040
-    STD   $A095
-    LDD   #$0100
-    ADDD  $A0C3
-    BRA   L_0012F7
-L_0012DF: ; 0x0012DF, $E2DF
-    CMPD  #$FF00
-    BGT   L_0012F1
-    LDD   #$FFC0
-    STD   $A095
-    LDD   #$FF00
-    ADDD  $A0C3
-    BRA   L_0012F7
-L_0012F1: ; 0x0012F1, $E2F1
+    CLRA ; A=0
+    ASRB ; B >> 1
+    RORA ; Bring B into A...
+    STA   $A094 ; Store
+    STB   $A093 ; Store
+    LDA   $A0BD ; Load
+    BMI   A_DIFF_VAL_SKIP_CLEARS_IF_NEGATIVE ; If negative, goto.
+    LDA   #$20 ; Load with val
+    TSTB ; Test B
+    BMI   CLEAR_BEFORE_RTN ; If B negative.
+    BRA   SKIP_CLEARS ; Always went to.
+A_DIFF_VAL_SKIP_CLEARS_IF_NEGATIVE: ; 0x0012B8, $E2B8
+    LDA   #$70 ; Load with val
+    TSTB ; Test B
+    BMI   SKIP_CLEARS ; If negative, goto. Skip clears.
+CLEAR_BEFORE_RTN: ; 0x0012BD, $E2BD
+    CLR   $A094 ; Clear
+    CLR   $A093 ; Clear
+SKIP_CLEARS: ; 0x0012C1, $E2C1
+    LDB   $A094 ; Load
+    ADDA  $A093 ; Add
+    STA   $A093 ; Store
+    SUBD  $A0C3 ; Sub value with loc
+    BEQ   CLEAR_95 ; If 0, goto
+    BLO   CMPD_TO_#$FF00 ; If value subbed was higher, goto.
+    CMPD  #$0100 ; Subbed was lower.
+    BLS   CLEAR_95 ; If <= val, goto.
+    LDD   #$0040 ; Load with
+    STD   $A095 ; Store to.
+    LDD   #$0100 ; Load
+    ADDD  $A0C3 ; Add with
+    BRA   D_TO_C3 ; Goto
+CMPD_TO_#$FF00: ; 0x0012DF, $E2DF
+    CMPD  #$FF00 ; Comp to
+    BGT   CLEAR_95 ; If >, goto
+    LDD   #$FFC0 ; Load val
+    STD   $A095 ; Store to
+    LDD   #$FF00 ; Load val
+    ADDD  $A0C3 ; Store to
+    BRA   D_TO_C3
+CLEAR_95: ; 0x0012F1, $E2F1
     CLRA
     CLRB
-    STD   $A095
-    LDD   $A093
-L_0012F7: ; 0x0012F7, $E2F7
-    STD   $A0C3
-    STA   $A0C1
-    LDD   $A020
-    STD   $A022
-    LDD   $A0C7
-    CMPD  #$0100
-    BLT   L_00130A
-    LDD   #$0100
-L_00130A: ; 0x00130A, $E30A
-    CMPD  #$FF00
-    BGT   L_001313
-    LDD   #$FF00
-L_001313: ; 0x001313, $E313
-    STD   $A0C7
-    ADDD  $A020
-    SUBD  $A095
-    STD   $A020
-    LDD   $A0C3
-    LSRA
+    STD   $A095 ; Clear
+    LDD   $A093 ; Move
+D_TO_C3: ; 0x0012F7, $E2F7
+    STD   $A0C3 ; Store
+    STA   $A0C1 ; Store to
+    LDD   $A020 ; Load
+    STD   $A022 ; Store
+    LDD   $A0C7 ; Load
+    CMPD  #$0100 ; If D _ val
+    BLT   DONT_APPLY_MAX ; <, set
+    LDD   #$0100 ; Max
+DONT_APPLY_MAX: ; 0x00130A, $E30A
+    CMPD  #$FF00 ; Compare to
+    BGT   DONT_APPLY_MIN ; If >, don't apply min.
+    LDD   #$FF00 ; Min
+DONT_APPLY_MIN: ; 0x001313, $E313
+    STD   $A0C7 ; Store
+    ADDD  $A020 ; Add with
+    SUBD  $A095 ; Sub from
+    STD   $A020 ; Store to
+    LDD   $A0C3 ; Load
+    LSRA ; A >> 2, into B
     RORB
     LSRA
     RORB
-    ANDB  #$E0
-    ADDD  $A020
-    STD   $A0CC
-    LDB   $A0C5
+    ANDB  #$E0 ; Only bits added in.
+    ADDD  $A020 ; Add with
+    STD   $A0CC ; Store to
+    LDB   PLAYER.VPOS ; Load
     LDA   WGT_DATA_B_RAM_COPY
-    LSRA
-    BLO   L_001337
+    LSRA ; Test UP bit
+    BLO   UP_SET
     LDA   WGT_DATA_A_RAM_COPY
-    BMI   L_001352
+    BMI   DOWN_SET ; If down set
     LDD   #$0000
-    BRA   L_00136D
-L_001337: ; 0x001337, $E337
-    CMPB  #$2B
-    BLS   L_001375
-    LDD   $A0CA
-    BPL   L_00134D
-    ADDD  #$FFF8
-    CMPD  #$FE00
-    BGE   L_00136D
-    LDD   #$FE00
-    BRA   L_00136D
-L_00134D: ; 0x00134D, $E34D
-    LDD   #$FF00
-    BRA   L_00136D
-L_001352: ; 0x001352, $E352
-    CMPB  #$EE
-    BHS   L_001375
-    LDD   $A0CA
-    BLE   L_001368
-    ADDD  #$0008
-    CMPD  #$0200
-    BLS   L_00136D
-    LDD   #$0200
-    BRA   L_00136D
-L_001368: ; 0x001368, $E368
-    LDD   #$0100
-    BRA   L_00136D
-L_00136D: ; 0x00136D, $E36D
-    STD   $A0CA
-    ADDD  $A0C5
-    STD   $A0C5
-    STA   $A0C2
-L_001375: ; 0x001375, $E375
-    RTS
+    BRA   COMMIT_D
+UP_SET: ; 0x001337, $E337
+    CMPB  #$2B ; Compare PLAYER.VPos to val
+    BLS   RTS ; <=, RTS
+    LDD   PLAYER_V_MOMENTUM ; Load momentum?
+    BPL   SET_UNIT_UP ; If positive, aka going down, up unit.
+    ADDD  #$FFF8 ; Add sub unit
+    CMPD  #$FE00 ; If _ val
+    BGE   COMMIT_D ; >, write.
+    LDD   #$FE00 ; Cap
+    BRA   COMMIT_D ; Commit
+SET_UNIT_UP: ; 0x00134D, $E34D
+    LDD   #$FF00 ; If going down, instantly change to 1 unit up.
+    BRA   COMMIT_D ; Commit val
+DOWN_SET: ; 0x001352, $E352
+    CMPB  #$EE ; PLAYER.VPos
+    BHS   RTS ; If >=, RTS
+    LDD   PLAYER_V_MOMENTUM ; Get momentum?
+    BLE   SET_UNIT_DOWN ; If <= 0, aka going up, set to 1 unit.
+    ADDD  #$0008 ; Add with sub unit.
+    CMPD  #$0200 ; Map
+    BLS   COMMIT_D ; <=, save.
+    LDD   #$0200 ; Cap
+    BRA   COMMIT_D ; Alaways do.
+SET_UNIT_DOWN: ; 0x001368, $E368
+    LDD   #$0100 ; Instantly move 1 unit per.
+    BRA   COMMIT_D ; This can be taken out rofl.
+COMMIT_D: ; 0x00136D, $E36D
+    STD   PLAYER_V_MOMENTUM ; Store momentum.
+    ADDD  PLAYER.VPOS ; Add to player VPos
+    STD   PLAYER.VPOS ; Store to VPos
+    STA   $A0C2 ; Store here too, idk why.
+RTS: ; 0x001375, $E375
+    RTS ; Leave
 L_001376: ; 0x001376, $E376
     LDA   $A0BA
     BITA  #$20
@@ -3367,7 +3391,7 @@ L_001690: ; 0x001690, $E690
 L_00169A: ; 0x00169A, $E69A
     DEC   $A0B5
     JMP   LIST_RTN_0x00000A_IDK
-RANDOMNESS_POOL?: ; 0x00169F, $E69F
+RANDOMNESS_32_OF_0,1,10,11: ; 0x00169F, $E69F
     LDX   #$A142 ; PTR?
     STX   $A0A4 ; Put to.
 LOOP_WRITE_X: ; 0x0016A4, $E6A4
@@ -3550,7 +3574,7 @@ L_001782: ; 0x001782, $E782
     .db $3E
     .db $3C
     .db $00
-L_0017BE: ; 0x0017BE, $E7BE
+MOVE_A05F_TO_A063: ; 0x0017BE, $E7BE
     LDX   #$A05F ; PTR
     STX   R_A063 ; Store...
 WAIT_FOR_FLAG: ; 0x0017C3, $E7C3
@@ -3638,7 +3662,7 @@ L_001856: ; 0x001856, $E856
     LDU   U
     BNE   L_00184D
     LDS   #$BFFF
-    JMP   L_0017BE
+    JMP   MOVE_A05F_TO_A063
 L_001861: ; 0x001861, $E861
     LDA   $A0BA
     BITA  #$10
@@ -3769,13 +3793,13 @@ L_001958: ; 0x001958, $E958
     LDB   $A0E0
     LSRB
     ADDB  #$2A
-    STB   $A0C5
+    STB   PLAYER.VPOS
     STD   $A0C1
     CLRA
     CLRB
     STA   $A0C9
     STD   $A0C7
-    STD   $A0CA
+    STD   PLAYER_V_MOMENTUM
     JSR   GOTO_B7-C000
     LDB   #$50
     JSR   L_000A3D
@@ -3785,7 +3809,7 @@ L_001958: ; 0x001958, $E958
     LDD   #$0000
     STD   14,X
     STD   16,X
-    LDD   $A0C5
+    LDD   PLAYER.VPOS
     STD   12,X
     LDD   $A0C3
     LSRA
@@ -3999,7 +4023,7 @@ L_001B1A: ; 0x001B1A, $EB1A
     BLS   L_001B2A
     CLRB
     LDA   $A074
-    ADDD  $A0CA
+    ADDD  PLAYER_V_MOMENTUM
     ASRA
     RORB
     STD   16,X
@@ -4803,7 +4827,7 @@ L_002116: ; 0x002116, $F116
     BLS   L_002133
     DEC   12,Y
     LDA   #$12
-    JSR   WRITE_ROM_PIA_DATA_REGS_FROM_AB
+    JSR   WRITE_ROM_PIA_DATA_REGS_W/_#$3F_AND_B
     LDA   #$01
     LDX   #$F101
     JMP   U=$63,A>U+4,X>U+2
@@ -4947,7 +4971,7 @@ L_002244: ; 0x002244, $F244
     LDX   7,U
     LDD   #$0000
     STD   16,X
-    LDA   $A0C5
+    LDA   PLAYER.VPOS
     ADDA  #$0A
     STA   12,X
     LDD   $A0CC
@@ -5857,7 +5881,8 @@ BANK_CHECK_DATA: ; 0x00286E, $F86E
     .db $97
     .db $00
     .db $E8
-    .db $00
+DATA_FOR_$82-$88: ; 0x0028A2, $F8A2
+    .db $00 ; fmt: [4 bytes]
     .db $00
     .db $00
     .db $00
@@ -5886,7 +5911,7 @@ BANK_CHECK_DATA: ; 0x00286E, $F86E
     .db $02
     .db $00
 INIT_DATA_FOR_7F5: ; 0x0028BE, $F8BE
-    .db $00
+    .db $00 ; 0x10 bytes
     .db $00
     .db $07
     .db $28
@@ -7200,11 +7225,11 @@ L_002F35: ; 0x002F35, $FF35
     STU   4,X
     LDD   6,X
     CMPA  #$98
-    BHI   L_002F46
+    BHI   RTS+RESTORE
     SUBB  $A0E6
     LDX   #$0000
     STX   D,X
-L_002F46: ; 0x002F46, $FF46
+RTS+RESTORE: ; 0x002F46, $FF46
     PULS  A,B,X,Y,U,PC
     .db $FE
     .db $EF
@@ -7382,7 +7407,7 @@ L_003006: ; 0x003006, $C006
     JSR   FIND_IDK
     LDA   #$FF
     STA   $A0BA
-    JSR   STARS_UNK
+    JSR   STARS_INIT
     LDA   $A037
     STA   R_A183
     CLRA
@@ -8407,7 +8432,7 @@ L_003936: ; 0x003936, $C936
     LDA   R_A08C_PLAYERS_CNT_1/2?
 L_003938: ; 0x003938, $C938
     BEQ   L_003940
-    JSR   L_0003DB
+    JSR   PLAYER_SCORE_TO_SCREEN
     DECA
     BRA   L_003938
 L_003940: ; 0x003940, $C940
@@ -16515,13 +16540,16 @@ CMOS_RAM_INIT_DATA: ; 0x005ECF, $CECF
 	.org $C000
 
     JMP   L_006015
-    JMP   L_006092
+JMP_TO_IRQ_TASK_UNK: ; 0x006003, $C003
+    JMP   IRQ_TASK_IDK
     JMP   L_006262
     JMP   L_00629A
     ANDB  #$50
     JMP   L_0065D0
+DATA_USED_IN_$D000_CODE: ; 0x006011, $C011
     .db $C6
     .db $BA
+DATA_USED_IN_$D000_CODE_END: ; 0x006013, $C013
     .db $C7
     .db $72
 L_006015: ; 0x006015, $C015
@@ -16572,7 +16600,7 @@ L_006066: ; 0x006066, $C066
     CMPD  $A017
     BMI   L_006072
 L_00606D: ; 0x00606D, $C06D
-    JSR   L_00612C
+    JSR   $A012_THING+MORE
     BRA   L_006061
 L_006072: ; 0x006072, $C072
     LDD   $A003
@@ -16590,118 +16618,118 @@ L_006089: ; 0x006089, $C089
     CMPY  #$BF50
     BNE   L_006089
     RTS
-L_006092: ; 0x006092, $C092
-    LDD   $A020
-    ANDB  #$E0
-    SUBD  $A015
-    ASLB
+IRQ_TASK_IDK: ; 0x006092, $C092
+    LDD   $A020 ; Load
+    ANDB  #$E0 ; AND...
+    SUBD  $A015 ; Sub with...
+    ASLB ; B<<4 into A
     ROLA
     ASLB
     ROLA
     ASLB
     ROLA
-    STA   $A000
-    BEQ   L_0060C2
-    BMI   L_0060B4
-L_0060A4: ; 0x0060A4, $C0A4
-    LDD   $A015
-    ADDD  #$0020
-    STD   $A015
-    JSR   L_0061CD
-    DEC   $A000
-    BNE   L_0060A4
-    BRA   L_0060C2
-L_0060B4: ; 0x0060B4, $C0B4
-    LDD   $A015
-    SUBD  #$0020
-    STD   $A015
-    JSR   L_00612C
-    INC   $A000
-    BNE   L_0060B4
-L_0060C2: ; 0x0060C2, $C0C2
-    LDD   $A020
-    ANDB  #$E0
-    STD   $A015
-    LDX   #$0000
-    LDY   #$BE20
-    STS   $A013
-    LDS   $A005
-    BITB  #$20
-    BNE   L_0060DC
-    LDS   $A007
-L_0060DC: ; 0x0060DC, $C0DC
-    LDA   #$98
-L_0060DE: ; 0x0060DE, $C0DE
-    STX   [Y]
+    STA   $A000 ; Store A to.
+    BEQ   UNK_RTN_MOD_ALOT ; If == 0, goto.
+    BMI   LOOP_INC_A000 ; If A:7 set, goto.
+LOOP_A000_TIMES: ; 0x0060A4, $C0A4
+    LDD   $A015 ; Load
+    ADDD  #$0020 ; D+=32
+    STD   $A015 ; Store back
+    JSR   L_0061CD ; Does IDK
+    DEC   $A000 ; Dec A000 
+    BNE   LOOP_A000_TIMES
+    BRA   UNK_RTN_MOD_ALOT
+LOOP_INC_A000: ; 0x0060B4, $C0B4
+    LDD   $A015 ; Load
+    SUBD  #$0020 ; Sub
+    STD   $A015 ; Store back
+    JSR   $A012_THING+MORE
+    INC   $A000 ; ++
+    BNE   LOOP_INC_A000
+UNK_RTN_MOD_ALOT: ; 0x0060C2, $C0C2
+    LDD   $A020 ; Load
+    ANDB  #$E0 ; B bits..
+    STD   $A015 ; Store to
+    LDX   #$0000 ; Val?
+    LDY   #$BE20 ; Ptr
+    STS   STACK_SAVE_LOC ; Save S
+    LDS   $A005 ; S from here.
+    BITB  #$20 ; Test bit
+    BNE   SKIP_REPLACE_S ; If set, goto
+    LDS   $A007 ; S from here otherwise.
+SKIP_REPLACE_S: ; 0x0060DC, $C0DC
+    LDA   #$98 ; Val
+LOOP_WRITE_DATA: ; 0x0060DE, $C0DE
+    STX   [Y] ; Clear where Y says.
+    PULS  B,U ; Get data from stack
+    STD   Y ; $98XX to Y
+    STU   [Y++] ; Val to D pointer we just stored.
+    DECA ; Dec high byte.
+    STX   [Y] ; 2x
     PULS  B,U
     STD   Y
     STU   [Y++]
     DECA
-    STX   [Y]
+    STX   [Y] ; 3x
     PULS  B,U
     STD   Y
     STU   [Y++]
     DECA
-    STX   [Y]
+    STX   [Y] ; 4x
     PULS  B,U
     STD   Y
     STU   [Y++]
     DECA
-    STX   [Y]
+    STX   [Y] ; 5x
     PULS  B,U
     STD   Y
     STU   [Y++]
     DECA
-    STX   [Y]
+    STX   [Y] ; 6x
     PULS  B,U
     STD   Y
     STU   [Y++]
     DECA
-    STX   [Y]
+    STX   [Y] ; 7x
     PULS  B,U
     STD   Y
     STU   [Y++]
     DECA
-    STX   [Y]
+    STX   [Y] ; 8x
     PULS  B,U
     STD   Y
     STU   [Y++]
     DECA
-    STX   [Y]
-    PULS  B,U
-    STD   Y
-    STU   [Y++]
-    DECA
-    BNE   L_0060DE
-    LDS   $A013
-    RTS
-L_00612C: ; 0x00612C, $C12C
-    JSR   L_006323
-    BMI   L_006135
-    DEC   $A012
-    BRA   L_006137
-L_006135: ; 0x006135, $C135
-    INC   $A012
-L_006137: ; 0x006137, $C137
-    LDA   #$20
-    BITA  $A016
-    BNE   L_006185
-    LDX   $A007
-    JSR   L_0062F6
-    BMI   L_006164
-    DEC   $A011
-    LDA   $A011
-    STA   X
-    STA   456,X
-    LDD   #$7007
-    STD   1,X
-    STD   457,X
-    LEAX  3,X
-    CMPX  #$BC58
-    BNE   L_006161
-    LDX   #$BA90
-L_006161: ; 0x006161, $C161
-    STX   $A007
+    BNE   LOOP_WRITE_DATA ; If A != 0, goto.
+    LDS   STACK_SAVE_LOC
+    RTS ; RTS
+$A012_THING+MORE: ; 0x00612C, $C12C
+    JSR   A00E_STUFF_UNK
+    BMI   INC_$12 ; If A is negative, taken.
+    DEC   $A012 ; --
+    BRA   POST_$12_CHANGE ; Always goto.
+INC_$12: ; 0x006135, $C135
+    INC   $A012 ; ++
+POST_$12_CHANGE: ; 0x006137, $C137
+    LDA   #$20 ; Load with val
+    BITA  $A016 ; Test bit here.
+    BNE   L_006185 ; Bit not set.
+    LDX   $A007 ; Get X from
+    JSR   A00F_STUFF
+    BMI   L_006164 ; If A returned negative, goto.
+    DEC   $A011 ; --
+    LDA   $A011 ; Get val.
+    STA   X ; Store to X
+    STA   456,X ; Store to X+456?
+    LDD   #$7007 ; Load D
+    STD   1,X ; Store to X+1
+    STD   457,X ; Store to X+457?
+    LEAX  3,X ; X+=3
+    CMPX  #$BC58 ; Compare to
+    BNE   COMMIT_X_A007,RTS ; If !=, save as it
+    LDX   #$BA90 ; Reset
+COMMIT_X_A007,RTS: ; 0x006161, $C161
+    STX   $A007 ; Store to.
     RTS
 L_006164: ; 0x006164, $C164
     LDA   $A011
@@ -16714,14 +16742,14 @@ L_006164: ; 0x006164, $C164
     STD   457,X
     LEAX  3,X
     CMPX  #$BC58
-    BNE   L_006182
+    BNE   COMMIT_X_$A007,RTS
     LDX   #$BA90
-L_006182: ; 0x006182, $C182
+COMMIT_X_$A007,RTS: ; 0x006182, $C182
     STX   $A007
     RTS
 L_006185: ; 0x006185, $C185
     LDX   $A005
-    JSR   L_0062F6
+    JSR   A00F_STUFF
     BMI   L_0061AC
     DEC   $A011
     LDA   $A011
@@ -16732,9 +16760,9 @@ L_006185: ; 0x006185, $C185
     STD   457,X
     LEAX  3,X
     CMPX  #$B8C8
-    BNE   L_0061A9
+    BNE   COMMIT_X_A005,RTS
     LDX   #$B700
-L_0061A9: ; 0x0061A9, $C1A9
+COMMIT_X_A005,RTS: ; 0x0061A9, $C1A9
     STX   $A005
     RTS
 L_0061AC: ; 0x0061AC, $C1AC
@@ -16748,9 +16776,9 @@ L_0061AC: ; 0x0061AC, $C1AC
     STD   457,X
     LEAX  3,X
     CMPX  #$B8C8
-    BNE   L_0061CA
+    BNE   COMMIT_X_A005,RTS
     LDX   #$B700
-L_0061CA: ; 0x0061CA, $C1CA
+COMMIT_X_A005,RTS: ; 0x0061CA, $C1CA
     STX   $A005
     RTS
 L_0061CD: ; 0x0061CD, $C1CD
@@ -16911,63 +16939,63 @@ L_0062EB: ; 0x0062EB, $C2EB
     LDA   U
     STA   $A00E
     RTS
-L_0062F6: ; 0x0062F6, $C2F6
-    LDA   $A00F
-    CMPA  #$07
-    BEQ   L_006308
-    INC   $A00F
-    LDA   $A00D
-    LSRA
-    BHS   L_006305
-    ADDA  #$80
-L_006305: ; 0x006305, $C305
-    STA   $A00D
+A00F_STUFF: ; 0x0062F6, $C2F6
+    LDA   $A00F ; Load val
+    CMPA  #$07 ; If _ 7
+    BEQ   TIMER_A00F_REACHED ; ==, goto
+    INC   $A00F ; ++
+    LDA   $A00D ; Load val
+    LSRA ; Shift off bit.
+    BHS   SKIP_ADD_80 ; If shifted off 1, don't add 80.
+    ADDA  #$80 ; +=80
+SKIP_ADD_80: ; 0x006305, $C305
+    STA   $A00D ; Store to.
     RTS
-L_006308: ; 0x006308, $C308
-    LDU   $A009
-    CMPU  #$C350
-    BNE   L_006313
-    LDU   #$C450
-L_006313: ; 0x006313, $C313
-    LEAU  -1,U
-    STU   $A009
-    CLR   $A00F
-    LDA   U
-    LSRA
-    BHS   L_006320
-    ADDA  #$80
-L_006320: ; 0x006320, $C320
-    STA   $A00D
-    RTS
-L_006323: ; 0x006323, $C323
-    LDA   $A010
-    CMPA  #$07
-    BEQ   L_006335
-    INC   $A010
-    LDA   $A00E
-    LSRA
-    BHS   L_006332
-    ADDA  #$80
-L_006332: ; 0x006332, $C332
-    STA   $A00E
-    RTS
-L_006335: ; 0x006335, $C335
-    LDU   $A00B
-    CMPU  #$C350
+TIMER_A00F_REACHED: ; 0x006308, $C308
+    LDU   $A009 ; Load U from
+    CMPU  #$C350 ; If U _ val
+    BNE   USE_U_ASIS ; !=, goto.
+    LDU   #$C450 ; Reset
+USE_U_ASIS: ; 0x006313, $C313
+    LEAU  -1,U ; U--
+    STU   $A009 ; Store to.
+    CLR   $A00F ; Clear
+    LDA   U ; Load from U
+    LSRA ; Shift
+    BHS   STORE_A00D ; If shifted off 0, skip add.
+    ADDA  #$80 ; +=80
+STORE_A00D: ; 0x006320, $C320
+    STA   $A00D ; Store to.
+    RTS ; RTS
+A00E_STUFF_UNK: ; 0x006323, $C323
+    LDA   $A010 ; Get val
+    CMPA  #$07 ; If A _ 7
+    BEQ   U_FROM_A00B,LOW_BOUND_C450 ; ==, goto
+    INC   $A010 ; Inc count
+    LDA   $A00E ; Load val
+    LSRA ; Shift off bit
+    BHS   DONT_ADD_80 ; If shifted 0, goto.
+    ADDA  #$80 ; Add #$80
+DONT_ADD_80: ; 0x006332, $C332
+    STA   $A00E ; Store back
+    RTS ; RTS
+U_FROM_A00B,LOW_BOUND_C450: ; 0x006335, $C335
+    LDU   $A00B ; Get U from
+    CMPU  #$C350 ; If U _ C350
 L_00633B: ; 0x00633B, $C33B
-    BNE   L_006340
-    LDU   #$C450
-L_006340: ; 0x006340, $C340
-    LEAU  -1,U
-    STU   $A00B
-    CLR   $A010
-    LDA   U
-    LSRA
-    BHS   L_00634D
-    ADDA  #$80
-L_00634D: ; 0x00634D, $C34D
-    STA   $A00E
-    RTS
+    BNE   SKIP_LOADING_U ; !=, goto
+    LDU   #$C450 ; Load U
+SKIP_LOADING_U: ; 0x006340, $C340
+    LEAU  -1,U ; U-=1
+    STU   $A00B ; Store new U
+    CLR   $A010 ; Clear
+    LDA   U ; Get data at U
+    LSRA ; get bit off.
+    BHS   COMMIT_A_RTS ; If shifted 0, don't add 80
+    ADDA  #$80 ; +=#$80
+COMMIT_A_RTS: ; 0x00634D, $C34D
+    STA   $A00E ; Store here.
+    RTS ; RTS
     .db $2A
     .db $AA
     .db $AA

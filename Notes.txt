@@ -16,12 +16,3 @@ Initial palette:
 0x00
 0x00
 0x00
-
-
-0x000015 explaination:
-
-U.next | X | X.next
-
-X = U.next
-D = X.next, saves X.next
-U.Next = D, X.next
