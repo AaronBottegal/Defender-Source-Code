@@ -124,7 +124,8 @@ A015_X_MATCH:                            .rs 0x01 ;0xA015
 A017_COMPARED_TO_A017:                   .rs 0x01 ;0xA017
 
 
-	.org $A036
+	.org $A026
+COLOR_PALETTE_RAM_COPY:                  .rs 0x10 ;0xA026 to A035
 CURRENT_BANK:                            .rs 0x01 ;0xA036
 
 VAL_FROM_SRAM_C495-C496:                 .rs 0x01 ;0xA037
@@ -188,8 +189,7 @@ LIST_$6D_UNK:                            .rs 0x01 ;0xA06D
 
 
 	.org $A073
-A073_LOOP_CNT_HUMANOID/MISC?:            .rs 0x01 ;0xA073
-
+A073_SCRATCH_LOOP_WORD?:                 .rs 0x02 ;0xA073 to A074
 
 	.org $A077
 R_A077_S_TEMP?:                          .rs 0x01 ;0xA077
@@ -215,7 +215,9 @@ WGT_DATA_B_RAM_COPY:                     .rs 0x01 ;0xA07D
 81_TIMER_UNK:                            .rs 0x01 ;0xA081
 
 
-	.org $A08B
+	.org $A08A
+R_A08A_UPDATE_SCORE?:                    .rs 0x01 ;0xA08A
+
 A08B_CURRENT_PLAYER:                     .rs 0x01 ;0xA08B
 
 A08C_CURRENT_PLAYER:                     .rs 0x01 ;0xA08C
@@ -228,8 +230,7 @@ R_A097:                                  .rs 0x01 ;0xA097
 
 
 	.org $A0A2
-INVERTED_VIDEO_BITS?:                    .rs 0x01 ;0xA0A2
-
+VIDEO_BITS_LOCATION_COPY:                .rs 0x02 ;0xA0A2 to A0A3
 
 	.org $A0AB
 R_A0AB:                                  .rs 0x01 ;0xA0AB
@@ -880,11 +881,11 @@ GFX_CLEAR_12X6: ; 0x000350, $D350
 SCORE_ADD_AB: ; 0x000360, $D360
     PSHS  U,Y,X,B,A ; Save
     ORCC  #$01 ; Set CC.c
-    ROL   $A08A ; Bring in 1.
+    ROL   R_A08A_UPDATE_SCORE? ; Flag?
     LSRA ; If 1 if shifted off, multiplies value passed by 10
     PSHS  A ; Save
     LDA   #$00 ; Clear if next not taken.
-    BHS   SKIP_B(F0)_TO_A(0F) ; If A was odd, take.
+    BHS   SKIP_TIMES_TEN ; If A was odd, take.
     ASLB ; High B...
     ROLA ; to A
     ASLB
@@ -893,24 +894,24 @@ SCORE_ADD_AB: ; 0x000360, $D360
     ROLA
     ASLB
     ROLA ; 4x
-SKIP_B(F0)_TO_A(0F): ; 0x000375, $D375
+SKIP_TIMES_TEN: ; 0x000375, $D375
     JSR   GET_PLAYER_PTR_IN_X_FROM_A08B ; Player 1 or 2?
-    STD   A073_LOOP_CNT_HUMANOID/MISC? ; Store D to loc.
+    STD   A073_SCRATCH_LOOP_WORD? ; Store D to loc.
     LDB   #$03 ; Load B
     SUBB  S+ ; Sub B from on stack, clean up stack too?
     LDA   B,X ; Get A from X+B
-    ADDA  $A074 ; Add with B stored above.
+    ADDA  A073_SCRATCH_LOOP_WORD?+1 ; Add with B stored above.
     DAA ; Dec adjust.
     STA   B,X ; Store back.
     DECB ; B-=1
     BMI   B_NOW_NEGATIVE ; If negative.
 LOOP_STILL_POSITIVE: ; 0x000388, $D388
     LDA   B,X ; Get data.
-    ADCA  A073_LOOP_CNT_HUMANOID/MISC? ; Add with carry now.
+    ADCA  A073_SCRATCH_LOOP_WORD? ; Add with carry now.
     DAA ; Adjust
     STA   B,X ; Store back.
     LDA   #$00
-    STA   A073_LOOP_CNT_HUMANOID/MISC? ; Clear
+    STA   A073_SCRATCH_LOOP_WORD? ; Clear
     DECB ; Minus another
     BPL   LOOP_STILL_POSITIVE ; If still not negative, loop.
 B_NOW_NEGATIVE: ; 0x000396, $D396
@@ -962,7 +963,7 @@ PLAYER_TWO_HANDLER: ; 0x0003E8, $D3E8
     LDX   #$711C ; Pos
     LDU   #$A200 ; Data ptr
 USE_REGS: ; 0x0003EE, $D3EE
-    CLR   A073_LOOP_CNT_HUMANOID/MISC? ; Clear displayed flag.
+    CLR   A073_SCRATCH_LOOP_WORD? ; Clear displayed flag.
     LDB   #$06 ; Digit count?
     LDA   CURRENT_BANK ; Save bank.
     PSHS  A ; To stack
@@ -984,13 +985,13 @@ USING_LOW_NIBBLE: ; 0x00040D, $D40D
     BNE   CHR_TO_SCREEN ; If != 0
     CMPB  #$02 ; If B _ 2
     BLS   CHR_TO_SCREEN ; <=, go. Always show 2 chars.
-    TST   A073_LOOP_CNT_HUMANOID/MISC? ; Test if went before.
+    TST   A073_SCRATCH_LOOP_WORD? ; Test if went before.
     BNE   CHR_TO_SCREEN ; If did, go again.
     EXG   X-D ; Location to D?
     JSR   GFX_BANK2_CHR_CLEAR ; Clear char.
     BRA   SCORE_CHR_POST ; Done, post put rtn.
 CHR_TO_SCREEN: ; 0x000420, $D420
-    INC   A073_LOOP_CNT_HUMANOID/MISC? ; Since taken, always do.
+    INC   A073_SCRATCH_LOOP_WORD? ; Since taken, always do.
     ASLA ; *2
     ASLA ; *4, because target fmt is [B,B,W]
     LEAY  A,Y ; Add A to Y
@@ -1534,7 +1535,7 @@ COMMIT_B_AS_IS: ; 0x000785, $D785
     STD   A0E0_RAND_WORD ; Store to...
     LDD   #$FF70 ; PTR to 0's?
     STD   $A0A1 ; Store to...
-    CLR   $A0A3 ; NULL?
+    CLR   VIDEO_BITS_LOCATION_COPY+1 ; NULL?
     LDB   #$FF ; D=A0FF
     STD   PIA_ROM_DATA_A_RAM_COPY ; Store...
     JSR   SAVE_BANK+SET_WATCHDOG_NONFLIPPED ; Set screen+other
@@ -1668,7 +1669,7 @@ CLEAR_DATA_LOOP: ; 0x000881, $D881
     CLR   $A039 ; Clear
     NOP ; NOP
     LDX   #$A1C2 ; Ptr to P1 data?
-    JSR   PLAYER_COMMIT_IDK_UNK
+    JSR   END_WAVE_EXTRAS?
     LDX   #$C481 ; Get SRAM
     JSR   GET_DATA_FROM_SRAM[X]_IN_AB ; Get data in.
     STD   R_A0AB ; Store to, word.
@@ -1785,7 +1786,7 @@ BIT_7_NOT_SET: ; 0x00096E, $D96E
     STD   $A0BB ; To
     CLR   $A0AD ; Clear
     CLR   $A0B5
-    CLR   $A08A
+    CLR   R_A08A_UPDATE_SCORE?
     CLR   $A0AF
     CLR   $A09A
     CLR   $A099 ; These
@@ -1797,7 +1798,7 @@ BIT_7_NOT_SET: ; 0x00096E, $D96E
     ANDA  #$07 ; Get bits
     LDU   #$DB53 ; PTR
     LDA   A,U ; Load from ptr
-    STA   $A02B ; Store to.
+    STA   COLOR_PALETTE_RAM_COPY+5 ; Store to.
     DEC   7,X ; Dec PLAYER[7]
     JSR   DISPLAY_SETUP_INGAME ; Show display.
     LDD   #$2080 ; Unsure val
@@ -1865,7 +1866,7 @@ CALLBACK_MAIN?: ; 0x000A32, $DA32
     JMP   IDK_BUT_CAN_END_WAVE
 A_FROM_A0FA,B_CLEARED_OR_2: ; 0x000A3C, $DA3C
     CLRB
-A_FROM_A0FA,B_OR'D_CONDITIONALLY: ; 0x000A3D, $DA3D
+OR_AND_STORE_B_NO_HUMANOIDS?: ; 0x000A3D, $DA3D
     LDA   A0FA_HUMANOID_COUNT?
 OR_B_WITH_2_IF_NOT_ZERO: ; 0x000A3F, $DA3F
     BNE   SKIP_OR_B
@@ -1875,7 +1876,7 @@ SKIP_OR_B: ; 0x000A43, $DA43
     RTS
 L_000A46: ; 0x000A46, $DA46
     LDB   #$58
-    BSR   A_FROM_A0FA,B_OR'D_CONDITIONALLY
+    BSR   OR_AND_STORE_B_NO_HUMANOIDS?
     LDD   $A020
     STD   $A022
     LDX   $A0BF
@@ -1908,8 +1909,8 @@ L_000A6B: ; 0x000A6B, $DA6B
     LDX   7,U
     LDA   X+
     BEQ   L_000AA8
-    STA   $A031
-    CLR   $A026
+    STA   COLOR_PALETTE_RAM_COPY+11
+    CLR   COLOR_PALETTE_RAM_COPY
     STX   7,U
     LDA   #$02
     LDX   #$DA7C
@@ -1918,11 +1919,11 @@ L_000AA8: ; 0x000AA8, $DAA8
     LDA   #$7F
     STA   $A0BA
     LDA   #$FF
-    STA   $A026
+    STA   COLOR_PALETTE_RAM_COPY
     LDA   #$02
     LDX   #$DAB8
     JMP   SET_U2LIST,STORE_X2HANDLER+A2COUNTER,U.NEXT
-    CLR   $A026
+    CLR   COLOR_PALETTE_RAM_COPY
     JSR   SORT_LIST_A05F_INTO_OTHER_LISTS_IF_OBJ[5]!=2
     LDX   $A0C1
     LEAX  1027,X
@@ -2080,7 +2081,7 @@ DONT_ADD_WITH_22_IN: ; 0x000BD8, $DBD8
     PULS  A,B,X,U,PC ; RTS
 FILL_OUT_HUMANOID?: ; 0x000BE1, $DBE1
     PSHS  B,A ; Save
-    STA   $A074 ; Store to...
+    STA   A073_SCRATCH_LOOP_WORD?+1 ; Store to...
 LOOP_FILL_OUT: ; 0x000BE5, $DBE5
     JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR ; Fill out obj with data.
     .db $F9
@@ -2110,7 +2111,7 @@ SHIFTED_OFF_ZERO: ; 0x000C01, $DC01
     STD   6,X ; OBJ[6],OBJ[7]
     STX   LIST_$65_UNK ; Store to list?
     STX   Y++ ; Store to Y? Idk what Y is.
-    DEC   $A074 ; Dec val.
+    DEC   A073_SCRATCH_LOOP_WORD?+1 ; Dec val.
     BNE   LOOP_FILL_OUT
     PULS  A,B,PC ; RTS
     INC   A08D_CURRENT_PLAYER_PTR?+1
@@ -2142,12 +2143,12 @@ NOT_ZERO_HUMANOID: ; 0x000C44, $DC44
     ADDA  10,U ; Add count?
     BEQ   NO_HUMANOIDS ; If 0, goto.
 HUMANOIDS_COUNT_<=7?: ; 0x000C51, $DC51
-    STA   A073_LOOP_CNT_HUMANOID/MISC? ; Store count <= 7 here?
+    STA   A073_SCRATCH_LOOP_WORD? ; Store count <= 7 here?
 LOOP_MORE_HUMANOIDS: ; 0x000C53, $DC53
     LDB   A0E0_RAND_WORD ; Load B. TODO: Used for STD 10,X below?
     LDA   #$01 ; Idk val
     BSR   FILL_OUT_HUMANOID?
-    DEC   A073_LOOP_CNT_HUMANOID/MISC? ; Dec counter
+    DEC   A073_SCRATCH_LOOP_WORD? ; Dec counter
     BNE   LOOP_MORE_HUMANOIDS
 NO_HUMANOIDS: ; 0x000C5D, $DC5D
     LDU   A08D_CURRENT_PLAYER_PTR? ; Load player ptr
@@ -2309,7 +2310,7 @@ L_000D81: ; 0x000D81, $DD81
     BNE   L_000D96
     LDB   #$02
     LDY   #$A0FB
-    JSR   PLAYER_DATA_MANIP_IDK
+    JSR   PLAYER_DATA_DIFFICULTY_MANIPULATION
     LDA   #$28
     STA   7,U
 L_000D96: ; 0x000D96, $DD96
@@ -2337,7 +2338,7 @@ ENEMY_COUNTS_RETURN?: ; 0x000DAE, $DDAE
     ADDA  R_A115_ENEMY_IDK_COUNT
     ADDA  R_A0FE_ENEMY_IDK_COUNT
     RTS ; RTS
-A_ADJUST_PER_#$10: ; 0x000DC2, $DDC2
+DECIMAL_BACK_TO_HEX_A: ; 0x000DC2, $DDC2
     PSHS  B ; Save B
     CLRB ; Clear
 LOOP_A_SUB: ; 0x000DC5, $DDC5
@@ -2367,7 +2368,7 @@ NO_FIXING_NEEDED: ; 0x000DE5, $DDE5
     DAA ; Adjust again. TODO: Find 99->00 factor.
     PULS  B,PC
 END_OF_WAVE: ; 0x000DEC, $DDEC
-    CLR   $A026 ; Clear
+    CLR   COLOR_PALETTE_RAM_COPY ; Clear
     LDU   R_A063_PTR_TO_OTHER_LIST ; Load ptr to list.
     PULS  X ; X from stack.
     STX   13,U ; Store to [A063]+13
@@ -2429,166 +2430,166 @@ CALLBACK_WAVE_END_HUMANOIDS: ; 0x000E66, $DE66
     BNE   HUMANOID_DISPLAY_LOOP
 NO_MORE_HUMANOIDS_TO_DISPLAY: ; 0x000E6C, $DE6C
     LDX   A08D_CURRENT_PLAYER_PTR? ; Get ptr.
-    JSR   PLAYER_COMMIT_IDK_UNK
+    JSR   END_WAVE_EXTRAS?
     LDA   #$80 ; Timer for callback.
     LDX   #$DE79 ; Callback
     JMP   SET_U2LIST,STORE_X2HANDLER+A2COUNTER,U.NEXT ; Set task.
 CALLBACK_WAVE_END_WAIT: ; 0x000E79, $DE79
     JMP   [13,U] ; Jumps to RTN in 13,U
-PLAYER_COMMIT_IDK_UNK: ; 0x000E7C, $DE7C
+END_WAVE_EXTRAS?: ; 0x000E7C, $DE7C
     PSHS  U,X,B,A ; Save
-    INC   8,X ; Inc PTR+X
-    LDX   #$C49D
+    INC   8,X ; PLAYER[8], wave?
+    LDX   #$C49D ; Sram ptr
     JSR   GET_DATA_FROM_SRAM[X]_IN_A ; Get data from.
-    STA   A073_LOOP_CNT_HUMANOID/MISC? ; Store to.
-    LDX   2,S ; Restore X passed.
+    STA   A073_SCRATCH_LOOP_WORD? ; Store to.
+    LDX   2,S ; Restore player ptr
     TSTA ; Test SRAM loaded.
     BEQ   BANK_7_STUFF? ; If we loaded 0, go here.
-    LDA   8,X ; Load val.
-LOOP_SUB: ; 0x000E8F, $DE8F
-    SUBA  A073_LOOP_CNT_HUMANOID/MISC? ; Sub with loaded value.
-    BLO   BANK_7_STUFF? ; If we went negative with the subtract.
-    BNE   LOOP_SUB ; If it's not 0, try again.
+    LDA   8,X ; Load wave
+TEST_RESET_HUMANOIDS: ; 0x000E8F, $DE8F
+    SUBA  A073_SCRATCH_LOOP_WORD? ; Sub with sram val
+    BLO   BANK_7_STUFF? ; If we went negative, not modulo even.
+    BNE   TEST_RESET_HUMANOIDS ; If it's not 0, try again.
     LDA   #$0A ; Store
-    STA   10,X
+    STA   10,X ; PLAYER[10], humanoid count?
 BANK_7_STUFF?: ; 0x000E99, $DE99
     JSR   BANKSWITCH_TO_7 ; Goto bank.
-    LDA   8,X ; Load val.
+    LDA   8,X ; PLAYER[8], wave
     PSHS  A ; Save
     CMPA  #$04 ; Compare to 4
     BLS   DONT_CAP_AT_4
     LDA   #$04 ; Cap
 DONT_CAP_AT_4: ; 0x000EA6, $DEA6
-    LDU   DATA_USED_IN_$D000_CODE ; Load PTR from bank 7.
+    LDU   DIFFICULTY_DATA_START_LOC ; Load PTR from bank 7.
     ADDA  #$03 ; A+=3
-    LEAX  11,X ; X+=11
+    LEAX  11,X ; PLAYER[11] base
 LOOP_MOVE: ; 0x000EAD, $DEAD
     LDB   A,U ; Get B from U[A]
-    STB   X+ ; Store to X
+    STB   X+ ; Store to X[11]+,
     LEAU  8,U ; U+=8
-    CMPU  DATA_USED_IN_$D000_CODE_END ; See if at end.
+    CMPU  DIFFICULTY_DATA_END_LOC ; See if at end. 23 bytes
     BNE   LOOP_MOVE ; Loop if not there.
-    PULS  A ; Restore A.
+    PULS  A ; Restore A, wave raw
     SUBA  #$04 ; A-=4
     BHS   STILL_POSITIVE
     CLRA ; Clear if went negative.
 STILL_POSITIVE: ; 0x000EC0, $DEC0
-    STA   A073_LOOP_CNT_HUMANOID/MISC? ; Store to.
+    STA   A073_SCRATCH_LOOP_WORD? ; Store to.
     LDX   #$C497 ; SRAM PTR
     JSR   GET_DATA_FROM_SRAM[X]_IN_AB ; Get word
-    JSR   A_ADJUST_PER_#$10 ; Add...
-    ADDA  A073_LOOP_CNT_HUMANOID/MISC? ; Add A with this.
-    STA   A073_LOOP_CNT_HUMANOID/MISC? ; Store to.
-    BEQ   RTS ; If == 0, goto.
+    JSR   DECIMAL_BACK_TO_HEX_A ; Back to
+    ADDA  A073_SCRATCH_LOOP_WORD? ; Add with wave.
+    STA   A073_SCRATCH_LOOP_WORD? ; Store to.
+    BEQ   RTS ; If == 0, leave.
     TFR   B>A ; Put B to A.
-    JSR   A_ADJUST_PER_#$10 ; Do rtn too.
-    CMPA  A073_LOOP_CNT_HUMANOID/MISC? ; If A _ Other
+    JSR   DECIMAL_BACK_TO_HEX_A ; Do rtn on B
+    CMPA  A073_SCRATCH_LOOP_WORD? ; If A _ Other
     BHS   SKIP_COMMIT ; >=, skip.
-    STA   A073_LOOP_CNT_HUMANOID/MISC? ; Commit higher.
+    STA   A073_SCRATCH_LOOP_WORD? ; Commit lower
 SKIP_COMMIT: ; 0x000EDC, $DEDC
-    LDA   A073_LOOP_CNT_HUMANOID/MISC? ; Load highest.
+    LDA   A073_SCRATCH_LOOP_WORD? ; Load lowest
 LOOP_MORE_A: ; 0x000EDE, $DEDE
-    LDB   #$03 ; Idk val
+    LDB   #$03 ; Ptr add
     JSR   GET_PLAYER_PTR_IN_X_FROM_A08B ; Get player X ptr
-    LEAY  11,X ; Y = ptr+11
-    BSR   PLAYER_DATA_MANIP_IDK ; Player data manipulation, unk function.
+    LEAY  11,X ; Y = PLAYER[11]
+    BSR   PLAYER_DATA_DIFFICULTY_MANIPULATION ; Player data manipulation, unk function.
     DECA ; A--
     BNE   LOOP_MORE_A ; Do more.
 RTS: ; 0x000EEA, $DEEA
-    PULS  A,B,X,U,PC
-PLAYER_DATA_MANIP_IDK: ; 0x000EEC, $DEEC
+    PULS  A,B,X,U,PC ; RTS
+PLAYER_DATA_DIFFICULTY_MANIPULATION: ; 0x000EEC, $DEEC
     PSHS  Y,X,A ; Save
     JSR   BANKSWITCH_TO_7 ; Bank 7
-    LDX   DATA_USED_IN_$D000_CODE ; Get data ptr.
+    LDX   DIFFICULTY_DATA_START_LOC ; Get difficult pointer
 LOOP_X_PTR: ; 0x000EF4, $DEF4
     LDA   B,X ; Get data at PTR+B
-    BMI   DATA_NOT_MINUS ; If negative, goto.
-    ADDA  Y ; Add player data.
-    BLO   NEXT_ITTERATION ; If overflow, taken.
+    BMI   DATA_MINUS ; If negative, goto.
+    ADDA  Y ; Add positive
+    BLO   DONT_COMMIT_TO_PLAYER ; If overflow, taken.
     CMPA  X ; Compare to data pointed to.
-    BHI   NEXT_ITTERATION ; If A >, do.
-    BRA   COMMIT_TO_PLAYER ; Always do this instead.
-DATA_NOT_MINUS: ; 0x000F02, $DF02
-    ADDA  Y ; Add player data.
-    BHS   NEXT_ITTERATION ; If no overflow, goto.
-    CMPA  1,X ; Compare to ptr+1
-    BLO   NEXT_ITTERATION ; If ptr+1 is lower, taken.
+    BHI   DONT_COMMIT_TO_PLAYER ; If A higher (signed), goto.
+    BRA   COMMIT_TO_PLAYER ; Is good to commit.
+DATA_MINUS: ; 0x000F02, $DF02
+    ADDA  Y ; Add player data, aka sub.
+    BHS   DONT_COMMIT_TO_PLAYER ; If underflow.
+    CMPA  1,X ; Compare to PLAYER+1
+    BLO   DONT_COMMIT_TO_PLAYER ; If PLAYER+1 is lower, goto.
 COMMIT_TO_PLAYER: ; 0x000F0A, $DF0A
     STA   Y ; If it's higher, store to player data.
-NEXT_ITTERATION: ; 0x000F0C, $DF0C
-    LEAY  1,Y ; Player ptr++
-    LEAX  8,X ; X+=8
-    CMPX  DATA_USED_IN_$D000_CODE_END ; See if end.
+DONT_COMMIT_TO_PLAYER: ; 0x000F0C, $DF0C
+    LEAY  1,Y ; Player data++
+    LEAX  8,X ; Difficulty data++
+    CMPX  DIFFICULTY_DATA_END_LOC ; See if end.
     BNE   LOOP_X_PTR ; Loop if not end.
     PULS  A,X,Y,PC ; RTS, Restore.
-P1_RELATED_CODE?_UNK_PTR'D_TO: ; 0x000F17, $DF17
-    CLR   BANKSWITCH
-    LDA   #$A0
+IRQ_INITIAL_P1: ; 0x000F17, $DF17
+    CLR   BANKSWITCH ; Set to IO
+    LDA   #$A0 ; Setup DP
     TFR   A>DP
-    LDA   #$04
-    STA   PIA_ROM_CTRL_B
-    LDA   PIA_ROM_DATA_B
-    LDA   VIDEO_COUNTER_BITS
+    LDA   #$04 ; PIA CTRL setting no interrupts, output reg direction.
+    STA   PIA_ROM_CTRL_B ; Set setting
+    LDA   PIA_ROM_DATA_B ; Clear IRQs
+    LDA   VIDEO_COUNTER_BITS ; Load scanline.
     CMPA  #$80
-    BLO   L_000F5D
-    LDA   $A092
-    BNE   LEAVE_IRQ_RTN
-    INC   $A092
-    JSR   IDK+THRUST+MORE
+    BLO   VADD_UPPER_HALF ; Top half, goto lower half stuff?
+    LDA   $A092 ; Load val
+    BNE   LEAVE_IRQ_RTN ; If != 0, leave IRQ.
+    INC   $A092 ; If 0, ++
+    JSR   IDK+THRUST+MORE ; Do subs
     JSR   MOVEMENT_STUFF_PLAYERS+IDK
     JSR   CLEAR_A_LOT
-    LDA   VIDEO_COUNTER_BITS
-    SUBA  #$08
-    CMPA  #$A8
-    BLS   L_000F47
-    LDA   #$A8
-L_000F47: ; 0x000F47, $DF47
-    STA   INVERTED_VIDEO_BITS?
+    LDA   VIDEO_COUNTER_BITS ; Load counter
+    SUBA  #$08 ; -=8
+    CMPA  #$A8 ; If A _ Scanline 168
+    BLS   DONT_CAP_A ; <=, goto.
+    LDA   #$A8 ; Cap
+DONT_CAP_A: ; 0x000F47, $DF47
+    STA   VIDEO_BITS_LOCATION_COPY ; Store to bits
     LDA   #$02
-    STA   BANKSWITCH
-    LDD   INVERTED_VIDEO_BITS?
-    JSR   L_00139F
-    LDD   INVERTED_VIDEO_BITS?
+    STA   BANKSWITCH ; Bankswitch to 2
+    LDD   VIDEO_BITS_LOCATION_COPY
+    JSR   IRQ_RTN_IDK
+    LDD   VIDEO_BITS_LOCATION_COPY
     JSR   L_001213
     JSR   L_001453
-    BRA   LEAVE_IRQ_RTN
-L_000F5D: ; 0x000F5D, $DF5D
-    LDB   $A092
-    BEQ   LEAVE_IRQ_RTN
-    CLR   $A092
-    INC   $A05D
+    BRA   LEAVE_IRQ_RTN ; Leave IRQ RTN
+VADD_UPPER_HALF: ; 0x000F5D, $DF5D
+    LDB   $A092 ; Load val
+    BEQ   LEAVE_IRQ_RTN ; If 0, nothing to do here.
+    CLR   $A092 ; Clear
+    INC   $A05D ; Inc
     LDB   #$38
-    STB   WATCHDOG
-    CMPA  #$08
-    BHI   L_000F89
-    LDU   #$C010
-    LDD   $A030
-    LDX   $A032
-    LDY   $A034
+    STB   WATCHDOG ; Set watchdog.
+    CMPA  #$08 ; VADDR
+    BHI   DONT_SET_PALETTE ; VADDR > 8, dont set palette.
+    LDU   #$C010 ; Color palette stack ptr.
+    LDD   COLOR_PALETTE_RAM_COPY+10
+    LDX   COLOR_PALETTE_RAM_COPY+12
+    LDY   COLOR_PALETTE_RAM_COPY+14
     PSHU  Y,X,B,A
-    LDD   $A02A
-    LDX   $A02C
-    LDY   $A02E
+    LDD   COLOR_PALETTE_RAM_COPY+4
+    LDX   COLOR_PALETTE_RAM_COPY+6
+    LDY   COLOR_PALETTE_RAM_COPY+8
     PSHU  Y,X,B,A
-    LDD   $A026
-    LDX   $A028
+    LDD   COLOR_PALETTE_RAM_COPY
+    LDX   COLOR_PALETTE_RAM_COPY+2
     PSHU  X,B,A
-L_000F89: ; 0x000F89, $DF89
-    JSR   CHECK_COINDOOR_INPUT
+DONT_SET_PALETTE: ; 0x000F89, $DF89
+    JSR   CHECK_COINDOOR_INPUT ; Check coin door input.
     LDA   #$07
-    STA   BANKSWITCH
+    STA   BANKSWITCH ; Bankswitch to 7
     LDA   $A0BA
-    BITA  #$02
-    BNE   L_000F9A
-    JSR   PALETTE_ENTRY_0x3
-L_000F9A: ; 0x000F9A, $DF9A
+    BITA  #$02 ; Test bit on val
+    BNE   SKIP_BANK7_RTN ; If set, skip JSR below.
+    JSR   JMP_TO_IRQ_TASK_UNK
+SKIP_BANK7_RTN: ; 0x000F9A, $DF9A
     LDA   #$02
-    STA   BANKSWITCH
-    LDD   $A0A1
-    JSR   L_001213
-    LDD   $A0A1
-    JSR   L_00139F
-    JSR   L_001376
+    STA   BANKSWITCH ; Bank to 2
+    LDD   $A0A1 ; Load val
+    JSR   L_001213 ; IDK
+    LDD   $A0A1 ; Load val again
+    JSR   IRQ_RTN_IDK ; IDK
+    JSR   L_001376 ; IDK
 LEAVE_IRQ_RTN: ; 0x000FAC, $DFAC
     ORCC  #$FF ; Mask interrupts.
     CLR   BANKSWITCH ; Set to IO
@@ -2600,7 +2601,7 @@ LEAVE_IRQ_RTN: ; 0x000FAC, $DFAC
     ANDA  #$6F ; Clear Entire+IRQ mask.
     STA   S ; Put that back.
     PULS  CC,A,B,DP,X,Y,U,PC ; RTI manually since we unset entire?
-DYNAMIC_IRQ_RTN_MAIN: ; 0x000FC3, $DFC3
+IRQ_INITIAL_P2: ; 0x000FC3, $DFC3
     CLR   BANKSWITCH ; Set to IO
     LDA   #$A0 ; DP
     TFR   A>DP
@@ -2613,9 +2614,9 @@ DYNAMIC_IRQ_RTN_MAIN: ; 0x000FC3, $DFC3
     LDB   $A092 ; Get val
     BNE   LEAVE_IRQ_RTN ; If != 0, goto.
     INC   $A092 ; Inc if 0
-    COMA ; Invert video bits.
+    COMA ; Invert video bits because flipped screen.
     NOP ; Nop
-    STA   INVERTED_VIDEO_BITS? ; Store inverted here.
+    STA   VIDEO_BITS_LOCATION_COPY ; Store inverted here.
     JSR   CHECK_COINDOOR_INPUT ; Do coin door input
     LDA   #$07
     STA   BANKSWITCH ; Bankswitch to 7
@@ -2629,7 +2630,7 @@ SKIP_JSR: ; 0x000FF4, $DFF4
     LDD   $A0A1 ; Load val
     JSR   L_001213
     LDD   $A0A1 ; Load val
-    JSR   L_00139F
+    JSR   IRQ_RTN_IDK
     BRA   LEAVE_IRQ_RTN ; Leaves
 VIDEO_COUNTER_BITS_UNDER_#$58: ; 0x001005, $E005
     LDB   $A092
@@ -2641,16 +2642,16 @@ VIDEO_COUNTER_BITS_UNDER_#$58: ; 0x001005, $E005
     CMPA  #$04 ; Video counter bits.
     BHI   VIDEO_COUNTER_>_4 ; If > 4, goto.
     LDU   #$C010 ; Ptr
-    LDD   $A030 ; Load
-    LDX   $A032 ; Load
-    LDY   $A034 ; Load
+    LDD   COLOR_PALETTE_RAM_COPY+10 ; Load
+    LDX   COLOR_PALETTE_RAM_COPY+12 ; Load
+    LDY   COLOR_PALETTE_RAM_COPY+14 ; Load
     PSHU  Y,X,B,A ; Push all loaded to stack
-    LDD   $A02A ; Load
-    LDX   $A02C ; Load
-    LDY   $A02E ; Load
+    LDD   COLOR_PALETTE_RAM_COPY+4 ; Load
+    LDX   COLOR_PALETTE_RAM_COPY+6 ; Load
+    LDY   COLOR_PALETTE_RAM_COPY+8 ; Load
     PSHU  Y,X,B,A ; Push all to stack.
-    LDD   $A026 ; Load
-    LDX   $A028 ; Load
+    LDD   COLOR_PALETTE_RAM_COPY ; Load
+    LDX   COLOR_PALETTE_RAM_COPY+2 ; Load
     PSHU  X,B,A ; Push to stack.
 VIDEO_COUNTER_>_4: ; 0x001031, $E031
     JSR   IDK+THRUST+MORE
@@ -2658,10 +2659,10 @@ VIDEO_COUNTER_>_4: ; 0x001031, $E031
     JSR   CLEAR_A_LOT
     LDA   #$02
     STA   BANKSWITCH
-    LDD   INVERTED_VIDEO_BITS?
+    LDD   VIDEO_BITS_LOCATION_COPY
     JSR   L_001213
-    LDD   INVERTED_VIDEO_BITS?
-    JSR   L_00139F
+    LDD   VIDEO_BITS_LOCATION_COPY
+    JSR   IRQ_RTN_IDK
     JSR   L_001453
     JSR   L_001376
     JMP   LEAVE_IRQ_RTN
@@ -3098,11 +3099,11 @@ L_00139A: ; 0x00139A, $E39A
     BNE   L_001381
 L_00139E: ; 0x00139E, $E39E
     RTS
-L_00139F: ; 0x00139F, $E39F
+IRQ_RTN_IDK: ; 0x00139F, $E39F
     PSHS  B,A
     LDA   $A0BA
     BITA  #$20
-    BNE   L_0013F1
+    BNE   RTS
     LDX   #$A065
     BRA   L_0013ED
 L_0013AC: ; 0x0013AC, $E3AC
@@ -3143,7 +3144,7 @@ L_0013C2: ; 0x0013C2, $E3C2
 L_0013ED: ; 0x0013ED, $E3ED
     LDX   X
     BNE   L_0013AC
-L_0013F1: ; 0x0013F1, $E3F1
+RTS: ; 0x0013F1, $E3F1
     PULS  A,B,PC
 L_0013F3: ; 0x0013F3, $E3F3
     PSHS  U,Y,B,A
@@ -3292,7 +3293,7 @@ L_001507: ; 0x001507, $E507
     STD   256,Y
     JMP   L_001493
     LDD   #$0025
-    JSR   SCORE_ADD_AB
+    JSR   SCORE_ADD_AB ; Score +25, hit by bullet?
     DEC   $A099
     JSR   REMOVE_X_FROM_LIST_A06D
     JSR   L_0023FE
@@ -3532,12 +3533,12 @@ L_0016E1: ; 0x0016E1, $E6E1
     STU   $A0DC
     LDY   2,X
     SUBD  Y
-    STD   A073_LOOP_CNT_HUMANOID/MISC?
+    STD   A073_SCRATCH_LOOP_WORD?
     CLRA
     CLRB
     STD   $A0D0
     STD   $A0D2
-    LDD   A073_LOOP_CNT_HUMANOID/MISC?
+    LDD   A073_SCRATCH_LOOP_WORD?
     SUBB  $A0D7
     BHI   L_0016FB
     NEGB
@@ -3554,7 +3555,7 @@ L_0016FD: ; 0x0016FD, $E6FD
 L_001706: ; 0x001706, $E706
     STA   $A0D2
 L_001708: ; 0x001708, $E708
-    LDD   A073_LOOP_CNT_HUMANOID/MISC?
+    LDD   A073_SCRATCH_LOOP_WORD?
     ADDD  Y
     SUBB  $A0D9
     BHI   L_001711
@@ -3629,7 +3630,7 @@ L_001782: ; 0x001782, $E782
     LDB   A,X
     BEQ   L_001782
     INC   $A0B6
-    STB   $A027
+    STB   COLOR_PALETTE_RAM_COPY+1
     LDA   #$02
     LDX   #$E784
     JMP   SET_U2LIST,STORE_X2HANDLER+A2COUNTER,U.NEXT
@@ -3837,7 +3838,7 @@ L_0018F0: ; 0x0018F0, $E8F0
     LDA   #$04
     STA   7,U
 L_0018F6: ; 0x0018F6, $E8F6
-    COM   $A026
+    COM   COLOR_PALETTE_RAM_COPY
     LDA   #$02
     LDX   #$E900
     JMP   SET_U2LIST,STORE_X2HANDLER+A2COUNTER,U.NEXT
@@ -3898,7 +3899,7 @@ L_001958: ; 0x001958, $E958
     STD   PLAYER_V_MOMENTUM
     JSR   GOTO_B7-C000
     LDB   #$50
-    JSR   A_FROM_A0FA,B_OR'D_CONDITIONALLY
+    JSR   OR_AND_STORE_B_NO_HUMANOIDS?
     JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR
     ADCB  $C1ED
     CMPX  R_0000
@@ -3969,12 +3970,12 @@ CALLBACK_UNK: ; 0x0019E3, $E9E3
 L_001A0A: ; 0x001A0A, $EA0A
     LDD   $A020
     SUBD  #$0C80
-    STD   A073_LOOP_CNT_HUMANOID/MISC?
+    STD   A073_SCRATCH_LOOP_WORD?
     LDX   #$A065
     BRA   L_001A2C
 L_001A16: ; 0x001A16, $EA16
     LDD   10,X
-    SUBD  A073_LOOP_CNT_HUMANOID/MISC?
+    SUBD  A073_SCRATCH_LOOP_WORD?
     CMPD  #$3E80
     BLO   L_001A2C
     LDU   X
@@ -3991,7 +3992,7 @@ L_001A2C: ; 0x001A2C, $EA2C
 L_001A33: ; 0x001A33, $EA33
     LDD   $A020
     SUBD  #$0C80
-    STD   A073_LOOP_CNT_HUMANOID/MISC?
+    STD   A073_SCRATCH_LOOP_WORD?
     LDX   #$A06B
     BRA   L_001A78
 L_001A3F: ; 0x001A3F, $EA3F
@@ -4021,7 +4022,7 @@ L_001A56: ; 0x001A56, $EA56
     ROLA
     ADDD  10,X
     STD   10,X
-    SUBD  A073_LOOP_CNT_HUMANOID/MISC?
+    SUBD  A073_SCRATCH_LOOP_WORD?
     CMPD  #$3E80
     BHS   L_001A78
     LDU   X
@@ -4097,16 +4098,16 @@ L_001AEE: ; 0x001AEE, $EAEE
     BLS   L_001B2A
 L_001AF5: ; 0x001AF5, $EAF5
     LDD   #$4001
-    STD   A073_LOOP_CNT_HUMANOID/MISC?
+    STD   A073_SCRATCH_LOOP_WORD?
     LDD   10,X
     SUBD  $A0CC
     BMI   L_001B02
-    NEG   A073_LOOP_CNT_HUMANOID/MISC?
+    NEG   A073_SCRATCH_LOOP_WORD?
 L_001B02: ; 0x001B02, $EB02
     ADDD  #$0280
     CMPD  #$0500
     BLS   L_001B12
-    LDB   A073_LOOP_CNT_HUMANOID/MISC?
+    LDB   A073_SCRATCH_LOOP_WORD?
     SEX
     ADDD  $A0C7
     STD   14,X
@@ -4114,13 +4115,13 @@ L_001B12: ; 0x001B12, $EB12
     LDA   12,X
     SUBA  $A0C0
     BMI   L_001B1A
-    NEG   $A074
+    NEG   A073_SCRATCH_LOOP_WORD?+1
 L_001B1A: ; 0x001B1A, $EB1A
     ADDA  #$0A
     CMPA  #$14
     BLS   L_001B2A
     CLRB
-    LDA   $A074
+    LDA   A073_SCRATCH_LOOP_WORD?+1
     ADDD  PLAYER_V_MOMENTUM
     ASRA
     RORB
@@ -4135,7 +4136,7 @@ L_001B2A: ; 0x001B2A, $EB2A
     .db $FD
     .db $39
 L_001B36: ; 0x001B36, $EB36
-    STA   A073_LOOP_CNT_HUMANOID/MISC?
+    STA   A073_SCRATCH_LOOP_WORD?
 L_001B38: ; 0x001B38, $EB38
     JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR
     EORB  $F7EB
@@ -4165,7 +4166,7 @@ L_001B67: ; 0x001B67, $EB67
 L_001B69: ; 0x001B69, $EB69
     STD   16,X
     JSR   JMP_TO_REPLACES_HANDLER_AND_DOES_ALOT
-    DEC   A073_LOOP_CNT_HUMANOID/MISC?
+    DEC   A073_SCRATCH_LOOP_WORD?
     BNE   L_001B38
     RTS
     JSR   L_00241D
@@ -4194,7 +4195,7 @@ RANDOM_WORD_TO_OBJ_X_[14],[16]: ; 0x001B89, $EB89
     RTS
 UNK_MAKE_OBJ_DETAILS_FROM_OBJ@Y?: ; 0x001B9E, $EB9E
     PSHS  U,Y,X,B,A
-    STA   A073_LOOP_CNT_HUMANOID/MISC? ; Store A to loop count
+    STA   A073_SCRATCH_LOOP_WORD? ; Store A to loop count
 LOOP_MAKE_THIS_OBJ: ; 0x001BA2, $EBA2
     LDA   R_A116_ENEMY_IDK_COUNT ; Load val
     INCA ; Inc
@@ -4230,7 +4231,7 @@ L_001BB0: ; 0x001BB0, $EBB0
     JSR   GET_NEW_A_THAT_IS_<=_CURRENT
     STA   11,U ; Store to OBJ[11]
     STX   LIST_$65_UNK ; Add to this list.
-    DEC   A073_LOOP_CNT_HUMANOID/MISC? ; Dec loop counter.
+    DEC   A073_SCRATCH_LOOP_WORD? ; Dec loop counter.
     BNE   LOOP_MAKE_THIS_OBJ
 RTS: ; 0x001BE7, $EBE7
     PULS  A,B,X,Y,U,PC ; Leave
@@ -4248,7 +4249,7 @@ RTS: ; 0x001BE7, $EBE7
     LDU   #$F8E2
     STU   2,X
     JSR   L_002C63
-    LDD   #$0115
+    LDD   #$0115 ; Score add +150. Lander, swarmer.
     JSR   SCORE_ADD_AB
     LDD   #$D516
     JMP   SET_A0B0-A0B3_WHEN_@D>A0B2
@@ -4528,7 +4529,7 @@ L_001E05: ; 0x001E05, $EE05
     LDD   #$F9F1
     STD   2,X
     LDB   #$02
-    STB   A073_LOOP_CNT_HUMANOID/MISC?
+    STB   A073_SCRATCH_LOOP_WORD?
 L_001E10: ; 0x001E10, $EE10
     JSR   RANDOM_VALUE_FWD+IN_A
     ANDA  #$3F
@@ -4538,13 +4539,13 @@ L_001E10: ; 0x001E10, $EE10
     STA   12,X
     SUBA  #$0A
     JSR   L_002C63
-    DEC   A073_LOOP_CNT_HUMANOID/MISC?
+    DEC   A073_SCRATCH_LOOP_WORD?
     BNE   L_001E10
     LDA   A0DF_RAND_BYTE
     ANDA  #$1F
     LDX   #$E799
     LDA   A,X
-    STA   $A026
+    STA   COLOR_PALETTE_RAM_COPY
     LDD   #$D4E4
     JSR   SET_A0B0-A0B3_WHEN_@D>A0B2
     LDX   #$EE44
@@ -4553,7 +4554,7 @@ L_001E3D: ; 0x001E3D, $EE3D
     LDB   #$08
     STB   $A05E
     JMP   SET_U2LIST,STORE_X2HANDLER+A2COUNTER,U.NEXT
-    CLR   $A026
+    CLR   COLOR_PALETTE_RAM_COPY
     LDA   7,U
     LSRA
     LSRA
@@ -4577,7 +4578,7 @@ L_001E3D: ; 0x001E3D, $EE3D
     JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR
     ADCB  L_0017ED
     CMPX  R_0000
-    LDD   #$0150
+    LDD   #$0150 ; +500, putting humanoid down.
 L_001E7F: ; 0x001E7F, $EE7F
     JSR   SCORE_ADD_AB
 CALLBACK_UNK: ; 0x001E82, $EE82
@@ -4662,7 +4663,7 @@ L_001F14: ; 0x001F14, $EF14
     RTS
 L_001F15: ; 0x001F15, $EF15
     PSHS  A ; Save A
-    STA   A073_LOOP_CNT_HUMANOID/MISC? ; Loop counter
+    STA   A073_SCRATCH_LOOP_WORD? ; Loop counter
 LOOP_MAKE_ENEMY_IDK: ; 0x001F19, $EF19
     LDX   #$F15E ; Handler
     LDA   #$00 ; Type
@@ -4702,7 +4703,7 @@ DONT_ADD_8000: ; 0x001F43, $EF43
     STU   6,X ; Store OBJ U to OBJ[6]@X
     STX   7,U ; Store OBJ X to OBJ[7]@U
     INC   R_A115_ENEMY_IDK_COUNT ; Inc enemy count
-    DEC   A073_LOOP_CNT_HUMANOID/MISC?
+    DEC   A073_SCRATCH_LOOP_WORD?
     BNE   LOOP_MAKE_ENEMY_IDK
     PULS  A,PC
     DEC   R_A115_ENEMY_IDK_COUNT
@@ -4735,7 +4736,7 @@ L_001F9A: ; 0x001F9A, $EF9A
     PULS  X,PC
 L_001F9C: ; 0x001F9C, $EF9C
     PSHS  A
-    STA   A073_LOOP_CNT_HUMANOID/MISC?
+    STA   A073_SCRATCH_LOOP_WORD?
 L_001FA0: ; 0x001FA0, $EFA0
     TST   A0FA_HUMANOID_COUNT?
     BNE   L_001FA7
@@ -4777,7 +4778,7 @@ L_001FE2: ; 0x001FE2, $EFE2
     STX   7,U
     BSR   L_001F78
     INC   R_A112_ENEMY_IDK_COUNT
-    DEC   A073_LOOP_CNT_HUMANOID/MISC?
+    DEC   A073_SCRATCH_LOOP_WORD?
     BNE   L_001FA0
     PULS  A,PC
     LDX   7,U
@@ -4789,10 +4790,10 @@ L_001FE2: ; 0x001FE2, $EFE2
     BNE   L_002016
     LDA   10,X
     ANDA  #$FC
-    STA   A073_LOOP_CNT_HUMANOID/MISC?
+    STA   A073_SCRATCH_LOOP_WORD?
     LDA   10,Y
     ANDA  #$FC
-    CMPA  A073_LOOP_CNT_HUMANOID/MISC?
+    CMPA  A073_SCRATCH_LOOP_WORD?
     BEQ   L_002065
     BRA   L_002025
 L_002016: ; 0x002016, $F016
@@ -5108,18 +5109,18 @@ L_00227C: ; 0x00227C, $F27C
     JSR   SET_A0B0-A0B3_WHEN_@D>A0B2
     JMP   OBJ_X@A063_REMOVED_FROM_A05F+HANDLED
 L_00229D: ; 0x00229D, $F29D
-    STA   A073_LOOP_CNT_HUMANOID/MISC?
+    STA   A073_SCRATCH_LOOP_WORD?
     LDB   R_A106
     COM   $A0AA
     BMI   L_0022A7
     NEGB
 L_0022A7: ; 0x0022A7, $F2A7
-    STB   $A074
+    STB   A073_SCRATCH_LOOP_WORD?+1
     LDX   #$F2F7
     LDA   #$00
     JSR   LIST_REMOVE_AND_INIT+IDK
     LEAU  X
-    LDA   A073_LOOP_CNT_HUMANOID/MISC?
+    LDA   A073_SCRATCH_LOOP_WORD?
     STA   15,U
     CLRA
     CLRB
@@ -5131,16 +5132,16 @@ L_0022C1: ; 0x0022C1, $F2C1
     JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR
     ADCB  R_29F3
     CMPX  R_8888
-    LDB   $A074
+    LDB   A073_SCRATCH_LOOP_WORD?+1
     SEX
     STD   14,X
     CLRA
     CLRB
     STD   16,X
-    LDA   A073_LOOP_CNT_HUMANOID/MISC?
+    LDA   A073_SCRATCH_LOOP_WORD?
     LSRA
     RORB
-    ADDA  A073_LOOP_CNT_HUMANOID/MISC?
+    ADDA  A073_SCRATCH_LOOP_WORD?
     ADDD  $A0CC
     ADDA  #$80
     STD   10,X
@@ -5149,11 +5150,11 @@ L_0022C1: ; 0x0022C1, $F2C1
     STA   16,U
     STU   6,X
     STX   LIST_$65_UNK
-    LDA   A073_LOOP_CNT_HUMANOID/MISC?
+    LDA   A073_SCRATCH_LOOP_WORD?
     ASLA
     ADDA  #$05
     STX   A,U
-    DEC   A073_LOOP_CNT_HUMANOID/MISC?
+    DEC   A073_SCRATCH_LOOP_WORD?
     BNE   L_0022C1
     RTS
     LDA   A0DF_RAND_BYTE
@@ -5323,8 +5324,8 @@ L_00241D: ; 0x00241D, $F41D
 L_002420: ; 0x002420, $F420
     PSHS  U,B,A
     LDU   4,S
-    PULU  A,B
-    JSR   SCORE_ADD_AB
+    PULU  A,B ; Pull add
+    JSR   SCORE_ADD_AB ; Add it. Smartbomb stuff? Generic rtn for item add?
     BSR   L_002434
     PULU  A,B
     STU   4,S
@@ -5344,9 +5345,9 @@ L_002440: ; 0x002440, $F440
     JMP   SET_U2LIST,STORE_X2HANDLER+A2COUNTER,U.NEXT
     LDX   7,U
     LDD   X++
-    STD   $A033
+    STD   COLOR_PALETTE_RAM_COPY+13
     LDA   X+
-    STA   $A035
+    STA   COLOR_PALETTE_RAM_COPY+15
     CMPX  #$F464
     BLO   L_002440
     BRA   CALLBACK_UNK
@@ -5359,7 +5360,7 @@ CALLBACK_UNK: ; 0x002464, $F464
     .db $86
     STU   R_9730
 L_002468: ; 0x002468, $F468
-    CLR   $A032
+    CLR   COLOR_PALETTE_RAM_COPY+12
     LDA   #$03
     LDX   #$F472
     JMP   SET_U2LIST,STORE_X2HANDLER+A2COUNTER,U.NEXT
@@ -5367,8 +5368,8 @@ L_002468: ; 0x002468, $F468
     ANDA  #$1F
     LDX   #$E799
     LDA   A,X
-    STA   $A030
-    STA   $A032
+    STA   COLOR_PALETTE_RAM_COPY+10
+    STA   COLOR_PALETTE_RAM_COPY+12
     LDX   #$CCB0
     CMPX  $A0A6
     BNE   L_002489
@@ -5379,7 +5380,7 @@ L_002489: ; 0x002489, $F489
     LDX   #$F464
     JMP   SET_U2LIST,STORE_X2HANDLER+A2COUNTER,U.NEXT
 CALLBACK_UNK: ; 0x002493, $F493
-    LDA   $A08A
+    LDA   R_A08A_UPDATE_SCORE?
     BNE   L_0024BB
     LDX   #$0F1C
     LDA   A08B_CURRENT_PLAYER
@@ -5450,7 +5451,7 @@ BANKSWITCH_TO_A: ; 0x00250D, $F50D
 PSH_ALL_GOTO_B2-C002: ; 0x002513, $F513
     PSHS  U,Y,X,DP,B,A,CC
     BSR   BANKSWITCH_TO_2
-    JSR   $C002
+    JSR   JMP_UNK_TO_SCREEN
     PULS  CC,A,B,DP,X,Y,U,PC
 GOTO_B3-C00F_BOOKKEEP_UPDATE_+1: ; 0x00251C, $F51C
     BSR   BANKSWITCH_TO_3
@@ -7544,7 +7545,7 @@ L_003050: ; 0x003050, $C050
     JSR   SET_WATCHDOG_GAMEPLAY?
 L_003053: ; 0x003053, $C053
     LDB   #$85
-    STB   $A027
+    STB   COLOR_PALETTE_RAM_COPY+1
     LDA   #$3E
     LDX   #$B260
     JSR   L_003147
@@ -7731,14 +7732,14 @@ L_0031DA: ; 0x0031DA, $C1DA
     LDA   #$3C
     LDX   #$C1DC
     JMP   L_0024BE
-    LDA   $A033
+    LDA   COLOR_PALETTE_RAM_COPY+13
     BNE   L_0031EF
-    LDA   $A027
+    LDA   COLOR_PALETTE_RAM_COPY+1
     BRA   L_0031F0
 L_0031EF: ; 0x0031EF, $C1EF
     CLRA
 L_0031F0: ; 0x0031F0, $C1F0
-    STA   $A033
+    STA   COLOR_PALETTE_RAM_COPY+13
     LDA   #$0F
     LDX   #$C1E7
     JMP   L_0024BE
@@ -7801,7 +7802,7 @@ L_003263: ; 0x003263, $C263
     JSR   L_00386F
     JSR   CLEAR_ALL_SCREEN
     JSR   SAVE_BANK+SET_WATCHDOG_NONFLIPPED
-    CLR   $A027
+    CLR   COLOR_PALETTE_RAM_COPY+1
     LDX   #$C8F4
     LDA   #$00
     JSR   FROM_LIST_A061_TO_A063_POINTS_TO+SETUP
@@ -7839,7 +7840,7 @@ L_00329C: ; 0x00329C, $C29C
     STX   R_A164
     BSR   L_003306
     LDA   #$3F
-    STA   $A032
+    STA   COLOR_PALETTE_RAM_COPY+12
     LDY   #$B300
     LDD   #$3C18
     STD   Y
@@ -8232,7 +8233,7 @@ L_003677: ; 0x003677, $C677
     LDA   #$00
     JSR   FROM_LIST_A061_TO_A063_POINTS_TO+SETUP
     LDA   #$3F
-    STA   $A032
+    STA   COLOR_PALETTE_RAM_COPY+12
     JMP   L_0036A2
 L_0036A2: ; 0x0036A2, $C6A2
     JSR   L_00386F
@@ -9440,7 +9441,7 @@ L_003CB5: ; 0x003CB5, $CCB5
 L_003CD3: ; 0x003CD3, $CCD3
     LDD   $A020
     SUBD  #$6D40
-    STD   A073_LOOP_CNT_HUMANOID/MISC?
+    STD   A073_SCRATCH_LOOP_WORD?
     LSRA
     LSRA
     LDU   #$CD69
@@ -9501,7 +9502,7 @@ L_003D0C: ; 0x003D0C, $CD0C
     RTS
 L_003D4F: ; 0x003D4F, $CD4F
     LDD   10,X
-    SUBD  A073_LOOP_CNT_HUMANOID/MISC?
+    SUBD  A073_SCRATCH_LOOP_WORD?
     LSRA
     LSRA
     LDB   12,X
@@ -10185,18 +10186,29 @@ L_003D64: ; 0x003D64, $CD64
 
     .db $C5 ; Used in 0x400 area.
     .db $FB
+JMP_UNK_TO_SCREEN: ; 0x004002, $C002
     JMP   TEXT_RTN_PTRS=$FFB3/$CAED ; The left value is IDK, right is a callback?
+JMP_UNK_CLEARED_FROM_SCREEN: ; 0x004005, $C005
     JMP   TEXT_RTN_PTRS=$FFB6/$CAED ; Callback sentences.
+JMP_UNK_TO_SCREEN: ; 0x004008, $C008
     JMP   TEST_RTN_PTRS=$FFB3/$CB5F
+JMP_UNK_CLEARED_FROM_SCREEN: ; 0x00400B, $C00B
     JMP   TEXT_RTN_PTRS=$FFB6/$CB5F
 JMP_TO_VAL_IN_AB_TO_SCREEN: ; 0x00400E, $C00E
-    JMP   TEXT_RTN_PTRS=$FFB3/$CC0F
-    JMP   TEXT_RTN_PTRS=$FFB6/$CC0F ; This callback handles A/B as a number to the screen.
+    JMP   TEXT_RTN_PTRS=$FFB3/$CC0F ; To screen, callback char to screen.
+JMP_TO_VAL_IN_AB_CLEARED_FROM_SCREEN: ; 0x004011, $C011
+    JMP   TEXT_RTN_PTRS=$FFB6/$CC0F ; Cleared from screen.
+JMP_UNK_TO_SCREEN: ; 0x004014, $C014
     JMP   TEXT_RTN_PTRS=$FFB3/$CC39
+JMP_UNK_CLEARED_FROM_SCREEN: ; 0x004017, $C017
     JMP   TEXT_RTN_PTRS=$FFB6/$CC39
+JMP_SPECIAL_TO_SCREEN: ; 0x00401A, $C01A
     JMP   TEXT_RTN_SPECIAL_PTR=$FFB6
+JMP_SPECIAL_CLEARED_FROM_SCREEN: ; 0x00401D, $C01D
     JMP   TEXT_RTN_SPECIAL_PTR=$FFB3
+JMP_UNKNOWN_TEXT/GFX_RTN: ; 0x004020, $C020
     JMP   TEXT_SENTENCE_RTN_PTR=$C0D9
+JMP_UNKNOWN_TEXT/GFX_RTN_2: ; 0x004023, $C023
     JMP   TEXT_SENTENCE_RTN_PTR=$C0BB
     .db $00
     .db $00
@@ -16656,10 +16668,10 @@ JMP_TO_C350_FILLS_B300-B7FF: ; 0x006006, $C006
     JMP   L_00629A
     ANDB  #$50
     JMP   L_0065D0
-DATA_USED_IN_$D000_CODE: ; 0x006011, $C011
+DIFFICULTY_DATA_START_LOC: ; 0x006011, $C011
     .db $C6
     .db $BA
-DATA_USED_IN_$D000_CODE_END: ; 0x006013, $C013
+DIFFICULTY_DATA_END_LOC: ; 0x006013, $C013
     .db $C7
     .db $72
 DOES_LOTS_IDFK: ; 0x006015, $C015
@@ -17816,7 +17828,7 @@ L_006641: ; 0x006641, $C641
     LDX   #$0000
     LDY   #$B300
     LDA   [R_A002]
-    STA   $A031
+    STA   COLOR_PALETTE_RAM_COPY+11
     BEQ   L_0066A8
 L_006658: ; 0x006658, $C658
     LDU   Y
