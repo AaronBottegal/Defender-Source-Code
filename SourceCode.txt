@@ -192,10 +192,7 @@ LIST_$6D_UNK:                            .rs 0x01 ;0xA06D
 A073_SCRATCH_LOOP_WORD?:                 .rs 0x02 ;0xA073 to A074
 
 	.org $A077
-R_A077_S_TEMP?:                          .rs 0x01 ;0xA077
-
-
-	.org $A079
+R_A077_REGISTER_TEMP?:                   .rs 0x02 ;0xA077 to A078
 PIA_ROM_DATA_A_RAM_COPY:                 .rs 0x01 ;0xA079
 
 PIA_ROM_DATA_A_RAM_COPY_OLD:             .rs 0x01 ;0xA07A
@@ -612,7 +609,7 @@ REMOVE_X_FROM_LIST_A06D: ; 0x0000F2, $D0F2
     LDU   #$A06D ; List ptr
     BRA   CMP_NEXT_LOOP_GENERIC ; Goto
     PSHS  X,DP ; Save...
-    STS   R_A077_S_TEMP? ; Store stack
+    STS   R_A077_REGISTER_TEMP? ; Store stack
     BHS   DONT_Y+=2 ; Don't add 2 to Y
     LEAY  2,Y ; Y+=2
 DONT_Y+=2: ; 0x000102, $D102
@@ -641,7 +638,7 @@ DONT_Y+=2: ; 0x000102, $D102
     LEAU  264,U ; POSX++
     BRA   GFX_SET_8X8 ; Do rest
     PSHS  X,DP ; Save
-    STS   R_A077_S_TEMP? ; Save
+    STS   R_A077_REGISTER_TEMP? ; Save
     BHS   SKIP_Y+=2
     LEAY  2,Y ; Y+=2
 SKIP_Y+=2: ; 0x000142, $D142
@@ -661,7 +658,7 @@ GFX_MOVE_4X8: ; 0x000159, $D159
     LEAU  264,U ; Next column, same pos.
     PULS  CC,A,B,DP,X,Y ; Pull 8 bytes.
     PSHU  Y,X,DP,B,A,CC ; Push 8 bytes.
-    LDS   R_A077_S_TEMP? ; Get S
+    LDS   R_A077_REGISTER_TEMP? ; Get S
     PULS  DP,X,PC ; RTS
     PSHS  X,DP ; Save
     ADDB  #$08 ; Voff for stack move.
@@ -682,7 +679,7 @@ GFX_SET_4X8: ; 0x000189, $D189
     PSHU  Y,X,DP,B,A,CC
     PULS  DP,X,PC ; RTS
     PSHS  X,DP ; Save
-    STS   R_A077_S_TEMP? ; Save
+    STS   R_A077_REGISTER_TEMP? ; Save
     BHS   SKIP_Y+=2
     LEAY  2,Y ; Y+=2
 SKIP_Y+=2: ; 0x00019C, $D19C
@@ -741,7 +738,7 @@ SKIP_Y+=2: ; 0x0001F5, $D1F5
     STA   258,U ; SCRX+1,SCRY+2.
     RTS ; RTS
     PSHS  U,X,B,A ; Save
-    STS   R_A077_S_TEMP? ; Save
+    STS   R_A077_REGISTER_TEMP? ; Save
     BHS   SKIP_Y+=2 ; Do
     LEAY  2,Y ; Y+=2
 SKIP_Y+=2: ; 0x000228, $D228
@@ -765,7 +762,7 @@ SKIP_Y+=2: ; 0x000228, $D228
     LEAU  260,U ; X++
     PULS  A,B,X ; Get
     PSHU  X,B,A ; Push
-    LDS   R_A077_S_TEMP? ; Load stack
+    LDS   R_A077_REGISTER_TEMP? ; Load stack
     PULS  A,B,X,U,PC ; RTS
     PSHS  U,X,B,A ; Save
     ADDB  #$04 ; Correct pos.
@@ -786,7 +783,7 @@ SKIP_Y+=2: ; 0x000228, $D228
     PULS  A,B,X,U,PC ; RTS
 GFX_16X6_MOVE+ADJUST: ; 0x00028E, $D28E
     PSHS  X ; Save
-    STS   R_A077_S_TEMP? ; Save
+    STS   R_A077_REGISTER_TEMP? ; Save
     BHS   SKIP_Y+=2
     LEAY  2,Y ; Y+=2
 SKIP_Y+=2: ; 0x000297, $D297
@@ -818,7 +815,7 @@ GFX_10X6_MOVE: ; 0x0002B6, $D2B6
     LEAU  262,U ; X+1
     PULS  A,B,X,Y ; Get
     PSHU  Y,X,B,A ; Put
-    LDS   R_A077_S_TEMP? ; Restore
+    LDS   R_A077_REGISTER_TEMP? ; Restore
     PULS  X,PC ; RTS
 GFX_CLEAR_16X6: ; 0x0002DF, $D2DF
     PSHS  X ; Save
@@ -846,7 +843,7 @@ GFX_CLR_10X6: ; 0x0002FF, $D2FF
     PSHU  Y,X,B,A
     PULS  X,PC ; RTS
     PSHS  X ; Save
-    STS   R_A077_S_TEMP? ; Save
+    STS   R_A077_REGISTER_TEMP? ; Save
     BHS   SKIP Y+=2
     LEAY  2,Y ; Y+=2
 SKIP Y+=2: ; 0x000324, $D324
@@ -862,7 +859,7 @@ SKIP Y+=2: ; 0x000324, $D324
     LEAY  X ; Clear
     BRA   GFX_CLR_10X6 ; Do
     PSHS  X ; Save
-    STS   R_A077_S_TEMP? ; Save
+    STS   R_A077_REGISTER_TEMP? ; Save
     BHS   SKIP_Y+=2 ; Skip
     LEAY  2,Y ; Y+=2
 SKIP_Y+=2: ; 0x000346, $D346
@@ -2548,10 +2545,10 @@ DONT_CAP_A: ; 0x000F47, $DF47
     LDA   #$02
     STA   BANKSWITCH ; Bankswitch to 2
     LDD   VIDEO_BITS_LOCATION_COPY
-    JSR   IRQ_RTN_IDK
+    JSR   IRQ_RTN_MOVE_OBJS?_A065
     LDD   VIDEO_BITS_LOCATION_COPY
-    JSR   L_001213
-    JSR   L_001453
+    JSR   SHIP_MOVE_RTN
+    JSR   BULLET_RELATED?
     BRA   LEAVE_IRQ_RTN ; Leave IRQ RTN
 VADD_UPPER_HALF: ; 0x000F5D, $DF5D
     LDB   $A092 ; Load val
@@ -2586,9 +2583,9 @@ SKIP_BANK7_RTN: ; 0x000F9A, $DF9A
     LDA   #$02
     STA   BANKSWITCH ; Bank to 2
     LDD   $A0A1 ; Load val
-    JSR   L_001213 ; IDK
+    JSR   SHIP_MOVE_RTN ; IDK
     LDD   $A0A1 ; Load val again
-    JSR   IRQ_RTN_IDK ; IDK
+    JSR   IRQ_RTN_MOVE_OBJS?_A065 ; IDK
     JSR   L_001376 ; IDK
 LEAVE_IRQ_RTN: ; 0x000FAC, $DFAC
     ORCC  #$FF ; Mask interrupts.
@@ -2628,9 +2625,9 @@ SKIP_JSR: ; 0x000FF4, $DFF4
     LDA   #$02 ; Bank 2
     STA   BANKSWITCH
     LDD   $A0A1 ; Load val
-    JSR   L_001213
+    JSR   SHIP_MOVE_RTN
     LDD   $A0A1 ; Load val
-    JSR   IRQ_RTN_IDK
+    JSR   IRQ_RTN_MOVE_OBJS?_A065
     BRA   LEAVE_IRQ_RTN ; Leaves
 VIDEO_COUNTER_BITS_UNDER_#$58: ; 0x001005, $E005
     LDB   $A092
@@ -2660,10 +2657,10 @@ VIDEO_COUNTER_>_4: ; 0x001031, $E031
     LDA   #$02
     STA   BANKSWITCH
     LDD   VIDEO_BITS_LOCATION_COPY
-    JSR   L_001213
+    JSR   SHIP_MOVE_RTN
     LDD   VIDEO_BITS_LOCATION_COPY
-    JSR   IRQ_RTN_IDK
-    JSR   L_001453
+    JSR   IRQ_RTN_MOVE_OBJS?_A065
+    JSR   BULLET_RELATED?
     JSR   L_001376
     JMP   LEAVE_IRQ_RTN
 INIT_STARS: ; 0x001052, $E052
@@ -2803,53 +2800,53 @@ LOOP_RANDOM: ; 0x00114E, $E14E
     CMPX  #$A183 ; End?
     BNE   LOOP_RANDOM ; Loop
     RTS ; Leave
-L_00115C: ; 0x00115C, $E15C
+DRAW_THRUST_TO_LEFT: ; 0x00115C, $E15C
     LDX   $A09F ; X from
     LDU   $A0BF ; U from
-    LEAU  -255,U
-    LDD   X
-    STD   U
-    LDA   5,X
-    LDB   9,X
-    STD   2,U
-    LDA   12,X
-    STA   4,U
+    LEAU  -255,U ; U -= 255
+    LDD   X ; Load from X
+    STD   U ; Store to U
+    LDA   5,X ; Load 
+    LDB   9,X ; Load
+    STD   2,U ; Store to
+    LDA   12,X ; Load
+    STA   4,U ; Store
     LDA   WGT_DATA_A_RAM_COPY
-    BITA  #$02 ; If adv pressed
-    BEQ   L_00119A
-    LDA   3,X
-    LDB   6,X
-    STD   -255,U
-    LDA   10,X
-    STA   -253,U
-    LDA   4,X
+    BITA  #$02 ; If thrust pressed.
+    BEQ   RTS ; Not pressed, RTS.
+    LDA   3,X ; Load
+    LDB   6,X ; Load
+    STD   -255,U ; Store
+    LDA   10,X ; Load
+    STA   -253,U ; Store
+    LDA   4,X ; Load
     LDB   7,X
-    STD   -511,U
-    LDA   11,X
-    STA   -509,U
-    LDA   8,X
-    STA   -766,U
-L_00119A: ; 0x00119A, $E19A
+    STD   -511,U ; Store
+    LDA   11,X ; Load
+    STA   -509,U ; Store
+    LDA   8,X ; Load
+    STA   -766,U ; Store
+RTS: ; 0x00119A, $E19A
     RTS
-L_00119B: ; 0x00119B, $E19B
-    LDU   $A09F
-    LDX   $A0BF
-    LEAX  2049,X
+DRAW_SHIP_THRUST_TO_RIGHT?: ; 0x00119B, $E19B
+    LDU   $A09F ; Load val
+    LDX   $A0BF ; Lod val
+    LEAX  2049,X ; X += ?
+    PULU  A,B,Y ; Pull from U
+    STD   X ; Val to X
+    STY   2,X ; Val to X[2]
+    PULU  A,B,Y ; Pull
+    STA   4,X ; Val to OBJ[4]
+    LDA   WGT_DATA_A_RAM_COPY ; Load
+    BITA  #$02 ; Test thrust
+    BEQ   RTS ; Not pressed.
+    STB   257,X ; B to. Thrust drawn?
+    STY   258,X ; Y to
     PULU  A,B,Y
-    STD   X
-    STY   2,X
-    PULU  A,B,Y
-    STA   4,X
-    LDA   WGT_DATA_A_RAM_COPY
-    BITA  #$02
-    BEQ   L_0011CC
-    STB   257,X
-    STY   258,X
-    PULU  A,B,Y
-    STY   513,X
-    STA   515,X
-    STB   770,X
-L_0011CC: ; 0x0011CC, $E1CC
+    STY   513,X ; Y to
+    STA   515,X ; A to
+    STB   770,X ; B to
+RTS: ; 0x0011CC, $E1CC
     RTS
 L_0011CD: ; 0x0011CD, $E1CD
     LDU   $A0BF
@@ -2877,49 +2874,49 @@ L_0011F0: ; 0x0011F0, $E1F0
     STB   -509,U
     STB   -766,U
     RTS
-L_001213: ; 0x001213, $E213
-    STA   R_A077_S_TEMP?
-    LDA   $A0BA
-    BITA  #$10
-    BNE   L_001243
-    LDA   R_A077_S_TEMP?
-    CMPA  $A0C0
-    BLS   L_001243
-    CMPB  $A0C0
-    BHI   L_001243
-    LDA   $A0BD
-    BMI   L_001231
-    JSR   L_00125E
+SHIP_MOVE_RTN: ; 0x001213, $E213
+    STA   R_A077_REGISTER_TEMP? ; Save
+    LDA   $A0BA ; Load val
+    BITA  #$10 ; Test bit
+    BNE   RTS_A_MESSED_UP ; If set, leave.
+    LDA   R_A077_REGISTER_TEMP? ; Load saved
+    CMPA  $A0C0 ; If A _ Loc
+    BLS   RTS_A_MESSED_UP ; <=, goto.
+    CMPB  $A0C0 ; If B _ Loc
+    BHI   RTS_A_MESSED_UP ; >, goto.
+    LDA   $A0BD ; Load val
+    BMI   Diff_JSR_set ; If negative, goto.
+    JSR   CLEAR_THING
     JSR   L_0011F0
-    BRA   L_001237
-L_001231: ; 0x001231, $E231
-    JSR   L_00125E
+    BRA   SKIP_OTHER_SET ; Skip other subs.
+Diff_JSR_set: ; 0x001231, $E231
+    JSR   CLEAR_THING
     JSR   L_0011CD
-L_001237: ; 0x001237, $E237
-    LDD   $A0BB
+SKIP_OTHER_SET: ; 0x001237, $E237
+    LDD   $A0BB ; Move val
     STD   $A0BD
-    BMI   L_001244
-    JSR   L_00124A
-    JSR   L_00115C
-L_001243: ; 0x001243, $E243
-    RTS
-L_001244: ; 0x001244, $E244
-    JSR   L_001258
-    JMP   L_00119B
-L_00124A: ; 0x00124A, $E24A
+    BMI   D_NEGATIVE ; If negative, goto.
+    JSR   OTHER_BITMAP+MOVE
+    JSR   DRAW_THRUST_TO_LEFT
+RTS_A_MESSED_UP: ; 0x001243, $E243
+    RTS ; Leave
+D_NEGATIVE: ; 0x001244, $E244
+    JSR   BITMAP+MOVE
+    JMP   DRAW_SHIP_THRUST_TO_RIGHT?
+OTHER_BITMAP+MOVE: ; 0x00124A, $E24A
     LDY   #$F9C1
-L_00124E: ; 0x00124E, $E24E
-    LDA   $A0C4
-    ASLA
-    LDD   $A0C1
+MOVE_THING: ; 0x00124E, $E24E
+    LDA   $A0C4 ; Load
+    ASLA ; Into carry
+    LDD   $A0C1 ; Move
     STD   $A0BF
-    JMP   GFX_16X6_MOVE+ADJUST
-L_001258: ; 0x001258, $E258
-    LDY   #$F9CB
-    BRA   L_00124E
-L_00125E: ; 0x00125E, $E25E
-    LDD   $A0BF
-    JMP   GFX_CLEAR_16X6
+    JMP   GFX_16X6_MOVE+ADJUST ; Put to screen
+BITMAP+MOVE: ; 0x001258, $E258
+    LDY   #$F9CB ; BITMAP ptr
+    BRA   MOVE_THING ; Move
+CLEAR_THING: ; 0x00125E, $E25E
+    LDD   $A0BF ; Pos?
+    JMP   GFX_CLEAR_16X6 ; Move
 MOVEMENT_STUFF_PLAYERS+IDK: ; 0x001263, $E263
     LDA   $A0BA ; Load val
     BITA  #$40 ; Test bit
@@ -3099,51 +3096,51 @@ L_00139A: ; 0x00139A, $E39A
     BNE   L_001381
 L_00139E: ; 0x00139E, $E39E
     RTS
-IRQ_RTN_IDK: ; 0x00139F, $E39F
+IRQ_RTN_MOVE_OBJS?_A065: ; 0x00139F, $E39F
     PSHS  B,A
-    LDA   $A0BA
-    BITA  #$20
-    BNE   RTS
-    LDX   #$A065
-    BRA   L_0013ED
-L_0013AC: ; 0x0013AC, $E3AC
-    LDD   4,X
-    BEQ   L_0013C2
-    CMPB  S
-    BHI   L_0013ED
-    CMPB  1,S
-    BLS   L_0013ED
-    LDY   2,X
-    JSR   [8,Y]
-    CLRA
+    LDA   $A0BA ; Load val
+    BITA  #$20 ; Test bit
+    BNE   RTS ; If set, leave.
+    LDX   #$A065 ; Load list ptr
+    BRA   X_TO_X.next ; Into list obj.
+PROCESS_OBJ: ; 0x0013AC, $E3AC
+    LDD   4,X ; Load OBJ[4]
+    BEQ   OBJ[4]_IS_ZERO ; If zero, goto.
+    CMPB  S ; Compare to stack byte
+    BHI   X_TO_X.next ; If higher than stack, next obj.
+    CMPB  1,S ; Compare to S[1]
+    BLS   X_TO_X.next ; <=, next obj.
+    LDY   2,X ; Load Y from OBJ[Y]
+    JSR   [8,Y] ; Callback+8 holds addr.
+    CLRA ; Clear D
     CLRB
-    STD   4,X
-L_0013C2: ; 0x0013C2, $E3C2
-    LDB   12,X
-    CMPB  S
-    BHI   L_0013ED
-    CMPB  1,S
-    BLS   L_0013ED
-    LDD   10,X
-    SUBD  $A020
-    CMPD  #$2580
-    BHS   L_0013ED
-    LDY   2,X
-    ASLB
-    ROLA
-    ASLB
-    ROLA
-    ADDA  Y
-    CMPA  #$9C
-    BHI   L_0013ED
-    SUBA  Y
-    ASLB
-    LDB   12,X
-    STD   4,X
-    JSR   [6,Y]
-L_0013ED: ; 0x0013ED, $E3ED
-    LDX   X
-    BNE   L_0013AC
+    STD   4,X ; Clear OBJ[4]
+OBJ[4]_IS_ZERO: ; 0x0013C2, $E3C2
+    LDB   12,X ; OBJ[12]
+    CMPB  S ; S[0]
+    BHI   X_TO_X.next ; If B if higher, next.
+    CMPB  1,S ; S[1]
+    BLS   X_TO_X.next ; If B <=, goto.
+    LDD   10,X ; Load OBJ[10]
+    SUBD  $A020 ; Sub with val
+    CMPD  #$2580 ; Compare to val
+    BHS   X_TO_X.next ; If D >= Val, goto.
+    LDY   2,X ; OBJ[2], callback.
+    ASLB ; Shift left
+    ROLA ; Bring in shifted
+    ASLB ; Shift left
+    ROLA ; Bring in shifted.
+    ADDA  Y ; Add A with callback val?
+    CMPA  #$9C ; If A _ #$9C
+    BHI   X_TO_X.next ; >, next obj.
+    SUBA  Y ; Subtrack added?
+    ASLB ; Shift B, filling out carry. Direction?
+    LDB   12,X ; Load OBJ[12]
+    STD   4,X ; Store D to OBJ[4]
+    JSR   [6,Y] ; JSR to CALLBACK+6
+X_TO_X.next: ; 0x0013ED, $E3ED
+    LDX   X ; To X.next
+    BNE   PROCESS_OBJ ; If not null, process.
 RTS: ; 0x0013F1, $E3F1
     PULS  A,B,PC
 L_0013F3: ; 0x0013F3, $E3F3
@@ -3196,50 +3193,50 @@ L_00144A: ; 0x00144A, $E44A
     STU   6,S
     CLRA
     PULS  A,B,Y,U,PC
-L_001453: ; 0x001453, $E453
-    LDA   $A0BA
-    BITA  #$20
-    BNE   L_001497
-    LDD   $A020
-    ANDB  #$E0
-    STD   $A09D
-    LDD   $A022
-    ANDB  #$E0
-    SUBD  $A09D
-    ASLB
+BULLET_RELATED?: ; 0x001453, $E453
+    LDA   $A0BA ; Load val
+    BITA  #$20 ; Test bit
+    BNE   RTS ; If set, RTS.
+    LDD   $A020 ; Load val
+    ANDB  #$E0 ; Clear bottom B
+    STD   $A09D ; Store to
+    LDD   $A022 ; Load val
+    ANDB  #$E0 ; Clear bottom B
+    SUBD  $A09D ; Sub with
+    ASLB ; D << 2, 0's in.
     ROLA
     ASLB
     ROLA
-    STD   $A09D
-    LDX   #$A06D
-    BRA   L_001493
-L_001470: ; 0x001470, $E470
-    LDY   4,X
-    LDD   16,X
-    ADDD  12,X
-    CMPA  #$2A
-    BLS   L_0014C6
-    STD   12,X
-    LDD   14,X
-    ADDD  $A09D
-    ADDD  10,X
-    CMPA  #$98
-    BHS   L_0014C6
-    STD   10,X
-    LDB   12,X
-    STD   4,X
-    LDU   4,X
-    JMP   [18,X]
-L_001493: ; 0x001493, $E493
+    STD   $A09D ; Store to
+    LDX   #$A06D ; PTR to list.
+    BRA   X_TO_X.NEXT
+PROCESS_OBJ_BULLET?: ; 0x001470, $E470
+    LDY   4,X ; OBJ[4]
+    LDD   16,X ; OBJ[16]
+    ADDD  12,X ; OBJ[12]
+    CMPA  #$2A ; A _ #$2A
+    BLS   OFF_GAME_SCREEN ; <=, goto
+    STD   12,X ; Store to OBJ[12]
+    LDD   14,X ; OBJ[14]
+    ADDD  $A09D ; Add with
+    ADDD  10,X ; OBJ[10]
+    CMPA  #$98 ; IF A _ #$98
+    BHS   OFF_GAME_SCREEN ; >=, goto
+    STD   10,X ; To OBJ[10]
+    LDB   12,X ; OBJ[12]
+    STD   4,X ; OBJ[4]
+    LDU   4,X ; OBJ[4]
+    JMP   [18,X] ; JMP to OBJ[18]
+X_TO_X.NEXT: ; 0x001493, $E493
     LDX   X
-    BNE   L_001470
-L_001497: ; 0x001497, $E497
+    BNE   PROCESS_OBJ_BULLET? ; If valid, process.
+RTS: ; 0x001497, $E497
     RTS
     LDU   $A0A6
     LDB   11,X
-    BPL   L_0014A0
+    BPL   DELETE_DONT_ADD
     LEAU  6,U
-L_0014A0: ; 0x0014A0, $E4A0
+DELETE_DONT_ADD: ; 0x0014A0, $E4A0
     LDD   #$0000
     STD   Y
     STA   2,Y
@@ -3253,26 +3250,26 @@ L_0014A0: ; 0x0014A0, $E4A0
     STB   256,Y
     LDD   4,U
     STD   257,Y
-    BRA   L_001493
-L_0014C6: ; 0x0014C6, $E4C6
-    CLRA
+    BRA   X_TO_X.NEXT
+OFF_GAME_SCREEN: ; 0x0014C6, $E4C6
+    CLRA ; Clear D
     CLRB
-    STA   22,X
-    STD   Y
-    STA   2,Y
-    STD   256,Y
-    STA   258,Y
-    BRA   L_001493
+    STA   22,X ; Clear OBJ[22], disabled?
+    STD   Y ; Clear Y
+    STA   2,Y ; (0,2)
+    STD   256,Y ; (2,0)
+    STA   258,Y ; (2,2)
+    BRA   X_TO_X.NEXT ; Next OBJ
     LDU   $A0A8
-    LDB   11,X
-    ASLB
-    LDD   #$0000
+    LDB   11,X ; OBJ[11]
+    ASLB ; Get bit into carry
+    LDD   #$0000 ; Clear bullet
     STD   Y
     STA   2,Y
     STD   256,Y
     STA   258,Y
-    LDY   4,X
-    BLO   L_001507
+    LDY   4,X ; Get OBJ[4]
+    BLO   L_001507 ; If CC.c = 1, goto
     LDD   U
     ANDA  #$0F
     STD   Y
@@ -3281,7 +3278,7 @@ L_0014C6: ; 0x0014C6, $E4C6
     STA   2,Y
     ANDB  #$F0
     STB   257,Y
-    JMP   L_001493
+    JMP   X_TO_X.NEXT ; Next OBJ
 L_001507: ; 0x001507, $E507
     LDD   U
     ANDB  #$0F
@@ -3291,7 +3288,7 @@ L_001507: ; 0x001507, $E507
     LDD   2,U
     ANDA  #$F0
     STD   256,Y
-    JMP   L_001493
+    JMP   X_TO_X.NEXT
     LDD   #$0025
     JSR   SCORE_ADD_AB ; Score +25, hit by bullet?
     DEC   $A099
@@ -6278,6 +6275,7 @@ HUMANOID_BITMAP: ; 0x002915, $F915
     .db $1F
     .db $D2
     .db $60
+BITMAP_IDK: ; 0x0029C1, $F9C1
     .db $08
     .db $06
     .db $CE
@@ -6288,6 +6286,7 @@ HUMANOID_BITMAP: ; 0x002915, $F915
     .db $8E
     .db $D2
     .db $DF
+BITMAP_IDK_POS2: ; 0x0029CB, $F9CB
     .db $08
     .db $06
     .db $CE
@@ -14362,10 +14361,10 @@ RUG_MISMATCH_JMP: ; 0x00523D, $C23D
     JSR   ROM_BOARD_LED_DISPLAY_B
     LDB   #$57
     JSR   SET_COLOR_$C001
-    LDU   #$C073
-    LDX   #$3870
-    JSR   GOTO_C002_B2
-    LDY   #$C041
+    LDU   #$C073 ; PTR TO SENTENCE RAM FAILURE
+    LDX   #$3870 ; Pos XXYY
+    JSR   GOTO_C002_B2 ; To screen
+    LDY   #$C041 ; Idk ptr to
     JSR   GOTO_C023_B2
     LDD   $A041
     TSTA
