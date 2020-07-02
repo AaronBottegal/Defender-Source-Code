@@ -230,11 +230,19 @@ IRQ_CMD_LOC:                             .rs 0x03 ;0xA08F to A091
 R_A097:                                  .rs 0x01 ;0xA097
 
 
+	.org $A099
+ENEMY_UNK_SPAWNED?BULLET?:               .rs 0x01 ;0xA099
+
+
 	.org $A0A2
 VIDEO_BITS_LOCATION_COPY:                .rs 0x02 ;0xA0A2 to A0A3
 
 	.org $A0AB
 R_A0AB:                                  .rs 0x01 ;0xA0AB
+
+
+	.org $A0B5
+A0B5_LASER_COUNT?:                       .rs 0x01 ;0xA0B5
 
 
 	.org $A0BA
@@ -1793,11 +1801,11 @@ BIT_7_NOT_SET: ; 0x00096E, $D96E
     STD   $A0BD ; To
     STD   $A0BB ; To
     CLR   $A0AD ; Clear
-    CLR   $A0B5
+    CLR   A0B5_LASER_COUNT?
     CLR   R_A08A_UPDATE_SCORE?
     CLR   $A0AF
     CLR   $A09A
-    CLR   $A099 ; These
+    CLR   ENEMY_UNK_SPAWNED?BULLET? ; These
     LDX   #$A11A ; Idk why val
     STX   $A09B
     JSR   GET_PLAYER_PTR_IN_X_FROM_A08B
@@ -3158,50 +3166,50 @@ X_TO_X.next: ; 0x0013ED, $E3ED
     BNE   PROCESS_OBJ ; If not null, process.
 RTS: ; 0x0013F1, $E3F1
     PULS  A,B,PC
-L_0013F3: ; 0x0013F3, $E3F3
-    PSHS  U,Y,B,A
-    LDA   $A099
-    CMPA  #$14
-    BHS   RTS_TO_PC_JSR'D+6
-    LDD   10,X
-    SUBD  $A020
-    CMPD  #$2580
-    BHS   RTS_TO_PC_JSR'D+6
-    ASLB
+SPAWNS_SOMETHING_IF_UNDER_20: ; 0x0013F3, $E3F3
+    PSHS  U,Y,B,A ; Save
+    LDA   ENEMY_UNK_SPAWNED?BULLET? ; Load
+    CMPA  #$14 ; If A _ #$14, cap?
+    BHS   RTS_TO_PC_JSR'D+6 ; >=, goto.
+    LDD   10,X ; Load OBJ[10]
+    SUBD  $A020 ; Sub with
+    CMPD  #$2580 ; Idk why val
+    BHS   RTS_TO_PC_JSR'D+6 ; >= CMP'd, RTS
+    ASLB ; D << 2
     ROLA
     ASLB
     ROLA
-    LDB   12,X
-    CMPB  #$2A
-    BLS   RTS_TO_PC_JSR'D+6
-    LDX   LIST_$67_UNUSED_OBJS?
-    BEQ   RTS_TO_PC_JSR'D+6
-    STD   4,X
-    STD   10,X
-    EXG   A-B
-    STD   12,X
-    STU   6,X
-    CLRA
+    LDB   12,X ; B from OBJ[12]
+    CMPB  #$2A ; Off screen top
+    BLS   RTS_TO_PC_JSR'D+6 ; <=, goto.
+    LDX   LIST_$67_UNUSED_OBJS? ; Get objs free.
+    BEQ   RTS_TO_PC_JSR'D+6 ; RTS if none.
+    STD   4,X ; D to OBJ[4]
+    STD   10,X ; D to OBJ[10]
+    EXG   A-B ; Flip D
+    STD   12,X ; To OBJ[12]
+    STU   6,X ; U to OBJ[6]
+    CLRA ; Clear D
     CLRB
-    STD   14,X
-    STD   16,X
-    LDU   6,S
-    PULU  A,B,Y
-    STD   18,X
-    STY   2,X
-    PULU  A,B
-    STU   6,S
-    STD   8,X
-    LDA   #$14
-    STA   21,X
+    STD   14,X ; Clear
+    STD   16,X ; Clear
+    LDU   6,S ; U is JSR'd from addr.
+    PULU  A,B,Y ; Restore passed.
+    STD   18,X ; D to OBJ[18]
+    STY   2,X ; Y to OBJ[2] handler?
+    PULU  A,B ; Load
+    STU   6,S ; Store new U back, RTS's here.
+    STD   8,X ; to OBJ[8]
+    LDA   #$14 ; Val
+    STA   21,X ; To OBJ[21], [22]
     STA   22,X
-    LDD   X
-    STD   LIST_$67_UNUSED_OBJS?
-    LDD   LIST_$6D_UNK
-    STD   X
-    INC   $A099
-    STX   LIST_$6D_UNK
-    PULS  A,B,Y,U,PC
+    LDD   X ; D from X.next
+    STD   LIST_$67_UNUSED_OBJS? ; Fix list.
+    LDD   LIST_$6D_UNK ; Load list first entry
+    STD   X ; Store to X.next
+    INC   ENEMY_UNK_SPAWNED?BULLET?
+    STX   LIST_$6D_UNK ; Store X to list as head.
+    PULS  A,B,Y,U,PC ; RTS, leaving 6 bytes ahead.
 RTS_TO_PC_JSR'D+6: ; 0x00144A, $E44A
     LDU   6,S ; U = S[6]
     LEAU  6,U ; U += 6
@@ -3224,7 +3232,7 @@ BULLET_RELATED?: ; 0x001453, $E453
     ROLA
     STD   $A09D ; Store to
     LDX   #$A06D ; PTR to list.
-    BRA   X_TO_X.NEXT
+    BRA   X_TO_X.NEXT_BULLET?
 PROCESS_OBJ_BULLET?: ; 0x001470, $E470
     LDY   4,X ; OBJ[4]
     LDD   16,X ; OBJ[16]
@@ -3242,7 +3250,7 @@ PROCESS_OBJ_BULLET?: ; 0x001470, $E470
     STD   4,X ; OBJ[4]
     LDU   4,X ; OBJ[4]
     JMP   [18,X] ; JMP to OBJ[18]
-X_TO_X.NEXT: ; 0x001493, $E493
+X_TO_X.NEXT_BULLET?: ; 0x001493, $E493
     LDX   X
     BNE   PROCESS_OBJ_BULLET? ; If valid, process.
 RTS: ; 0x001497, $E497
@@ -3250,22 +3258,22 @@ RTS: ; 0x001497, $E497
     LDU   $A0A6
     LDB   11,X
     BPL   DELETE_DONT_ADD
-    LEAU  6,U
+    LEAU  6,U ; Switches which bullet shown?
 DELETE_DONT_ADD: ; 0x0014A0, $E4A0
-    LDD   #$0000
-    STD   Y
+    LDD   #$0000 ; Clear
+    STD   Y ; Clear Y to Y+2
     STA   2,Y
-    STD   256,Y
+    STD   256,Y ; X+1, Y+0 to Y+2
     STA   258,Y
-    LDY   4,X
-    LDD   U
-    STD   Y
-    LDD   2,U
-    STA   2,Y
-    STB   256,Y
-    LDD   4,U
-    STD   257,Y
-    BRA   X_TO_X.NEXT
+    LDY   4,X ; Y from XOBJ[4]
+    LDD   U ; D from @U
+    STD   Y ; X to Y
+    LDD   2,U ; D from U[2]
+    STA   2,Y ; A to Y+2
+    STB   256,Y ; B to Y+0
+    LDD   4,U ; D from U[4]
+    STD   257,Y ; To X+1,Y+1 to Y+2
+    BRA   X_TO_X.NEXT_BULLET? ; Next
 OFF_GAME_SCREEN: ; 0x0014C6, $E4C6
     CLRA ; Clear D
     CLRB
@@ -3274,56 +3282,57 @@ OFF_GAME_SCREEN: ; 0x0014C6, $E4C6
     STA   2,Y ; (0,2)
     STD   256,Y ; (2,0)
     STA   258,Y ; (2,2)
-    BRA   X_TO_X.NEXT ; Next OBJ
-    LDU   $A0A8
+    BRA   X_TO_X.NEXT_BULLET? ; Next OBJ
+    LDU   $A0A8 ; Graphic ptr?
     LDB   11,X ; OBJ[11]
     ASLB ; Get bit into carry
     LDD   #$0000 ; Clear bullet
-    STD   Y
+    STD   Y ; X to X+1, Y to Y+2
     STA   2,Y
     STD   256,Y
     STA   258,Y
-    LDY   4,X ; Get OBJ[4]
+    LDY   4,X ; Get OBJ[4] to Y
     BLO   L_001507 ; If CC.c = 1, goto
-    LDD   U
-    ANDA  #$0F
-    STD   Y
-    LDD   2,U
-    ANDA  #$0F
-    STA   2,Y
-    ANDB  #$F0
-    STB   257,Y
-    JMP   X_TO_X.NEXT ; Next OBJ
+    LDD   U ; D from U
+    ANDA  #$0F ; Delete top bits.
+    STD   Y ; To YOBJ..?
+    LDD   2,U ; Load from UOBJ[2]
+    ANDA  #$0F ; Delete top bits
+    STA   2,Y ; Store A to YOBJ[2]? Unsure why
+    ANDB  #$F0 ; Get upper bits only.
+    STB   257,Y ; Store to Y,X+1,Y+1
+    JMP   X_TO_X.NEXT_BULLET? ; Next OBJ
 L_001507: ; 0x001507, $E507
-    LDD   U
-    ANDB  #$0F
-    STB   1,Y
-    ANDA  #$F0
-    STA   258,Y
-    LDD   2,U
-    ANDA  #$F0
-    STD   256,Y
-    JMP   X_TO_X.NEXT
+    LDD   U ; D from U
+    ANDB  #$0F ; Keep bottom bits.
+    STB   1,Y ; Store to Y+1
+    ANDA  #$F0 ; Get top bits
+    STA   258,Y ; Store to Y,X+1,Y+2
+    LDD   2,U ; Load U+2
+    ANDA  #$F0 ; Keep top bits.
+    STD   256,Y ; Store to Y+1
+    JMP   X_TO_X.NEXT_BULLET? ; Next bullet.
+CALLBACK_BULLET_HIT_PLAYER?: ; 0x00151E, $E51E
     LDD   #$0025
     JSR   SCORE_ADD_AB ; Score +25, hit by bullet?
-    DEC   $A099
-    JSR   REMOVE_X_FROM_LIST_A06D
-    JSR   L_0023FE
-    LDD   10,X
-    LSRA
+    DEC   ENEMY_UNK_SPAWNED?BULLET? ; Dec counter.
+    JSR   REMOVE_X_FROM_LIST_A06D ; Remove from list.
+    JSR   BANK_TWO_HANDLER+8_HANDLER
+    LDD   10,X ; D from OBJ[10]
+    LSRA ; D >> 2
     RORB
     LSRA
     RORB
-    ADDD  $A020
-    STD   10,X
-    LDA   12,X
-    SUBA  #$02
-    STA   12,X
-    LDD   #$F951
-    STD   2,X
+    ADDD  $A020 ; Add with val
+    STD   10,X ; D to OBJ[10]
+    LDA   12,X ; Load A with OBJ[12]
+    SUBA  #$02 ; Sub 2
+    STA   12,X ; Store back.
+    LDD   #$F951 ; Load different callback.
+    STD   2,X ; Store to obj.
     JSR   L_002C63
     LDD   #$D4E4
-    JMP   SET_A0B0-A0B3_WHEN_@D>A0B2
+    JMP   SET_A0B0-A0B3_WHEN_@D>A0B2 ; Still unsure.
     .db $5E ; Data?
 SETUP_A1A2-A1B1_WITH_99/9A/A9/AA: ; 0x00154B, $E54B
     LDX   #$A1A2 ; Ptr?
@@ -3346,37 +3355,37 @@ COMMIT_B: ; 0x001562, $E562
     BNE   LOOP_NOT_DONE ; Not yet.
     RTS ; Leave
 L_00156A: ; 0x00156A, $E56A
-    LDX   #$A06D
-    BRA   L_00158A
-L_00156F: ; 0x00156F, $E56F
-    LDA   22,X
-    BEQ   L_001579
-    DEC   21,X
-    BNE   L_00158A
-L_001579: ; 0x001579, $E579
-    LDU   X
-    STU   Y
-    LDU   LIST_$67_UNUSED_OBJS?
-    STU   X
-    STX   LIST_$67_UNUSED_OBJS?
-    JSR   L_0023FE
-    DEC   $A099
-    LEAX  Y
-L_00158A: ; 0x00158A, $E58A
-    LEAY  X
-    LDX   X
-    BNE   L_00156F
-    RTS
-    LDA   $A0B5
-    CMPA  #$04
-    BHS   L_0015A8
-    INC   $A0B5
+    LDX   #$A06D ; List ptr
+    BRA   TO_NEXT_OBJ
+PROCESS_OBJ_UNK: ; 0x00156F, $E56F
+    LDA   22,X ; Load OBJ[22]
+    BEQ   REMOVE_BULLET_FROM_SCR? ; If 0, don't dec.
+    DEC   21,X ; Dec val.
+    BNE   TO_NEXT_OBJ ; To next
+REMOVE_BULLET_FROM_SCR?: ; 0x001579, $E579
+    LDU   X ; Load next obj
+    STU   Y ; To previous, removing OBJ X
+    LDU   LIST_$67_UNUSED_OBJS? ; Load list
+    STU   X ; List to X.next
+    STX   LIST_$67_UNUSED_OBJS? ; X is new head.
+    JSR   BANK_TWO_HANDLER+8_HANDLER
+    DEC   ENEMY_UNK_SPAWNED?BULLET?
+    LEAX  Y ; X is now X.prev
+TO_NEXT_OBJ: ; 0x00158A, $E58A
+    LEAY  X ; Obj X to Y, Y is X.last in rtn
+    LDX   X ; X to X.next
+    BNE   PROCESS_OBJ_UNK ; If not null, goto.
+    RTS ; RTS
+    LDA   A0B5_LASER_COUNT? ; Load val
+    CMPA  #$04 ; If A _ #$04
+    BHS   L_0015A8 ; >=, goto.
+    INC   A0B5_LASER_COUNT? ; ++
     LDD   #$D51B
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2
-    LDX   $A0C1
-    LDA   $A0BB
-    BPL   L_0015C1
-    JMP   L_001630
+    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2 ; Difficulty?
+    LDX   $A0C1 ; Load X with
+    LDA   $A0BB ; Load A with
+    BPL   LASER_SETUP? ; If A positive, goto.
+    JMP   L_001630 ; Otherwise.
 L_0015A8: ; 0x0015A8, $E5A8
     JMP   OBJ_X@A063_REMOVED_FROM_A05F+HANDLED
 L_0015AB: ; 0x0015AB, $E5AB
@@ -3391,60 +3400,60 @@ L_0015AB: ; 0x0015AB, $E5AB
     LDU   #$F96F
     JSR   L_0016BA
     PULS  U,PC
-L_0015C1: ; 0x0015C1, $E5C1
-    LEAX  1796,X
-    STX   7,U
-    STX   9,U
-    STX   11,U
-    LDA   A0BA_GAME_STATE?
-    BITA  #$40
-    BNE   L_001621
-    LDA   #$04
-    LDX   7,U
-    LDB   #$11
-    CMPX  #$9800
-    BHS   L_001621
-L_0015DC: ; 0x0015DC, $E5DC
-    STB   X
-    LEAX  256,X
-    DECA
-    BNE   L_0015DC
-    LDB   #$99
-    STB   X
-    STX   7,U
-    LDY   $A0A4
-    CMPY  #$A15F
-    BLO   L_0015F8
-    LDY   #$A142
-L_0015F8: ; 0x0015F8, $E5F8
-    LDX   9,U
-    LDA   #$03
-L_0015FC: ; 0x0015FC, $E5FC
-    LDB   Y+
-    STB   X
-    LEAX  256,X
-    DECA
-    BNE   L_0015FC
-    STY   $A0A4
-    STX   9,U
-    CLR   [11,U]
-    INC   11,U
-    LDD   7,U
-    SUBA  #$06
-    BSR   L_0015AB
-    BNE   L_001621
-    LDA   #$01
+LASER_SETUP?: ; 0x0015C1, $E5C1
+    LEAX  1796,X ; X+7,Y+4?
+    STX   7,U ; To UOBJ[7]
+    STX   9,U ; To UOBJ[9]
+    STX   11,U ; To OBJ[11]
+    LDA   A0BA_GAME_STATE? ; Load state
+    BITA  #$40 ; Test bit
+    BNE   CLEAR_LASER_OBJ[11]_TO_OBJ[7] ; Set, goto.
+    LDA   #$04 ; Idk val
+    LDX   7,U ; Load OBJ[7]
+    LDB   #$11 ; Load laser color.
+    CMPX  #$9800 ; Compare to edge of screen.
+    BHS   CLEAR_LASER_OBJ[11]_TO_OBJ[7] ; If >=, goto.
+LOOP_STORE_LASER_1: ; 0x0015DC, $E5DC
+    STB   X ; B to X
+    LEAX  256,X ; X+1
+    DECA ; Dec counter
+    BNE   LOOP_STORE_LASER_1 ; Loop if not 0.
+    LDB   #$99 ; Front of laser?
+    STB   X ; B to X
+    STX   7,U ; X stored back to obj.
+    LDY   $A0A4 ; Load Y
+    CMPY  #$A15F ; If Y _ ADDR
+    BLO   DONT_SEED_Y ; <, goto.
+    LDY   #$A142 ; Seed Y, randomness pool.
+DONT_SEED_Y: ; 0x0015F8, $E5F8
+    LDX   9,U ; X from OBJ[9]
+    LDA   #$03 ; Unsure val
+LOOP_STORE_LASER_2: ; 0x0015FC, $E5FC
+    LDB   Y+ ; B from Y
+    STB   X ; To X
+    LEAX  256,X ; X+1
+    DECA ; Dec A
+    BNE   LOOP_STORE_LASER_2
+    STY   $A0A4 ; Laser ptr 2?
+    STX   9,U ; Store to OBJ[9]
+    CLR   [11,U] ; Clear OBJ[11] PTR
+    INC   11,U ; Inc high byte
+    LDD   7,U ; D from OBJ[7]
+    SUBA  #$06 ; Sub A
+    BSR   L_0015AB ; Need to solve
+    BNE   CLEAR_LASER_OBJ[11]_TO_OBJ[7] ; Skip callback.
+    LDA   #$01 ; Callback stuff.
     LDX   #$E5CB
     JMP   SET_U2LIST,STORE_X2HANDLER+A2COUNTER,U.NEXT
-L_001621: ; 0x001621, $E621
-    LDX   11,U
-    CLRA
-L_001624: ; 0x001624, $E624
-    STA   X
-    LEAX  256,X
-    CMPX  7,U
-    BLS   L_001624
-    BRA   L_00169A
+CLEAR_LASER_OBJ[11]_TO_OBJ[7]: ; 0x001621, $E621
+    LDX   11,U ; Load OBJ[11]
+    CLRA ; Clear A
+LOOP_CLEAR_LASER: ; 0x001624, $E624
+    STA   X ; Store to X+
+    LEAX  256,X ; X+1
+    CMPX  7,U ; Catch up to OBJ[7]
+    BLS   LOOP_CLEAR_LASER ; If <=, goto.
+    BRA   ONE_LESS_LASER
 L_001630: ; 0x001630, $E630
     LEAX  4,X
     STX   7,U
@@ -3497,8 +3506,8 @@ L_001690: ; 0x001690, $E690
     LEAX  -256,X
     CMPX  7,U
     BHS   L_001690
-L_00169A: ; 0x00169A, $E69A
-    DEC   $A0B5
+ONE_LESS_LASER: ; 0x00169A, $E69A
+    DEC   A0B5_LASER_COUNT? ; 1 less laser on screen.
     JMP   OBJ_X@A063_REMOVED_FROM_A05F+HANDLED
 RANDOMNESS_32_OF_0,1,10,11_AT_A142-A161: ; 0x00169F, $E69F
     LDX   #$A142 ; PTR?
@@ -3728,7 +3737,7 @@ OBJ[20]_WAS_ZERO: ; 0x0017FE, $E7FE
     ADDA  #$60 ; Add
     ADDD  10,X ; Add
     STD   10,X ; Store to...
-    JSR   L_0023FE ; Does tons.
+    JSR   BANK_TWO_HANDLER+8_HANDLER ; Does tons.
     LDD   #$0000
     STD   4,X ; Clear
     LDU   LIST_$6B_UNK ; Get obj at head
@@ -3884,7 +3893,7 @@ L_001936: ; 0x001936, $E936
     JSR   REMOVE_X_FROM_LIST_A06D
     BRA   L_001936
 L_00193F: ; 0x00193F, $E93F
-    CLR   $A099
+    CLR   ENEMY_UNK_SPAWNED?BULLET?
     LDD   A0DF_RAND_BYTE
     STD   $A020
     STD   $A022
@@ -4329,7 +4338,7 @@ L_001C86: ; 0x001C86, $EC86
     EORA  14,X
     BMI   L_001CBF
     LEAY  X
-    JSR   L_0013F3
+    JSR   SPAWNS_SOMETHING_IF_UNDER_20
     ANDB  [-1701,U]
     BITB  -2,X
     BEQ   L_001CBF
@@ -4621,7 +4630,7 @@ L_001EA4: ; 0x001EA4, $EEA4
     JMP   OBJ_X@A063_REMOVED_FROM_A05F+HANDLED
 L_001EBA: ; 0x001EBA, $EEBA
     PSHS  X
-    JSR   L_0013F3
+    JSR   SPAWNS_SOMETHING_IF_UNDER_20
     ANDB  [-1701,U]
     BITB  -2,X
     BEQ   L_001EFC
@@ -5294,11 +5303,11 @@ L_0023CA: ; 0x0023CA, $F3CA
 L_0023DB: ; 0x0023DB, $F3DB
     RTS
 L_0023DC: ; 0x0023DC, $F3DC
-    LDA   $A099
+    LDA   ENEMY_UNK_SPAWNED?BULLET?
     CMPA  #$0A
 L_0023E0: ; 0x0023E0, $F3E0
     BHS   L_0023FA
-    JSR   L_0013F3
+    JSR   SPAWNS_SOMETHING_IF_UNDER_20
     .db $E4
     .db $98
     .db $F9
@@ -5317,36 +5326,36 @@ L_0023FA: ; 0x0023FA, $F3FA
     RTS
 L_0023FB: ; 0x0023FB, $F3FB
     JSR   REMOVE_X_FROM_LIST_A065|A06B
-L_0023FE: ; 0x0023FE, $F3FE
-    PSHS  U,Y,X,B,A
-    JSR   BANKSWITCH_TO_2
-    LDD   4,X
-    LDY   2,X
-    JSR   [8,Y]
-    PULS  A,B,X,Y,U,PC
+BANK_TWO_HANDLER+8_HANDLER: ; 0x0023FE, $F3FE
+    PSHS  U,Y,X,B,A ; Save
+    JSR   BANKSWITCH_TO_2 ; Switch to bank 2
+    LDD   4,X ; D from OBJ[4]
+    LDY   2,X ; Y from OBJ[2]
+    JSR   [8,Y] ; JSR to ADDR at Y+8
+    PULS  A,B,X,Y,U,PC ; RTS+Restore
     PSHS  X
     JSR   LIST_SEARCH_FOR_X_IN_OBJ[6]_AND_REMOVE_FROM_$A05F
     PULS  X
-    BRA   L_002420
+    BRA   ADD_TO_SCORE+MORE_UNK
 L_002416: ; 0x002416, $F416
     PSHS  X
     JSR   LIST_SEARCH_FOR_X_IN_OBJ[6]_AND_REMOVE_FROM_$A05F
     PULS  X
 L_00241D: ; 0x00241D, $F41D
     JSR   REMOVE_X_FROM_LIST_A065|A06B
-L_002420: ; 0x002420, $F420
+ADD_TO_SCORE+MORE_UNK: ; 0x002420, $F420
     PSHS  U,B,A
     LDU   4,S
     PULU  A,B ; Pull add
-    JSR   SCORE_ADD_AB ; Add it. Smartbomb stuff? Generic rtn for item add?
-    BSR   L_002434
+    JSR   SCORE_ADD_AB ; Add val pulled. Generic rtn this is?
+    BSR   L_002434 ; Particle effects setup?
     PULU  A,B
     STU   4,S
     JSR   SET_A0B0-A0B3_WHEN_@D>A0B2
     PULS  A,B,U,PC
 L_002434: ; 0x002434, $F434
-    PSHS  U,Y,X,B,A
-    BSR   L_0023FE
+    PSHS  U,Y,X,B,A ; Save
+    BSR   BANK_TWO_HANDLER+8_HANDLER ; Idk why
     JSR   L_002C63
     PULS  A,B,X,Y,U,PC
 CALLBACK_UNK: ; 0x00243D, $F43D
@@ -6180,14 +6189,11 @@ HUMANOID_BITMAP: ; 0x002915, $F915
     .db $39
     .db $D1
     .db $6B
-    .db $04
-    .db $08
-    .db $CC
-    .db $90
-    .db $CC
-    .db $90
-    .db $D1
-    .db $39
+CALLBACK?_SHIP_EXPLODE_COUNTDOWN?: ; 0x002951, $F951
+    LSR   $A008
+    LDD   #$90CC
+    SUBA  $A0D1
+    RTS
     .db $D1
     .db $6B
     .db $02
