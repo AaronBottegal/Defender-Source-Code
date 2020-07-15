@@ -36,47 +36,45 @@ BANKSWITCH                               = 0xD000
 
 ;RAM Variables
 
-	.org $A002
-R_A002:                                  .rs 0x01 ;0xA002
+	.org $A000
+R_A000_CURR_PLANET_GEN_SHIFT_DELTA:      .rs 0x01 ;0xA000
 
+A001_CURR_PLANET_GEN_HEIGHT_CHANGES:     .rs 0x01 ;0xA001
 
-	.org $A005
-R_A005_IRQ_STACK_VAL_1:                  .rs 0x01 ;0xA005
+R_A002_CURR_PLANET_GEN_HEIGHT:           .rs 0x01 ;0xA002
 
-R_A006_SCORE_POS_CHAR:                   .rs 0x01 ;0xA006
+A003_CURR_PLANET_GEN_DATA_PTR:           .rs 0x02 ;0xA003 to A004
+R_A005_PLANET_DATA_PTR_LOWER:            .rs 0x02 ;0xA005 to A006
+R_A007_PLANET_DATA_PTR_HIGHER:           .rs 0x02 ;0xA007 to A008
+A009_WORLD_DATA_PTR_UNK:                 .rs 0x01 ;0xA009
 
-R_A007_IRQ_STACK_VAL_2:                  .rs 0x01 ;0xA007
+HIGHSCORE_INITIALS_ADDR+2:               .rs 0x01 ;0xA00A
 
-HIGHSCORE_INITIALS_ADDR:                 .rs 0x03 ;0xA008 to A00A
 A00B_PLANET_GEN_DATA_PTR:                .rs 0x01 ;0xA00B
 
 
 	.org $A00D
-SHITED_DATA_A00D:                        .rs 0x01 ;0xA00D
+A00D_WORLD_MOVE_DATA_UNK:                .rs 0x01 ;0xA00D
 
-A00B_PLANET_GEN_SEED:                    .rs 0x01 ;0xA00E
+A00B_PLANET_GEN_HEIGHT_CHANGES:          .rs 0x01 ;0xA00E
 
-COUNTDOWN_A00F:                          .rs 0x01 ;0xA00F
+A00F_SHIFTS_COUNTER_UNK:                 .rs 0x01 ;0xA00F
 
-A010_PLANET_SHIFTS_COUNTDOWN:            .rs 0x01 ;0xA010
+A010_PLANET_GEN_SHIFTS_DELTA:            .rs 0x01 ;0xA010
 
-A011_TIED_WITH_A00D:                     .rs 0x01 ;0xA011
+A011_WORLD_HEIGHT_UNK:                   .rs 0x01 ;0xA011
 
-A012_PLANET_HEIGHT_CREATING:             .rs 0x01 ;0xA012
+A012_PLANET_GEN_HEIGHT:                  .rs 0x01 ;0xA012
 
 R_A013_STACK_SAVE_IRQ_RTN_B7:            .rs 0x01 ;0xA013
 
 
 	.org $A015
-A015_X_MATCH:                            .rs 0x01 ;0xA015
-
-
-	.org $A017
-A017_COMPARED_TO_A017:                   .rs 0x01 ;0xA017
-
+A015_WORLD_UPDATE_COUNT?:                .rs 0x02 ;0xA015 to A016
+A017_WORLD_MOVEMENT_MASKED:              .rs 0x02 ;0xA017 to A018
 
 	.org $A020
-R_A020_SCREEN_POS_CHANGE_HORIZ?:         .rs 0x01 ;0xA020
+R_A020_SCREEN_POS_HORIZ?CHANGE?:         .rs 0x01 ;0xA020
 
 
 	.org $A022
@@ -213,6 +211,8 @@ PTR_TO_A162_POOL:                        .rs 0x01 ;0xA09F
 
 	.org $A0A2
 VIDEO_BITS_LOCATION_COPY:                .rs 0x02 ;0xA0A2 to A0A3
+DEMO_LASER_HOLES_PTR:                    .rs 0x01 ;0xA0A4
+
 
 	.org $A0A6
 RANDOM_PALETTE_ROTATION_DEFENDER_LOGO?:  .rs 0x01 ;0xA0A6
@@ -447,7 +447,7 @@ R_A185:                                  .rs 0x01 ;0xA185
 
 R_A186:                                  .rs 0x01 ;0xA186
 
-R_A187_OBJ_TMP_4?:                       .rs 0x01 ;0xA187
+R_A187_OBJ_TMP_LASER?:                   .rs 0x01 ;0xA187
 
 
 	.org $A189
@@ -459,7 +459,7 @@ R_A18B_OBJ_PTR_SHIP?:                    .rs 0x01 ;0xA18B
 
 
 	.org $A18D
-R_A18D_OBJ_PTR_LANDER?:                  .rs 0x01 ;0xA18D
+R_A18D_OBJ_PTR_ENEMY?:                   .rs 0x01 ;0xA18D
 
 
 	.org $A18F
@@ -473,7 +473,7 @@ R_A192_OBJ_PTR_SCRATCH:                  .rs 0x01 ;0xA192
 
 
 	.org $A194
-R_A194:                                  .rs 0x01 ;0xA194
+DEMO_LASER_START_POS:                    .rs 0x01 ;0xA194
 
 
 	.org $A196
@@ -604,18 +604,18 @@ X_TO_X.NEXT: ; 0x000081, $D081
     BRA   X_TO_X.NEXT ; Always traverse again.
 RTS: ; 0x000093, $D093
     PULS  A,X,PC ; RTS
-FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR: ; 0x000095, $D095
+23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR: ; 0x000095, $D095
     BSR   LIST_GET_23B,X.next_FROM_$65_ONSCREEN? ; Get obj X
     PSHS  U,Y,B,A ; Save to sys
-    STU   6,X ; U to OBJ[6]
-    LDU   6,S ; Load X from passed S[0]
+    STU   6,X ; U to OBJ[6], callback?
+    LDU   6,S ; Load JSR location.
     PULU  A,B,Y ; Pull from loaded ptr
-    STD   2,X ; to OBJ[2]
-    STY   8,X ; To OBJ[8]
+    STD   2,X ; JSR[0] TO XOBJ[2]
+    STY   8,X ; JSR[2] to XOBJ[8], handler?
     PULU  A,B ; Pull from U
-    STD   18,X ; Put to OBJ[18]
-    STU   6,S ; Store next instruction.
-    PULS  A,B,Y,U,PC ; RTS, restore. FMT:[2.W,8.W,18.W]
+    STD   18,X ; JSR[4] to XOBJ[18]
+    STU   6,S ; Store next instruction for RST past table.
+    PULS  A,B,Y,U,PC ; RTS, restore.
 LIST_GET_23B,X.next_FROM_$65_ONSCREEN?: ; 0x0000AD, $D0AD
     PSHS  U,B,A ; Save
     LDX   LIST_23B_UNUSED_OBJS? ; Get obj
@@ -1822,11 +1822,11 @@ SKIP_WATCHDOG_OTHER: ; 0x000968, $D968
 BIT_7_NOT_SET: ; 0x00096E, $D96E
     CLRA ; Clear D
     CLRB
-    STD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Clear
+    STD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Clear
     STD   R_A022_SCR_CHANGE_UNK ; Clear
     JSR   BANKSWITCH_TO_7 ; Bank 7
-    JSR   JMP_TO_GENERATE_LAND_DATA? ; Prep for...?
-    JSR   JMP_TO_DRAW_LAND? ; Unsure.
+    JSR   JMP_TO_GENERATE_LAND_DATA_B300-B6FF ; Prep for...?
+    JSR   JMP_TO_DRAW_LAND_UNK ; Unsure.
     JSR   CLEAR_GAME_SCREEN ; Clear the screen.
     LDD   #$0300 ; Idk why val
     STD   $A0BD ; To
@@ -1854,7 +1854,7 @@ BIT_7_NOT_SET: ; 0x00096E, $D96E
     LDD   #$2000 ; Unsure val
     STD   $A0C3
     LDD   #$0800 ; Unsure val.
-    ADDD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; Add?
+    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add?
     STD   $A0CC ; Store to
     LDD   #$8000 ; VPOS?
     STD   PLAYER.VPOS ; Store to
@@ -1890,7 +1890,7 @@ BIT_7_NOT_SET: ; 0x00096E, $D96E
     LDA   A08B_CURRENT_PLAYER ; Load val
     DECA ; Dec
     BEQ   DONT_MOVE_U ; If was 1, don't move.
-    LDU   #$C0F1 ; SENTENCE PTR PLAYER ONE
+    LDU   #$C0F1 ; SENTENCE PTR PLAYER TWO
 DONT_MOVE_U: ; 0x000A11, $DA11
     LDX   #$3C80 ; Pos?
     JSR   PSH_ALL_GOTO_B2-C002 ; Print
@@ -1924,7 +1924,7 @@ SKIP_OR_B: ; 0x000A43, $DA43
 L_000A46: ; 0x000A46, $DA46
     LDB   #$58 ; State?
     BSR   OR_AND_STORE_B_NO_HUMANOIDS? ; Or state?
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Move
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Move
     STD   R_A022_SCR_CHANGE_UNK
     LDX   SHIP_SCR_POS_XXYY ; Pos from
     LDD   #$0806 ; Size
@@ -2040,8 +2040,8 @@ A08C_CURRENT_PLAYER_1: ; 0x000B2C, $DB2C
 CALLBACK_GAME_OVER_UNK_REASON: ; 0x000B48, $DB48
     JMP   GOTO_B1_C000
 CALLBACK_UNK: ; 0x000B4B, $DB4B
-    ASR   R_A007_IRQ_STACK_VAL_2
-    ASR   COUNTDOWN_A00F
+    ASR   R_A007_PLANET_DATA_PTR_HIGHER
+    ASR   A00F_SHIFTS_COUNTER_UNK
     SWI1 ; Interrupt
     CLR   BANKSWITCH
 DATA_UNK: ; 0x000B53, $DB53
@@ -2134,7 +2134,7 @@ FILL_OUT_HUMANOID?: ; 0x000BE1, $DBE1
     PSHS  B,A ; Save
     STA   A073_SCRATCH_LOOP_WORD?+1 ; Store to...
 LOOP_FILL_OUT: ; 0x000BE5, $DBE5
-    JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR ; Fill out obj with data.
+    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR ; Fill out obj with data.
     .db $F9
     .db $01
     .db $ED
@@ -2224,7 +2224,7 @@ LOOP_$67_TO_$65: ; 0x000C77, $DC77
     JSR   RANDOM_VALUE_FWD+IN_A ; Get random.
     ANDA  #$3F ; Get bits.
     ADDA  #$80 ; Set top.
-    ADDD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; Add with this.
+    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add with this.
     STD   10,X ; Store to OBJ[10]
     LDA   $A0FF ; Load val
     BEQ   UN_RTN_IDK ; If 0, goto.
@@ -2632,7 +2632,7 @@ DONT_SET_PALETTE: ; 0x000F89, $DF89
     LDA   A0BA_PLAYER_GAME_STATE
     BITA  #$02 ; Test bit on val
     BNE   SKIP_BANK7_RTN ; If set, skip JSR below.
-    JSR   JMP_TO_LAND_MODIFY?
+    JSR   JMP_TO_LAND_IRQ
 SKIP_BANK7_RTN: ; 0x000F9A, $DF9A
     LDA   #$02
     STA   BANKSWITCH ; Bank to 2
@@ -2674,7 +2674,7 @@ IRQ_INITIAL_P2: ; 0x000FC3, $DFC3
     LDA   A0BA_PLAYER_GAME_STATE ; Val
     BITA  #$02 ; If bit 2...
     BNE   SKIP_JSR ; Is set, goto...
-    JSR   JMP_TO_LAND_MODIFY? ; Do this if set.
+    JSR   JMP_TO_LAND_IRQ ; Do this if set.
 SKIP_JSR: ; 0x000FF4, $DFF4
     LDA   #$02 ; Bank 2
     STA   BANKSWITCH
@@ -2747,7 +2747,7 @@ STARS_UNK: ; 0x00107E, $E07E
     BITA  #$20 ; Test bit
     BNE   RTS_STARS ; If not set, RTS
     LDX   #$AF9D ; Load, stars PTR
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Load val
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load val
     ANDB  #$80 ; Clear bottom 7
     STD   $A06F ; Store
     LDD   R_A022_SCR_CHANGE_UNK ; Load
@@ -3060,7 +3060,7 @@ CLEAR_95: ; 0x0012F1, $E2F1
 D_TO_C3: ; 0x0012F7, $E2F7
     STD   $A0C3 ; Store
     STA   $A0C1 ; Store to
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Load
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load
     STD   R_A022_SCR_CHANGE_UNK ; Store
     LDD   $A0C7 ; Load
     CMPD  #$0100 ; If D _ val
@@ -3072,16 +3072,16 @@ DONT_APPLY_MAX: ; 0x00130A, $E30A
     LDD   #$FF00 ; Min
 DONT_APPLY_MIN: ; 0x001313, $E313
     STD   $A0C7 ; Store
-    ADDD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; Add with
+    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add with
     SUBD  $A095 ; Sub from
-    STD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Store to
+    STD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Store to
     LDD   $A0C3 ; Load
     LSRA ; A >> 2, into B
     RORB
     LSRA
     RORB
     ANDB  #$E0 ; Only bits added in.
-    ADDD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; Add with
+    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add with
     STD   $A0CC ; Store to
     LDB   PLAYER.VPOS ; Load
     LDA   WGT_DATA_B_RAM_COPY
@@ -3176,7 +3176,7 @@ OBJ[4]_IS_ZERO: ; 0x0013C2, $E3C2
     CMPB  1,S ; S[1]
     BLS   X_TO_X.next ; If B <=, goto.
     LDD   10,X ; Load OBJ[10]
-    SUBD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; Sub with val
+    SUBD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Sub with val
     CMPD  #$2580 ; Compare to val
     BHS   X_TO_X.next ; If D >= Val, goto.
     LDY   2,X ; OBJ[2], callback.
@@ -3203,7 +3203,7 @@ SPAWNS_SOMETHING_IF_UNDER_20_WITH_6_PAST_JSR: ; 0x0013F3, $E3F3
     CMPA  #$14 ; If A _ #$14, cap?
     BHS   RTS_TO_PC_JSR'D+6 ; >=, goto.
     LDD   10,X ; Load OBJ[10]
-    SUBD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; Sub with
+    SUBD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Sub with
     CMPD  #$2580 ; Idk why val
     BHS   RTS_TO_PC_JSR'D+6 ; >= CMP'd, RTS
     ASLB ; D << 2
@@ -3251,7 +3251,7 @@ BULLET_RELATED?: ; 0x001453, $E453
     LDA   A0BA_PLAYER_GAME_STATE ; Load val
     BITA  #$20 ; Test bit
     BNE   RTS ; If set, RTS.
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Load val
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load val
     ANDB  #$E0 ; Clear bottom B
     STD   $A09D ; Store to
     LDD   R_A022_SCR_CHANGE_UNK ; Load val
@@ -3354,7 +3354,7 @@ CALLBACK_BULLET_HIT_PLAYER?: ; 0x00151E, $E51E
     RORB
     LSRA
     RORB
-    ADDD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; Add with val
+    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add with val
     STD   10,X ; D to OBJ[10]
     LDA   12,X ; Load A with OBJ[12]
     SUBA  #$02 ; Sub 2
@@ -3452,7 +3452,7 @@ LOOP_STORE_LASER_1: ; 0x0015DC, $E5DC
     LDB   #$99 ; Front of laser?
     STB   X ; B to X
     STX   7,U ; X stored back to obj.
-    LDY   $A0A4 ; Load Y
+    LDY   DEMO_LASER_HOLES_PTR ; Load Y
     CMPY  #$A15F ; If Y _ ADDR
     BLO   DONT_SEED_Y ; <, goto.
     LDY   #$A142 ; Seed Y, randomness pool.
@@ -3465,7 +3465,7 @@ LOOP_STORE_LASER_2: ; 0x0015FC, $E5FC
     LEAX  256,X ; X+1
     DECA ; Dec A
     BNE   LOOP_STORE_LASER_2
-    STY   $A0A4 ; Laser ptr 2?
+    STY   DEMO_LASER_HOLES_PTR ; Laser ptr 2?
     STX   9,U ; Store to OBJ[9]
     CLR   [11,U] ; Clear OBJ[11] PTR
     INC   11,U ; Inc high byte
@@ -3506,7 +3506,7 @@ LOOP_PUT_LASER_LEFT: ; 0x001649, $E649
     LDB   #$99 ; White?
     STB   X ; Store to new pos.
     STX   7,U ; Store pos to obj
-    LDY   $A0A4 ; Laser dots pool ptr
+    LDY   DEMO_LASER_HOLES_PTR ; Laser dots pool ptr
     CMPY  #$A15F ; End of pool
     BLO   L_001665 ; <, not end
     LDY   #$A142 ; Beginning of pool
@@ -3519,7 +3519,7 @@ LOOP_PUT_HOLES_LEFT: ; 0x001669, $E669
     LEAX  -256,X ; X-1
     DECA ; Loop--
     BNE   LOOP_PUT_HOLES_LEFT
-    STY   $A0A4 ; Store pos in pool back
+    STY   DEMO_LASER_HOLES_PTR ; Store pos in pool back
     STX   9,U ; Store holes next pos to OBJ
     CLR   [11,U] ; Clear end of line.
     DEC   11,U ; X--
@@ -3542,7 +3542,7 @@ ONE_LESS_LASER: ; 0x00169A, $E69A
     JMP   CALLBACK_REMOVE?
 LASER_HOLES_POOL_CREATION_FROM_RANDOM: ; 0x00169F, $E69F
     LDX   #$A142 ; PTR?
-    STX   $A0A4 ; Put to.
+    STX   DEMO_LASER_HOLES_PTR ; Put to.
 LOOP_WRITE_X: ; 0x0016A4, $E6A4
     JSR   RANDOM_VALUE_FWD+IN_A ; Depends on randomness?
     CLRB ; Clear B
@@ -3928,7 +3928,7 @@ LOOP_REMOVE_ALL_FROM_LIST_6D: ; 0x001936, $E936
 L_00193F: ; 0x00193F, $E93F
     CLR   ENEMY_UNK_SPAWNED?BULLET? ; Clear count
     LDD   A0DF_RAND_BYTE ; Random both.
-    STD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; To 2x
+    STD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; To 2x
     STD   R_A022_SCR_CHANGE_UNK
     LSRB ; Shift B
     BHS   VAL_SHIFTED_0 ; If 0 shifted off, goto.
@@ -3951,10 +3951,10 @@ VAL_SHIFTED_1: ; 0x001958, $E958
     STA   $A0C9 ; Clear
     STD   $A0C7 ; Clear
     STD   PLAYER_V_MOMENTUM ; Clear
-    JSR   GOTO_B7-C000 ; Do IDK
+    JSR   GOTO_B7-C000,DRAW_LAND_UNK ; Do IDK
     LDB   #$50 ; IDK Val
     JSR   OR_AND_STORE_B_NO_HUMANOIDS? ; Set
-    JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR
+    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR
     .db $F9
     .db $C1
     .db $ED
@@ -3971,7 +3971,7 @@ VAL_SHIFTED_1: ; 0x001958, $E958
     RORB
     LSRA
     RORB
-    ADDD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; Add
+    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add
     STD   10,X ; To OBJ[10]
     LDA   $A0BB ; Val from
     BPL   DONT_SET_OTHER_HANDLER? ; If positive, goto.
@@ -4026,7 +4026,7 @@ CALLBACK_ONSCREEN_HANDLE_IDK: ; 0x0019E3, $E9E3
     LDX   #$E9E3
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK
 PROCESS_IDK: ; 0x001A0A, $EA0A
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; D from
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; D from
     SUBD  #$0C80 ; D -= val
     STD   A073_SCRATCH_LOOP_WORD? ; To scratch.
     LDX   #$A065 ; X to list.
@@ -4048,7 +4048,7 @@ PROCESS_NEXT: ; 0x001A2C, $EA2C
     BNE   PROCESS_LOOP
     RTS
 INIT_PROCESS_OBJ_INTO_ONSCREEN_LIST: ; 0x001A33, $EA33
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Load val
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load val
     SUBD  #$0C80 ; Subtract
     STD   A073_SCRATCH_LOOP_WORD? ; Store to scratchpad
     LDX   #$A06B ; List ptr
@@ -4100,7 +4100,7 @@ MAKE_BAITER_RTN?: ; 0x001A80, $EA80
     LDA   #$00
     JSR   GET_15B_OBJECT+SCHEDULE ; Not exactly sure good name for rtn.
     LEAU  X ; X to U
-    JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR ; Fill out obj info.
+    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR ; Fill out obj info.
     .db $F9
     .db $A3
     .db $EB
@@ -4111,7 +4111,7 @@ MAKE_BAITER_RTN?: ; 0x001A80, $EA80
     STU   6,X ; U to XOBJ[6]
     LDD   A0DF_RAND_BYTE ; Get random
     ANDA  #$1F ; Bottom bits.
-    ADDD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; Add with
+    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add with
     STD   10,X ; Store to OBJ[10]
     LSRB ; B >> 1
     ADDB  #$2A ; Add with
@@ -4203,7 +4203,7 @@ CALLBACK_UNK: ; 0x001B2B, $EB2B
 L_001B36: ; 0x001B36, $EB36
     STA   A073_SCRATCH_LOOP_WORD? ; A to addr.
 LOOP_MAKE_OBJ: ; 0x001B38, $EB38
-    JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR ; Make obj
+    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR ; Make obj
     .db $F8
     .db $F7
     .db $EB
@@ -4278,7 +4278,7 @@ L_001BB0: ; 0x001BB0, $EBB0
     LDA   #$00 ; Type?
     JSR   GET_15B_OBJECT+SCHEDULE ; Setup
     LEAU  X ; Save X in U
-    JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR
+    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR
     .db $F9
     .db $7B
     .db $EB
@@ -4604,7 +4604,7 @@ L_001E05: ; 0x001E05, $EE05
 LOOP_ON_SCRATCH: ; 0x001E10, $EE10
     JSR   RANDOM_VALUE_FWD+IN_A ; Get rand
     ANDA  #$3F ; Keep 0011.1111
-    ADDD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; D += addr
+    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; D += addr
     STD   10,X ; To XOBJ[10]
     JSR   A_FROM_B300+(XOBJ[10]>>6) ; Get A
     STA   12,X ; A to XOBJ[12]
@@ -4643,7 +4643,7 @@ CALLBACK_RAND_TIMING: ; 0x001E54, $EE54
     JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Do
     JMP   CALLBACK_REMOVE? ; Goto
 BOMBER_BLOWN_UP?: ; 0x001E65, $EE65
-    JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR ; Do
+    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR ; Do
     .db $F9
     .db $DD
     .db $ED
@@ -4653,7 +4653,7 @@ BOMBER_BLOWN_UP?: ; 0x001E65, $EE65
     LDD   #$0125 ; + 250
     BRA   SCORE_ADD ; Goto
 CALLBACK_HUMANOID_DOWN?: ; 0x001E73, $EE73
-    JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR
+    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR
     .db $F9
     .db $E7
     .db $ED
@@ -4751,7 +4751,7 @@ LOOP_MAKE_ENEMY_IDK: ; 0x001F19, $EF19
     LDA   #$00 ; Type
     JSR   GET_15B_OBJECT+SCHEDULE ; Make obj
     LEAU  X ; Obj to U
-    JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR ; Data to it.
+    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR ; Data to it.
     .db $F8
     .db $CE
     .db $EF
@@ -4759,7 +4759,7 @@ LOOP_MAKE_ENEMY_IDK: ; 0x001F19, $EF19
     .db $CC
     .db $33
     JSR   RANDOM_VALUE_FWD+IN_A ; Get random
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Load
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load
     SUBD  #$2580 ; Subtract
     STD   $A075 ; Store
     LDD   A0E0_RAND_WORD ; Loasd
@@ -4828,7 +4828,7 @@ HUMANOIDS_NOT_ZERO: ; 0x001FA7, $EFA7
     LDA   #$00 ; Timer
     JSR   GET_15B_OBJECT+SCHEDULE ; Setup
     LEAU  X ; Obj X to U
-    JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR ; Fill out info past.
+    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR ; Fill out info past.
     .db $F9
     .db $85
     .db $F2
@@ -5214,7 +5214,7 @@ DONT_INVERT_B: ; 0x0022A7, $F2A7
     STD   11,U
     STD   13,U
 MORE_NEW_OBJS: ; 0x0022C1, $F2C1
-    JSR   FILL_OUT_NEW_OBJ_IN_X_WITH_DATA[6]_PAST_JSR ; Fill with info.
+    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR ; Fill with info.
     .db $F9
     .db $29
     .db $F3
@@ -5527,9 +5527,9 @@ GOTO_PAST_JSR: ; 0x0024D3, $F4D3
     PULS  A,U ; Pull saved.
     LEAS  3,S ; Unreserve stack.
     RTS ; RTS
-GOTO_B7-C000: ; 0x0024FA, $F4FA
+GOTO_B7-C000,DRAW_LAND_UNK: ; 0x0024FA, $F4FA
     BSR   BANKSWITCH_TO_7
-    JMP   JMP_TO_DRAW_LAND?
+    JMP   JMP_TO_DRAW_LAND_UNK
 BANKSWITCH_TO_7: ; 0x0024FF, $F4FF
     LDA   #$07
     BRA   BANKSWITCH_TO_A
@@ -6438,6 +6438,7 @@ BITMAP_IDK: ; 0x0029E7, $F9E7
     .db $22
     .db $F5
     .db $7B
+GFX_DATA_START?: ; 0x0029FB, $F9FB
     .db $00
     .db $00
     .db $03
@@ -7065,7 +7066,7 @@ SETUP_PARTICLES_SPAWN_IN: ; 0x002C69, $FC69
     STD   2,X ; Store to BMP
     STX   LIST_$65_ON_SCREEN? ; Store obj to list.
     LDD   10,X ; Load OBJ[10]
-    SUBD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; Sub with change.
+    SUBD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Sub with change.
     CMPD  #$2600 ; Compare to idk val
     BHI   ALL_PARTICLES_TAKEN_UP ; D >= val, goto.
     LDY   R_A0E2_PARTICLE_SPAWN_PTR ; Load Y from
@@ -7110,7 +7111,7 @@ RTS: ; 0x002CCA, $FCCA
 OBJX_PARTICLES_MOVE?: ; 0x002CCC, $FCCC
     PSHS  U,Y,B,A ; Save
     LDD   10,X ; Load OBJ[10]
-    SUBD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; Sub
+    SUBD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Sub
     CMPA  #$26 ; CMP
     BHI   RTS+RESTORE ; >, goto.
     STD   R_A0E9_PARTICLE_FOCUS/MULTIUSE? ; D to
@@ -7185,7 +7186,7 @@ CHECK_EACH_PARTICLE: ; 0x002D43, $FD43
     STD   Y ; Clear PARTICLE[0], really destroyed.
     BRA   NEXT_PARTICLE_SLOT
 DONT_DESTROY_PARTICLE: ; 0x002D5E, $FD5E
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; D from
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; D from
     ANDB  #$C0 ; Get bits 1100.0000
     PSHS  B,A ; Save val
     LDD   R_A022_SCR_CHANGE_UNK ; D from
@@ -7209,7 +7210,7 @@ CHECK_EACH_PARTICLE[0]_NEGATIVE: ; 0x002D7E, $FD7E
     BPL   PARTICLE[0]_NEGATIVE ; Now positive, goto.
     LDX   10,Y ; PARTICLE[10] is the object attached to this particulation.
     LDD   10,X ; D from XOBJ[10], OBJ pos?
-    SUBD  R_A020_SCREEN_POS_CHANGE_HORIZ? ; D -= val
+    SUBD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; D -= val
     ADDA  #$0C ; A += #$0C
     BITA  #$C0 ; Test 1100.0000
     BEQ   A:7-A:6_NOT_SET ; If not set, goto.
@@ -7559,8 +7560,8 @@ JMP_RUG_SETUP: ; 0x002FC5, $FFC5
     JMP   RUG_PATTERN_SETUP
 JMP_TO_RUG_PASS_SRAM_CHECK: ; 0x002FC8, $FFC8
     JMP   RUG_PASS_SRAM_CHECK
-JMP_TO_GOTO_B7-C000: ; 0x002FCB, $FFCB
-    JMP   GOTO_B7-C000
+JMP_TO_GOTO_B7-C000,DRAW_LAND_UNK: ; 0x002FCB, $FFCB
+    JMP   GOTO_B7-C000,DRAW_LAND_UNK
 JMP_GOTO_PAST_JSR: ; 0x002FCE, $FFCE
     JMP   GOTO_PAST_JSR
 JMP_TO_R_A063_OBJ_SETUP_BANKED_HANDLER?: ; 0x002FD1, $FFD1
@@ -7683,10 +7684,10 @@ WAIT_A_LITTLE: ; 0x003070, $C070
     .db $02
     .db $02
     LDD   #$412F ; Move to A000-A001
-    STD   $A000 ; D to
+    STD   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; D to
     LDA   #$40 ; A =
-    STD   R_A002 ; D to
-    STD   $A004 ; D to
+    STD   R_A002_CURR_PLANET_GEN_HEIGHT ; D to
+    STD   A003_CURR_PLANET_GEN_DATA_PTR+1 ; D to
     JSR   A000,A002,A004_TO_SCREEN ; To screen
     LDA   #$28 ; A to
     STA   INITIAL_ENTER_TIMER?
@@ -7699,7 +7700,7 @@ WAIT_A_LITTLE: ; 0x003070, $C070
     LDX   #$C1FA ; Callback char select.
     LDA   #$00
     JSR   GET_15B_OBJECT+SCHEDULE
-    CLR   INITIAL_POS_INDEX ; Clear idk
+    CLR   INITIAL_POS_INDEX ; Clear index.
     JSR   L_00316B ; Do sub
 L_0030CB: ; 0x0030CB, $C0CB
     CLRA ; Clear addr's.
@@ -7929,9 +7930,9 @@ SKIP_MOVE_LINE_TO_LEFT: ; 0x00329C, $C29C
     DECA ; X-1
     BPL   LOOP_DRAW_LINE ; Write to 0.
     LDA   #$2F ; End of text marker for groups.
-    STA   R_A007_IRQ_STACK_VAL_2 ; Store to
+    STA   R_A007_PLANET_DATA_PTR_HIGHER ; Store to
     STA   A00B_PLANET_GEN_DATA_PTR ; Store to
-    STA   A012_PLANET_HEIGHT_CREATING ; Store to.
+    STA   A012_PLANET_GEN_HEIGHT ; Store to.
     LDU   #$C103 ; Ptr to high score text data.
     LDX   #$1886 ; Screen pos?
     STX   R_A181_HIGHSCORE_SCR_POS
@@ -8078,12 +8079,12 @@ ATTRACT_GAME_DEMO_MAIN: ; 0x003351, $C351
     LDD   #$4433 ; Idk val
     STD   18,X ; OBJ[18]
     JSR   JMP_TO_REPLACES_BMP_AND_DOES_ALOT_SPAWN_IN?
-    STX   R_A18D_OBJ_PTR_LANDER? ; Store obj here.
+    STX   R_A18D_OBJ_PTR_ENEMY? ; Store obj here.
     LDA   #$E6 ; Schedule code below.
     LDX   #$C412
     JMP   SCHEDULE_BANKED_CALLBACK_IN_CURRENT
     LDD   #$FF50 ; Vertical movement value?
-    LDX   R_A18D_OBJ_PTR_LANDER? ; Object ptr
+    LDX   R_A18D_OBJ_PTR_ENEMY? ; Object ptr
     STD   16,X
     LDX   R_A189_OBJ_PTR_HUMANOID? ; Object ptr.
     STD   16,X
@@ -8092,8 +8093,8 @@ ATTRACT_GAME_DEMO_MAIN: ; 0x003351, $C351
     JMP   SCHEDULE_BANKED_CALLBACK_IN_CURRENT
     LDX   #$C5F5
     LDA   #$00
-    JSR   GET_15B_OBJECT+SCHEDULE ; Schedule future task.
-    STX   R_A187_OBJ_TMP_4? ; New obj to. Laser?
+    JSR   GET_15B_OBJECT+SCHEDULE ; Schedule task idk.
+    STX   R_A187_OBJ_TMP_LASER? ; New obj to. Laser?
     LDA   #$15
     LDX   #$C475
     JMP   SCHEDULE_BANKED_CALLBACK_IN_CURRENT
@@ -8103,7 +8104,7 @@ ATTRACT_GAME_DEMO_INIT: ; 0x00343C, $C43C
     JSR   CHAIN_LIST_$67,NULL_$65_$6B_$6D ; Setup enemies?
     JSR   CLEAR_ALL_SCREEN ; Clear screen.
     LDD   #$0000
-    STD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Clear
+    STD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Clear
     STD   R_A022_SCR_CHANGE_UNK ; Clear
     JSR   JMP_GOTO_PAST_JSR ; Draw land.
     .db $F4
@@ -8115,19 +8116,19 @@ ATTRACT_GAME_DEMO_INIT: ; 0x00343C, $C43C
     LDX   #$1030
     STX   SHIP_SCR_POS_XXYY ; Ship pos.
     RTS
-OBJ_4_MANIP_IDK: ; 0x003460, $C460
-    LDX   R_A187_OBJ_TMP_4? ; OBJ 4 slot.
-    LDU   R_A194 ; U from...
+ATTRACT_REMOVE_LASER: ; 0x003460, $C460
+    LDX   R_A187_OBJ_TMP_LASER? ; OBJ 4 slot.
+    LDU   DEMO_LASER_START_POS ; U from...
     CLRA ; Clear A
 LOOP_ADD_256: ; 0x003467, $C467
     STA   U ; Clear U addr.
     LEAU  256,U ; Y += 256
     CMPU  7,X ; If U _ XOBJ[7]
     BLS   LOOP_ADD_256 ; <=, goto.
-    JMP   XOBJ_BACK_TO_AVAILABLE_LIST ; Give object 4 back? Blown up?
+    JMP   XOBJ_BACK_TO_AVAILABLE_LIST ; Give obj back. RTS's back to callee.
 CALLBACK_ATTRACT_IDK: ; 0x003475, $C475
-    BSR   OBJ_4_MANIP_IDK
-    LDX   R_A18D_OBJ_PTR_LANDER? ; Obj 3
+    BSR   ATTRACT_REMOVE_LASER
+    LDX   R_A18D_OBJ_PTR_ENEMY? ; Obj 3
     JSR   REMOVE_X_FROM_LIST_A065|A06B ; Remove from list...
     JSR   L_002C63 ; IDK
     LDX   R_A18B_OBJ_PTR_SHIP? ; X obj 2, ship?
@@ -8226,22 +8227,22 @@ LOOP_ENEMIES: ; 0x00354F, $C54F
     STD   14,X ; H speed
     JSR   JMP_TO_REPLACES_BMP_AND_DOES_ALOT_SPAWN_IN?
     STU   R_A192_OBJ_PTR_SCRATCH
-    STX   R_A18D_OBJ_PTR_LANDER? ; Overwrite
-    LDA   #$5F ; Callback
+    STX   R_A18D_OBJ_PTR_ENEMY? ; Overwrite
+    LDA   #$5F ; Callback below.
     LDX   #$C585
     JMP   SCHEDULE_BANKED_CALLBACK_IN_CURRENT
-    LDX   #$C5F5 ; Schedule IDK
+    LDX   #$C5F5 ; Schedule laser.
     LDA   #$00
     JSR   GET_15B_OBJECT+SCHEDULE
-    STX   R_A187_OBJ_TMP_4? ; Store new obj here.
-    LDA   #$17
+    STX   R_A187_OBJ_TMP_LASER? ; Store new obj here.
+    LDA   #$17 ; Schedule below.
     LDX   #$C598
     JMP   SCHEDULE_BANKED_CALLBACK_IN_CURRENT ; Schedule below.
-    JSR   OBJ_4_MANIP_IDK ; Idfk what it does.
-    LDX   R_A18D_OBJ_PTR_LANDER? ; Load OBJ 3
+    JSR   ATTRACT_REMOVE_LASER ; Idfk what it does.
+    LDX   R_A18D_OBJ_PTR_ENEMY? ; Load OBJ 3
     JSR   REMOVE_X_FROM_LIST_A065|A06B ; Remove from list.
     JSR   LIST_GET_23B,X.next_FROM_$65_ONSCREEN? ; Get new obj on screen.
-    JSR   L_002C63 ; Blow in/out?
+    JSR   L_002C63 ; Particle IDK
     LDU   R_A192_OBJ_PTR_SCRATCH ; Load ptr
     LDD   24,U ; PTR+24
     STD   10,X ; To OBJ[10]
@@ -8255,9 +8256,9 @@ LOOP_ENEMIES: ; 0x00354F, $C54F
     LDA   #$20 ; Schedule below.
     LDX   #$C5CA
     JMP   SCHEDULE_BANKED_CALLBACK_IN_CURRENT
-CALLBACK_IDK: ; 0x0035CA, $C5CA
-    LDX   R_A196_ATTRACT_TEXT_CURRENT ; Load ptr
-    LEAX  2,X ; +=2
+CALLBACK_INC_TEXT_SHOWN: ; 0x0035CA, $C5CA
+    LDX   R_A196_ATTRACT_TEXT_CURRENT ; Ptr to strings.
+    LEAX  2,X ; Another string to display.
     STX   R_A196_ATTRACT_TEXT_CURRENT ; Store back.
     LDA   #$20 ; Schedule below.
     LDX   #$C5DA
@@ -8273,43 +8274,45 @@ CALLBACK_SCHEDULE_WILLIAMS_TITLESCREEN: ; 0x0035ED, $C5ED
     LDA   #$FF ; Callback williams title screen intro.
     LDX   #$C677
     JMP   SCHEDULE_BANKED_CALLBACK_IN_CURRENT
-    LDX   R_A18B_OBJ_PTR_SHIP?
-    LDX   4,X
-    LEAX  1796,X
-    STX   7,U
-    STX   9,U
-    STX   R_A194
-    LDA   #$04
-    LDX   7,U
-    LDB   #$11
-L_00360B: ; 0x00360B, $C60B
-    STB   X
-    LEAX  256,X
-    DECA
-    BNE   L_00360B
-    LDB   #$99
-    STB   X
-    STX   7,U
-    LDY   $A0A4
-    CMPY  #$A15F
-    BLO   L_003627
-    LDY   #$A142
-L_003627: ; 0x003627, $C627
-    LDX   9,U
-    LDA   #$03
-L_00362B: ; 0x00362B, $C62B
-    LDB   Y+
-    STB   X
-    LEAX  256,X
-    DECA
-    BNE   L_00362B
-    STY   $A0A4
-    STX   9,U
-    LDX   R_A194
-    CLR   X
-    LEAX  256,X
-    STX   R_A194
-    LDA   #$01
+CALLBACK_DEMO_LASERS_INIT: ; 0x0035F5, $C5F5
+    LDX   R_A18B_OBJ_PTR_SHIP? ; Load OBJ
+    LDX   4,X ; Load from XOBJ[4]
+    LEAX  1796,X ; +=X-7,Y-4
+    STX   7,U ; Val to UOBJ[7]
+    STX   9,U ; UOBJ[9]
+    STX   DEMO_LASER_START_POS ; Idk
+CALLBACK_DEMO_LASERS_RERUN: ; 0x003605, $C605
+    LDA   #$04 ; Loop cnt
+    LDX   7,U ; X from UOBJ[7]
+    LDB   #$11 ; Idk val
+LOOP_A_TIMES: ; 0x00360B, $C60B
+    STB   X ; B to XOBJ[0]
+    LEAX  256,X ; POS+(1,0)
+    DECA ; A--
+    BNE   LOOP_A_TIMES ; Loop
+    LDB   #$99 ; Idk val
+    STB   X ; B to X
+    STX   7,U ; X to UOBJ[7]
+    LDY   DEMO_LASER_HOLES_PTR ; Ptr
+    CMPY  #$A15F ; End of 00/01/10/11 Pool
+    BLO   DONT_CHANGE_PTR_TO_LASER_HOLES
+    LDY   #$A142 ; Laser holes pool start load.
+DONT_CHANGE_PTR_TO_LASER_HOLES: ; 0x003627, $C627
+    LDX   9,U ; To UOBJ[9]
+    LDA   #$03 ; Loop
+LOOP_LASER_HOLES: ; 0x00362B, $C62B
+    LDB   Y+ ; B from pool
+    STB   X ; B to laser
+    LEAX  256,X ; Holes+(1,0)
+    DECA ; A--
+    BNE   LOOP_LASER_HOLES ; Loop 3x
+    STY   DEMO_LASER_HOLES_PTR
+    STX   9,U ; Store laser to UOBJ[9]
+    LDX   DEMO_LASER_START_POS ; Load start
+    CLR   X ; Clear
+    LEAX  256,X ; X+1
+    STX   DEMO_LASER_START_POS ; Store back
+    LDA   #$01 ; Schedule laser callback.
     LDX   #$C605
     JMP   SCHEDULE_BANKED_CALLBACK_IN_CURRENT
 CALLBACK_ALL_TEXT_TO_SCREEN: ; 0x00364F, $C64F
@@ -8353,7 +8356,7 @@ SETUP_FIRST_INTRO_DATA: ; 0x0036A2, $C6A2
     STA   DRAW_STEPS_COUNT_SEED_VAL ; Seed
     LDX   #$C941 ; Ptr to unk data.
     STX   R_A16B_DRAWING_DATA_PTR? ; Store ptr.
-DRAW_LOGO_CALLBACK: ; 0x0036B0, $C6B0
+DRAW_WILLIAMS_CALLBACK: ; 0x0036B0, $C6B0
     LDA   DRAW_STEPS_COUNT_SEED_VAL ; Load val
     STA   DRAW_COUNTER_ACTUAL ; Store to
     LDY   R_A16B_DRAWING_DATA_PTR? ; Y from ptr.
@@ -8419,7 +8422,7 @@ DRAWING_EOF: ; 0x003711, $C711
 HAS_BEEN_RESEEDED: ; 0x003728, $C728
     LDX   #$C941
     STX   R_A16B_DRAWING_DATA_PTR? ; Reset data ptr.
-    BRA   DRAW_LOGO_CALLBACK ; Keep drawing logo.
+    BRA   DRAW_WILLIAMS_CALLBACK ; Keep drawing logo.
     LDX   #$C74C
     LDA   #$00
     JSR   GET_15B_OBJECT+SCHEDULE
@@ -8440,7 +8443,7 @@ HAS_BEEN_RESEEDED: ; 0x003728, $C728
     LDD   #$B412 ; Another?
     STD   R_A16F ; Ptr to
     LDD   #$0000
-    STD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Clear
+    STD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Clear
     LDD   #$0C00 ; Not sure of val.
     STD   R_A171
     LDD   #$B304 ; Yet another pointer idk.
@@ -9467,7 +9470,6 @@ DATA_IDK: ; 0x003C11, $CC11
 DATA_TABLE_TEXT_POS: ; 0x003C61, $CC61
     .db $43 ; fmt: [XX,YY]
     .db $30
-DATA_TABLE_IDK: ; 0x003C63, $CC63
     .db $1C
     .db $70
     .db $3C
@@ -9561,7 +9563,7 @@ L_003CB5: ; 0x003CB5, $CCB5
     CLR   2,X
     STU   -256,X
 L_003CD3: ; 0x003CD3, $CCD3
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ?
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE?
     SUBD  #$6D40
     STD   A073_SCRATCH_LOOP_WORD?
     LSRA
@@ -13228,6 +13230,7 @@ MANIPULATE_D: ; 0x004C3E, $CC3E
     ROLA
     ORB   #$0F ; D |= 0x000F, setting all shifted to 0's.
     RTS ; Leave
+BMP_LIB_START?: ; 0x004C49, $CC49
     .db $00
     .db $00
     .db $00
@@ -16784,15 +16787,15 @@ CMOS_RAM_INIT_DATA: ; 0x005ECF, $CECF
 ;Bank 7
 	.org $C000
 
-JMP_TO_DRAW_LAND?: ; 0x006000, $C000
-    JMP   DRAW_LAND?
-JMP_TO_LAND_MODIFY?: ; 0x006003, $C003
-    JMP   IRQ_TASK_LAND_MODIFY?
-JMP_TO_GENERATE_LAND_DATA?: ; 0x006006, $C006
-    JMP   GENERATE_LAND_DATA?
+JMP_TO_DRAW_LAND_UNK: ; 0x006000, $C000
+    JMP   DRAW_LAND_INITIALIZATION?
+JMP_TO_LAND_IRQ: ; 0x006003, $C003
+    JMP   IRQ_TASK_LAND_IRQ
+JMP_TO_GENERATE_LAND_DATA_B300-B6FF: ; 0x006006, $C006
+    JMP   GENERATE_LAND_DATA_B300-B6FF
 JMP_TO_CLEAR_LAND_ONSCREEN?: ; 0x006009, $C009
     JMP   CLEAR_LAND_ONSCREEN
-    ANDB  #$50
+    ANDB  #$50 ; Value here is related to land, dev leftover?
 JMP_TO_UNK_RTN: ; 0x00600E, $C00E
     JMP   UNK_RTN
 DIFFICULTY_DATA_START_LOC: ; 0x006011, $C011
@@ -16801,118 +16804,118 @@ DIFFICULTY_DATA_START_LOC: ; 0x006011, $C011
 DIFFICULTY_DATA_END_LOC: ; 0x006013, $C013
     .db $C7
     .db $72
-DRAW_LAND?: ; 0x006015, $C015
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Load
+DRAW_LAND_INITIALIZATION?: ; 0x006015, $C015
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load pos value.
     ANDB  #$E0 ; B=1110.0000
-    STD   A017_COMPARED_TO_A017 ; Store to
-    ADDD  #$2610 ; Add val
-    STD   A015_X_MATCH ; Store to.
-    CLR   COUNTDOWN_A00F ; Clear
-    LDX   #$C34F ; 1 byte before data area 1
-    STX   BANK_7_DATA_PTR? ; Store to
-    LDA   #$E0 ; Val
-    STA   A011_TIED_WITH_A00D ; To here.
-    JSR   AOOF_COUNTDOWN_STUFF ; Countdown.
+    STD   A017_WORLD_MOVEMENT_MASKED ; Store to, start.
+    ADDD  #$2610 ; Make do whole screen.
+    STD   A015_WORLD_UPDATE_COUNT? ; Store to.
+    CLR   A00F_SHIFTS_COUNTER_UNK ; None left, aka reseed.
+    LDX   #$C34F ; World data ptr -1, because ++ on reseed.
+    STX   A009_WORLD_DATA_PTR_UNK ; Store to
+    LDA   #$E0 ; Load 1110.0000, val?
+    STA   A011_WORLD_HEIGHT_UNK ; To..
+    JSR   SHIFT_WORLD_DATA_RESEED_LEFT ; Seed data.
     LDX   #$0010 ; Load val
-LOOP_UNTIL_X=$A015: ; 0x006031, $C031
-    CMPX  A015_X_MATCH ; If X _ $A015
-    BEQ   X_MATCHES_A015 ; ==, goto.
-    LDA   SHITED_DATA_A00D ; Get shifted from here.
-    BPL   A00D_POSITIVE
-L_006039: ; 0x006039, $C039
-    DEC   A011_TIED_WITH_A00D ; Dec byte.
-    BRA   SKIP_INC ; Skip inc.
-A00D_POSITIVE: ; 0x00603D, $C03D
-    INC   A011_TIED_WITH_A00D ; Inc
-SKIP_INC: ; 0x00603F, $C03F
-    JSR   AOOF_COUNTDOWN_STUFF ; A00F stuff.
+LOOP_X304: ; 0x006031, $C031
+    CMPX  A015_WORLD_UPDATE_COUNT? ; If X _ $A015
+    BEQ   SEED_WORLDGEN_FROM_FIGURED? ; ==, goto.
+    LDA   A00D_WORLD_MOVE_DATA_UNK ; Get shifted from here.
+    BPL   WORLD_MOVE_DATA_POSITIVE ; Positive, inc.
+DEC_A011_WORLD_HEIGHT: ; 0x006039, $C039
+    DEC   A011_WORLD_HEIGHT_UNK ; Dec
+    BRA   HEIGHT_MODIFIED ; Skip inc.
+WORLD_MOVE_DATA_POSITIVE: ; 0x00603D, $C03D
+    INC   A011_WORLD_HEIGHT_UNK ; Inc
+HEIGHT_MODIFIED: ; 0x00603F, $C03F
+    JSR   SHIFT_WORLD_DATA_RESEED_LEFT ; Shift
     LEAX  32,X ; X+=32
-    BRA   LOOP_UNTIL_X=$A015
-X_MATCHES_A015: ; 0x006047, $C047
-    LDD   BANK_7_DATA_PTR? ; Move
-    STD   $A003
-    LDA   COUNTDOWN_A00F ; Move
-    STA   $A000
-    LDA   SHITED_DATA_A00D ; Move
-    STA   $A001
-    LDA   A011_TIED_WITH_A00D ; Move
-    STA   R_A002
-    LDX   #$B700 ; Move
-    STX   R_A005_IRQ_STACK_VAL_1
-    LDX   #$BA90 ; Move
-    STX   R_A007_IRQ_STACK_VAL_2
-LOOP_A015/A017: ; 0x006061, $C061
-    LDD   A015_X_MATCH ; Get val
-    SUBD  #$0020 ; Sub
+    BRA   LOOP_X304
+SEED_WORLDGEN_FROM_FIGURED?: ; 0x006047, $C047
+    LDD   A009_WORLD_DATA_PTR_UNK ; Move
+    STD   A003_CURR_PLANET_GEN_DATA_PTR
+    LDA   A00F_SHIFTS_COUNTER_UNK ; Move
+    STA   R_A000_CURR_PLANET_GEN_SHIFT_DELTA
+    LDA   A00D_WORLD_MOVE_DATA_UNK ; Move
+    STA   A001_CURR_PLANET_GEN_HEIGHT_CHANGES
+    LDA   A011_WORLD_HEIGHT_UNK ; Move
+    STA   R_A002_CURR_PLANET_GEN_HEIGHT
+    LDX   #$B700 ; Planet GFX PTR 1
+    STX   R_A005_PLANET_DATA_PTR_LOWER
+    LDX   #$BA90 ; Planet GFX PTR 2
+    STX   R_A007_PLANET_DATA_PTR_HIGHER
+LOOP_UNTIL_A015<A017: ; 0x006061, $C061
+    LDD   A015_WORLD_UPDATE_COUNT? ; Get val
+    SUBD  #$0020 ; -=
 L_006066: ; 0x006066, $C066
-    STD   A015_X_MATCH ; Store to
-    CMPD  A017_COMPARED_TO_A017 ; Compare to.
-    BMI   CLEAR_CURRENT_PLANET ; If D - A017 negative, taken.
+    STD   A015_WORLD_UPDATE_COUNT? ; Store to
+    CMPD  A017_WORLD_MOVEMENT_MASKED ; Compare to.
+    BMI   CURRENT_PLANET_GEN_STATE_TO_GEN_SEED ; If result is negative, goto.
 L_00606D: ; 0x00606D, $C06D
-    JSR   $A012_THING+MORE ; Run sub.
-    BRA   LOOP_A015/A017
-CLEAR_CURRENT_PLANET: ; 0x006072, $C072
-    LDD   $A003 ; Seeds all planet gen vals.
+    JSR   UPDATE_PLANET_SURFACE_BUFFERS_TO_RIGHT ; Update one scroll pixel?
+    BRA   LOOP_UNTIL_A015<A017
+CURRENT_PLANET_GEN_STATE_TO_GEN_SEED: ; 0x006072, $C072
+    LDD   A003_CURR_PLANET_GEN_DATA_PTR ; Seeds all planet gen vals.
     STD   A00B_PLANET_GEN_DATA_PTR
-    LDA   $A000 ; Move
-    STA   A010_PLANET_SHIFTS_COUNTDOWN
-    LDA   $A001 ; Move
-    STA   A00B_PLANET_GEN_SEED
-    LDA   R_A002 ; Move
-    STA   A012_PLANET_HEIGHT_CREATING
-    LDY   #$BE20 ; This clears the planet data.
+    LDA   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; Move
+    STA   A010_PLANET_GEN_SHIFTS_DELTA
+    LDA   A001_CURR_PLANET_GEN_HEIGHT_CHANGES ; Move
+    STA   A00B_PLANET_GEN_HEIGHT_CHANGES
+    LDA   R_A002_CURR_PLANET_GEN_HEIGHT ; Move
+    STA   A012_PLANET_GEN_HEIGHT
+    LDY   #$BE20 ; Planet ptrs array.
     LDX   #$0000 ; Clear/NULL
-LOOP_CLEAR_PLANET: ; 0x006089, $C089
+LOOP_CLEAR_PLANET_POINTERS_LOOP: ; 0x006089, $C089
     STX   Y++ ; Clear
     CMPY  #$BF50 ; Until
-    BNE   LOOP_CLEAR_PLANET
+    BNE   LOOP_CLEAR_PLANET_POINTERS_LOOP
     RTS ; Leave
-IRQ_TASK_LAND_MODIFY?: ; 0x006092, $C092
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Load
+IRQ_TASK_LAND_IRQ: ; 0x006092, $C092
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load
     ANDB  #$E0 ; AND...
-    SUBD  A015_X_MATCH ; Sub with...
-    ASLB ; D << 3
+    SUBD  A015_WORLD_UPDATE_COUNT? ; Sub with...
+    ASLB ; D << 3, *8
     ROLA
     ASLB
     ROLA
     ASLB
     ROLA
-    STA   $A000 ; Store A to.
-    BEQ   UNK_RTN_MOD_ALOT ; If == 0, goto.
-    BMI   LOOP_INC_A000 ; If A:7 set, goto.
-LOOP_A000_TIMES: ; 0x0060A4, $C0A4
-    LDD   A015_X_MATCH ; Load
+    STA   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; Store A to.
+    BEQ   CLEAR_PLANET_AND_DRAW_NEW ; No change, goto.
+    BMI   LOOP_MOVE_PLANET_MINUS ; Move minus.
+LOOP_MOVE_PLANET_PLUS: ; 0x0060A4, $C0A4
+    LDD   A015_WORLD_UPDATE_COUNT? ; Load
     ADDD  #$0020 ; D+=32
-    STD   A015_X_MATCH ; Store back
-    JSR   L_0061CD ; Does IDK
-    DEC   $A000 ; Dec A000 
-    BNE   LOOP_A000_TIMES
-    BRA   UNK_RTN_MOD_ALOT
-LOOP_INC_A000: ; 0x0060B4, $C0B4
-    LDD   A015_X_MATCH ; Load
+    STD   A015_WORLD_UPDATE_COUNT? ; Store back
+    JSR   WORLD_MOVE_DATA_IDK_LEFT ; Does IDK
+    DEC   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; Dec A000 
+    BNE   LOOP_MOVE_PLANET_PLUS
+    BRA   CLEAR_PLANET_AND_DRAW_NEW ; Draw
+LOOP_MOVE_PLANET_MINUS: ; 0x0060B4, $C0B4
+    LDD   A015_WORLD_UPDATE_COUNT? ; Load
     SUBD  #$0020 ; Sub
-    STD   A015_X_MATCH ; Store back
-    JSR   $A012_THING+MORE
-    INC   $A000 ; ++
-    BNE   LOOP_INC_A000
-UNK_RTN_MOD_ALOT: ; 0x0060C2, $C0C2
-    LDD   R_A020_SCREEN_POS_CHANGE_HORIZ? ; Load
-    ANDB  #$E0 ; B bits..
-    STD   A015_X_MATCH ; Store to
+    STD   A015_WORLD_UPDATE_COUNT? ; Store back
+    JSR   UPDATE_PLANET_SURFACE_BUFFERS_TO_RIGHT
+    INC   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; ++
+    BNE   LOOP_MOVE_PLANET_MINUS
+CLEAR_PLANET_AND_DRAW_NEW: ; 0x0060C2, $C0C2
+    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load
+    ANDB  #$E0 ; B bits, 1110.0000
+    STD   A015_WORLD_UPDATE_COUNT? ; Store to
     LDX   #$0000 ; Pixel clear.
-    LDY   #$BE20 ; Ptr to on-screen planet.
-    STS   R_A013_STACK_SAVE_IRQ_RTN_B7 ; Save S
-    LDS   R_A005_IRQ_STACK_VAL_1 ; S from here.
-    BITB  #$20 ; Test bit
-    BNE   SKIP_OTHER_STACK_LOAD ; If set, goto
-    LDS   R_A007_IRQ_STACK_VAL_2 ; S from here otherwise.
-SKIP_OTHER_STACK_LOAD: ; 0x0060DC, $C0DC
-    LDA   #$98 ; Val
-LOOP_WRITE_PLANET_DATA_EVERYWHERE: ; 0x0060DE, $C0DE
+    LDY   #$BE20 ; Ptr to on-screen pixels.
+    STS   R_A013_STACK_SAVE_IRQ_RTN_B7 ; Save S stack.
+    LDS   R_A005_PLANET_DATA_PTR_LOWER ; S from here.
+    BITB  #$20 ; Test world bit 0010.0000
+    BNE   USING_LOWER_STACK_ADDR ; If set, goto
+    LDS   R_A007_PLANET_DATA_PTR_HIGHER ; S from here otherwise.
+USING_LOWER_STACK_ADDR: ; 0x0060DC, $C0DC
+    LDA   #$98 ; X pos in D
+LOOP_WRITE_NEW_PLANET_OVER_OLD: ; 0x0060DE, $C0DE
     STX   [Y] ; Clear screen planet pixel.
-    PULS  B,U ; Pull height, addr.
+    PULS  B,U ; Pull height, gfx.
     STD   Y ; Addr on screen to Y
-    STU   [Y++] ; Store where Y points.
+    STU   [Y++] ; Planet data to ptr stored.
     DECA
     STX   [Y] ; 2x
     PULS  B,U
@@ -16949,286 +16952,286 @@ LOOP_WRITE_PLANET_DATA_EVERYWHERE: ; 0x0060DE, $C0DE
     STD   Y
     STU   [Y++]
     DECA
-    BNE   LOOP_WRITE_PLANET_DATA_EVERYWHERE ; If A != 0, goto.
+    BNE   LOOP_WRITE_NEW_PLANET_OVER_OLD ; If A != 0, goto.
     LDS   R_A013_STACK_SAVE_IRQ_RTN_B7 ; Fix stack
     RTS ; RTS
-$A012_THING+MORE: ; 0x00612C, $C12C
-    JSR   A00E_STUFF_UNK
-    BMI   INC_$12 ; If A is negative, taken.
-    DEC   A012_PLANET_HEIGHT_CREATING ; --
-    BRA   POST_$12_CHANGE ; Always goto.
-INC_$12: ; 0x006135, $C135
-    INC   A012_PLANET_HEIGHT_CREATING ; ++
-POST_$12_CHANGE: ; 0x006137, $C137
+UPDATE_PLANET_SURFACE_BUFFERS_TO_RIGHT: ; 0x00612C, $C12C
+    JSR   PLANET_GEN_SHIFT_TO_RIGHT ; Shift planet gen byte to the right?
+    BMI   INC_PLANET_HEIGHT ; If A is negative, taken.
+    DEC   A012_PLANET_GEN_HEIGHT ; --
+    BRA   HEIGHT_CHANGED ; Always goto.
+INC_PLANET_HEIGHT: ; 0x006135, $C135
+    INC   A012_PLANET_GEN_HEIGHT ; ++
+HEIGHT_CHANGED: ; 0x006137, $C137
     LDA   #$20 ; Load with val
-    BITA  $A016 ; Test bit here.
-    BNE   L_006185 ; Bit not set.
-    LDX   R_A007_IRQ_STACK_VAL_2 ; Get X from
-    JSR   A00F_STUFF
-    BMI   L_006164 ; If A returned negative, goto.
-    DEC   A011_TIED_WITH_A00D ; --
-    LDA   A011_TIED_WITH_A00D ; Get val.
-    STA   X ; Store to X
-    STA   456,X ; Store to X+456?
-    LDD   #$7007 ; Load D
-    STD   1,X ; Store to X+1
-    STD   457,X ; Store to X+457?
+    BITA  R_A016_UNK ; Test bit here.
+    BNE   USE_PLANET_DATA_PTR_HIGHER_TO_RIGHT ; If set, use higher.
+    LDX   R_A007_PLANET_DATA_PTR_HIGHER ; Get X from
+    JSR   PLANET_IDK_SHIFT_RIGHT ; Shift planet data. Implied result test.
+    BMI   VALUE_IS_NEGATIVE ; If A store was negative.
+    DEC   A011_WORLD_HEIGHT_UNK ; --
+    LDA   A011_WORLD_HEIGHT_UNK ; Get val.
+    STA   X ; Store to PTR[0]
+    STA   456,X ; Store to OPRT[0]
+    LDD   #$7007 ; Pixels to display.
+    STD   1,X ; Store to PTR[1]
+    STD   457,X ; Store to OPTR[1]
     LEAX  3,X ; X+=3
     CMPX  #$BC58 ; Compare to
-    BNE   COMMIT_X_A007,RTS ; If !=, save as it
+    BNE   SAVE_STACK,RTS ; !=, skip reset.
     LDX   #$BA90 ; Reset
-COMMIT_X_A007,RTS: ; 0x006161, $C161
-    STX   R_A007_IRQ_STACK_VAL_2 ; Store to.
+SAVE_STACK,RTS: ; 0x006161, $C161
+    STX   R_A007_PLANET_DATA_PTR_HIGHER ; Store to.
     RTS
-L_006164: ; 0x006164, $C164
-    LDA   A011_TIED_WITH_A00D
-    STA   X
-    STA   456,X
-    INCA
-    STA   A011_TIED_WITH_A00D
-    LDD   #$0770
-    STD   1,X
-    STD   457,X
-    LEAX  3,X
-    CMPX  #$BC58
+VALUE_IS_NEGATIVE: ; 0x006164, $C164
+    LDA   A011_WORLD_HEIGHT_UNK ; Get height
+    STA   X ; To PTR[0]
+    STA   456,X ; To OPTR[0]
+    INCA ; Height++
+    STA   A011_WORLD_HEIGHT_UNK ; Store to
+    LDD   #$0770 ; Pixels storing.
+    STD   1,X ; To PTR[1]
+    STD   457,X ; To OPTR[1]
+    LEAX  3,X ; X+=3
+    CMPX  #$BC58 ; CMP to end.
     BNE   COMMIT_X_$A007,RTS
-    LDX   #$BA90
+    LDX   #$BA90 ; Reset
 COMMIT_X_$A007,RTS: ; 0x006182, $C182
-    STX   R_A007_IRQ_STACK_VAL_2
+    STX   R_A007_PLANET_DATA_PTR_HIGHER ; Store.
     RTS
-L_006185: ; 0x006185, $C185
-    LDX   R_A005_IRQ_STACK_VAL_1
-    JSR   A00F_STUFF
-    BMI   L_0061AC
-    DEC   A011_TIED_WITH_A00D
-    LDA   A011_TIED_WITH_A00D
-    STA   X
-    STA   456,X
-    LDD   #$7007
-    STD   1,X
-    STD   457,X
-    LEAX  3,X
-    CMPX  #$B8C8
-    BNE   COMMIT_X_A005,RTS
-    LDX   #$B700
-COMMIT_X_A005,RTS: ; 0x0061A9, $C1A9
-    STX   R_A005_IRQ_STACK_VAL_1
+USE_PLANET_DATA_PTR_HIGHER_TO_RIGHT: ; 0x006185, $C185
+    LDX   R_A005_PLANET_DATA_PTR_LOWER ; Load X from
+    JSR   PLANET_IDK_SHIFT_RIGHT ; Shift to right, implied result test.
+    BMI   PLANET_MOVE_DATA_NEGATIVE ; If rtn made negative, goto.
+    DEC   A011_WORLD_HEIGHT_UNK ; Dec world height idk
+    LDA   A011_WORLD_HEIGHT_UNK ; Load
+    STA   X ; Store height to PTR[0]
+    STA   456,X ; Store to OPTR[0]
+    LDD   #$7007 ; Pixels to draw.
+    STD   1,X ; To PTR[1]
+    STD   457,X ; To OPTR[1]
+    LEAX  3,X ; X+=3
+    CMPX  #$B8C8 ; End
+    BNE   SAVE_STACK,RTS
+    LDX   #$B700 ; Reset stack ptr.
+SAVE_STACK,RTS: ; 0x0061A9, $C1A9
+    STX   R_A005_PLANET_DATA_PTR_LOWER ; Store back.
     RTS
-L_0061AC: ; 0x0061AC, $C1AC
-    LDA   A011_TIED_WITH_A00D
-    STA   X
-    STA   456,X
-    INCA
-    STA   A011_TIED_WITH_A00D
-    LDD   #$0770
-    STD   1,X
-    STD   457,X
-    LEAX  3,X
-    CMPX  #$B8C8
-    BNE   COMMIT_X_A005,RTS
-    LDX   #$B700
-COMMIT_X_A005,RTS: ; 0x0061CA, $C1CA
-    STX   R_A005_IRQ_STACK_VAL_1
+PLANET_MOVE_DATA_NEGATIVE: ; 0x0061AC, $C1AC
+    LDA   A011_WORLD_HEIGHT_UNK ; Get height
+    STA   X ; Store to ptr
+    STA   456,X ; Store to other ptr.
+    INCA ; Height ++
+    STA   A011_WORLD_HEIGHT_UNK ; Store height.
+    LDD   #$0770 ; Pixels to draw.
+    STD   1,X ; Store to PTR[1]
+    STD   457,X ; Store to OPTR[1]
+    LEAX  3,X ; X+=3
+    CMPX  #$B8C8 ; End?
+    BNE   SAVE_STACK,RTS
+    LDX   #$B700 ; Reset
+SAVE_STACK,RTS: ; 0x0061CA, $C1CA
+    STX   R_A005_PLANET_DATA_PTR_LOWER ; Store back.
     RTS
-L_0061CD: ; 0x0061CD, $C1CD
-    LDA   SHITED_DATA_A00D
-    BPL   L_0061D5
-    DEC   A011_TIED_WITH_A00D
-    BRA   L_0061D7
-L_0061D5: ; 0x0061D5, $C1D5
-    INC   A011_TIED_WITH_A00D
-L_0061D7: ; 0x0061D7, $C1D7
-    JSR   AOOF_COUNTDOWN_STUFF
+WORLD_MOVE_DATA_IDK_LEFT: ; 0x0061CD, $C1CD
+    LDA   A00D_WORLD_MOVE_DATA_UNK ; Load data.
+    BPL   INC_VAL
+    DEC   A011_WORLD_HEIGHT_UNK
+    BRA   SKIP_INC
+INC_VAL: ; 0x0061D5, $C1D5
+    INC   A011_WORLD_HEIGHT_UNK
+SKIP_INC: ; 0x0061D7, $C1D7
+    JSR   SHIFT_WORLD_DATA_RESEED_LEFT ; Reseed if needed.
     LDA   #$20
-    BITA  $A016
-    BEQ   L_006221
-    LDX   R_A007_IRQ_STACK_VAL_2
+    BITA  R_A016_UNK ; Test 0010.0000
+    BEQ   MANIP_LOWER_PLANET_POINTER ; Bit not set, goto.
+    LDX   R_A007_PLANET_DATA_PTR_HIGHER ; Offset stack 2
     LEAX  -3,X
-    CMPX  #$BA8D
-    BNE   L_0061EC
-    LDX   #$BC55
-L_0061EC: ; 0x0061EC, $C1EC
-    STX   R_A007_IRQ_STACK_VAL_2
-    LDA   A00B_PLANET_GEN_SEED
-    BPL   L_006209
-    DEC   A012_PLANET_HEIGHT_CREATING
-    LDA   A012_PLANET_HEIGHT_CREATING
-    STA   X
-    STA   456,X
-    LDD   #$0770
-    STD   1,X
+    CMPX  #$BA8D ; If X _ val
+    BNE   DONT_RESET
+    LDX   #$BC55 ; Reset
+DONT_RESET: ; 0x0061EC, $C1EC
+    STX   R_A007_PLANET_DATA_PTR_HIGHER ; Store stack ptr.
+    LDA   A00B_PLANET_GEN_HEIGHT_CHANGES ; Get height
+    BPL   PLANET_GOING_UP ; If positive, goto.
+    DEC   A012_PLANET_GEN_HEIGHT ; Goes down.
+    LDA   A012_PLANET_GEN_HEIGHT ; Load height
+    STA   X ; Store to
+    STA   456,X ; Mirrored
+    LDD   #$0770 ; Land
+    STD   1,X ; To 2nd and 3rd bytes reserved.
     STD   457,X
-    JSR   SHIFT_PLANET_MOVEMENT
-    RTS
-L_006209: ; 0x006209, $C209
-    LDA   A012_PLANET_HEIGHT_CREATING
-    STA   X
-    STA   456,X
-    INCA
-    STA   A012_PLANET_HEIGHT_CREATING
-    LDD   #$7007
-    STD   1,X
+    JSR   SHIFT_HEIGHT_CHANGE_DATA_LEFT ; Do IDK
+    RTS ; RTS
+PLANET_GOING_UP: ; 0x006209, $C209
+    LDA   A012_PLANET_GEN_HEIGHT ; Height
+    STA   X ; To H
+    STA   456,X ; And here...
+    INCA ; Height ++
+    STA   A012_PLANET_GEN_HEIGHT ; Store to, idk why.
+    LDD   #$7007 ; Planet pixels.
+    STD   1,X ; To 2nd and 3rd bytes reserved.
     STD   457,X
-    JSR   SHIFT_PLANET_MOVEMENT
+    JSR   SHIFT_HEIGHT_CHANGE_DATA_LEFT ; Do.
     RTS
-L_006221: ; 0x006221, $C221
-    LDX   R_A005_IRQ_STACK_VAL_1
-    LEAX  -3,X
-    CMPX  #$B6FD
-    BNE   L_00622D
+MANIP_LOWER_PLANET_POINTER: ; 0x006221, $C221
+    LDX   R_A005_PLANET_DATA_PTR_LOWER ; Load data ptr
+    LEAX  -3,X ; -=3
+    CMPX  #$B6FD ; Underflow?
+    BNE   WRITE_VAL
 L_00622A: ; 0x00622A, $C22A
-    LDX   #$B8C5
-L_00622D: ; 0x00622D, $C22D
-    STX   R_A005_IRQ_STACK_VAL_1
-    LDA   A00B_PLANET_GEN_SEED
-    BPL   L_00624A
-    DEC   A012_PLANET_HEIGHT_CREATING
-    LDA   A012_PLANET_HEIGHT_CREATING
-    STA   X
-    STA   456,X
-    LDD   #$0770
-    STD   1,X
-    STD   457,X
-    JSR   SHIFT_PLANET_MOVEMENT
+    LDX   #$B8C5 ; Reset ptr.
+WRITE_VAL: ; 0x00622D, $C22D
+    STX   R_A005_PLANET_DATA_PTR_LOWER ; Store back.
+    LDA   A00B_PLANET_GEN_HEIGHT_CHANGES ; Get height
+    BPL   HEIGHT_POSITIVE ; If positive, goto.
+    DEC   A012_PLANET_GEN_HEIGHT ; Dec height
+    LDA   A012_PLANET_GEN_HEIGHT ; Get height.
+    STA   X ; Height to PTR[0]
+    STA   456,X ; Height to OPTR[0]
+    LDD   #$0770 ; Pixels
+    STD   1,X ; To PTR[1]
+    STD   457,X ; To OPTR[1]
+    JSR   SHIFT_HEIGHT_CHANGE_DATA_LEFT ; Change height.
     RTS
-L_00624A: ; 0x00624A, $C24A
-    LDA   A012_PLANET_HEIGHT_CREATING
-    STA   X
-    STA   456,X
-    INCA
-    STA   A012_PLANET_HEIGHT_CREATING
-    LDD   #$7007
-    STD   1,X
-    STD   457,X
-    JSR   SHIFT_PLANET_MOVEMENT
+HEIGHT_POSITIVE: ; 0x00624A, $C24A
+    LDA   A012_PLANET_GEN_HEIGHT ; Get height.
+    STA   X ; To PTR[0]
+    STA   456,X ; To O[PTR]
+    INCA ; Height++
+    STA   A012_PLANET_GEN_HEIGHT ; Store
+    LDD   #$7007 ; Pixels
+    STD   1,X ; To PTR[1]
+    STD   457,X ; To OPTR[1]
+    JSR   SHIFT_HEIGHT_CHANGE_DATA_LEFT ; Height stuff.
     RTS
-GENERATE_LAND_DATA?: ; 0x006262, $C262
+GENERATE_LAND_DATA_B300-B6FF: ; 0x006262, $C262
     LDX   #$C350 ; Data ptr
     STX   A00B_PLANET_GEN_DATA_PTR ; Store to
     LDA   X ; Load from, base height for planet.
-SEED_GEN_FROM_A_MANUAL: ; 0x006269, $C269
-    STA   A00B_PLANET_GEN_SEED ; Store to
+GENERATE_LAND_HEIGHT_BUFFER_MANUALLY: ; 0x006269, $C269
+    STA   A00B_PLANET_GEN_HEIGHT_CHANGES ; Store height starting at.
     LDA   #$07 ; Load
-    STA   A010_PLANET_SHIFTS_COUNTDOWN ; Store
+    STA   A010_PLANET_GEN_SHIFTS_DELTA ; Store
     LDA   #$E0 ; Load
-    STA   A012_PLANET_HEIGHT_CREATING ; Store
-    LDX   #$B300 ; Ptr to buffer.
-LOOP_FILL_B300-B6FF: ; 0x006276, $C276
-    LDA   A012_PLANET_HEIGHT_CREATING ; Val from
+    STA   A012_PLANET_GEN_HEIGHT ; Store
+    LDX   #$B300 ; Ptr to buffer start.
+LOOP_FILL_B300-B6FF_PLANET_HEIGHT_BUFFER: ; 0x006276, $C276
+    LDA   A012_PLANET_GEN_HEIGHT ; Val from
     STA   X+ ; Commit planet data.
-    LDA   A00B_PLANET_GEN_SEED ; Load val
-    BPL   INC_HEIGHT_1 ; If positive, inc.
-    DEC   A012_PLANET_HEIGHT_CREATING ; Dec if negative.
-    BRA   SUBRTN ; Forward.
-INC_HEIGHT_1: ; 0x006282, $C282
-    INC   A012_PLANET_HEIGHT_CREATING
-SUBRTN: ; 0x006284, $C284
-    JSR   SHIFT_PLANET_MOVEMENT
-    LDA   A00B_PLANET_GEN_SEED ; Load to test high bit.
-    BPL   INC_HEIGHT_2
-    DEC   A012_PLANET_HEIGHT_CREATING
-    BRA   SHIFT_NEXT
-INC_HEIGHT_2: ; 0x00628F, $C28F
-    INC   A012_PLANET_HEIGHT_CREATING
-SHIFT_NEXT: ; 0x006291, $C291
-    JSR   SHIFT_PLANET_MOVEMENT
+    LDA   A00B_PLANET_GEN_HEIGHT_CHANGES ; Load val
+    BPL   INC_PLANET_HEIGHT ; If positive, inc.
+    DEC   A012_PLANET_GEN_HEIGHT ; Dec height if 1
+    BRA   PLANET_HEIGHT_DONE ; Forward.
+INC_PLANET_HEIGHT: ; 0x006282, $C282
+    INC   A012_PLANET_GEN_HEIGHT
+PLANET_HEIGHT_DONE: ; 0x006284, $C284
+    JSR   SHIFT_HEIGHT_CHANGE_DATA_LEFT
+    LDA   A00B_PLANET_GEN_HEIGHT_CHANGES ; Load to test high bit.
+    BPL   INC_PLANET_HEIGHT_2
+    DEC   A012_PLANET_GEN_HEIGHT
+    BRA   ALREADY_CHANGED_HEIGHT_2
+INC_PLANET_HEIGHT_2: ; 0x00628F, $C28F
+    INC   A012_PLANET_GEN_HEIGHT
+ALREADY_CHANGED_HEIGHT_2: ; 0x006291, $C291
+    JSR   SHIFT_HEIGHT_CHANGE_DATA_LEFT
     CMPX  #$B700 ; End X
 BNE_LOOP_FILL: ; 0x006297, $C297
-    BNE   LOOP_FILL_B300-B6FF
+    BNE   LOOP_FILL_B300-B6FF_PLANET_HEIGHT_BUFFER
     RTS
 CLEAR_LAND_ONSCREEN: ; 0x00629A, $C29A
     LDX   #$0000
-    LDY   #$BE20 ; Only assuming this is the planet clear because is 304 entries.
+    LDY   #$BE20 ; Planet screen pointers.
 LOOP_CLEAR: ; 0x0062A1, $C2A1
     STX   [Y++]
-    CMPY  #$BF50
-    BNE   LOOP_CLEAR
+    CMPY  #$BF50 ; 304, width of screen.
+    BNE   LOOP_CLEAR ; Not done, loop.
     RTS
-AOOF_COUNTDOWN_STUFF: ; 0x0062AA, $C2AA
-    LDA   COUNTDOWN_A00F ; Load
-    BEQ   A00F_IS_ZERO ; If 0, goto.
-    DEC   COUNTDOWN_A00F ; Sub 1.
-    LDA   SHITED_DATA_A00D ; Load D
+SHIFT_WORLD_DATA_RESEED_LEFT: ; 0x0062AA, $C2AA
+    LDA   A00F_SHIFTS_COUNTER_UNK ; Load
+    BEQ   RESEED_WORLD_DATA ; If 0, goto.
+    DEC   A00F_SHIFTS_COUNTER_UNK ; --
+    LDA   A00D_WORLD_MOVE_DATA_UNK ; Load D
     ASLA ; Shift
-    ADCA  #$00 ; Put bit back too.
-    STA   SHITED_DATA_A00D ; Store to.
+    ADCA  #$00 ; Put bit back to other end.
+    STA   A00D_WORLD_MOVE_DATA_UNK ; Store to.
     RTS
-A00F_IS_ZERO: ; 0x0062B8, $C2B8
-    LDU   BANK_7_DATA_PTR?
-    LEAU  1,U
-    CMPU  #$C450
-    BNE   L_0062C5
-    LDU   #$C350
-L_0062C5: ; 0x0062C5, $C2C5
-    STU   BANK_7_DATA_PTR?
+RESEED_WORLD_DATA: ; 0x0062B8, $C2B8
+    LDU   A009_WORLD_DATA_PTR_UNK ; Load world data ptr.
+    LEAU  1,U ; ++
+    CMPU  #$C450 ; End world data.
+    BNE   DONT_RESET ; Skip reset.
+    LDU   #$C350 ; Range
+DONT_RESET: ; 0x0062C5, $C2C5
+    STU   A009_WORLD_DATA_PTR_UNK ; Store ptr to data back.
     LDA   #$07
-    STA   COUNTDOWN_A00F
-    LDA   U
-    STA   SHITED_DATA_A00D
-    RTS
-SHIFT_PLANET_MOVEMENT: ; 0x0062D0, $C2D0
-    LDA   A010_PLANET_SHIFTS_COUNTDOWN ; Load val from
-    BEQ   RESEED_TERRAIN_GEN_DATA ; If 0, do this.
-    DEC   A010_PLANET_SHIFTS_COUNTDOWN ; Dec available.
-    LDA   A00B_PLANET_GEN_SEED ; Load
+    STA   A00F_SHIFTS_COUNTER_UNK ; Reset shifts.
+    LDA   U ; Load world data.
+    STA   A00D_WORLD_MOVE_DATA_UNK ; Store
+    RTS ; RTS
+SHIFT_HEIGHT_CHANGE_DATA_LEFT: ; 0x0062D0, $C2D0
+    LDA   A010_PLANET_GEN_SHIFTS_DELTA ; Load val from
+    BEQ   RESEED_HEIGHT_CHANGE_DATA ; If 0, do this.
+    DEC   A010_PLANET_GEN_SHIFTS_DELTA ; Dec available.
+    LDA   A00B_PLANET_GEN_HEIGHT_CHANGES ; Load
     ASLA ; Shift
     ADCA  #$00 ; If shifted off one, put back...
-    STA   A00B_PLANET_GEN_SEED ; Store back.
+    STA   A00B_PLANET_GEN_HEIGHT_CHANGES ; Store back.
     RTS
-RESEED_TERRAIN_GEN_DATA: ; 0x0062DE, $C2DE
+RESEED_HEIGHT_CHANGE_DATA: ; 0x0062DE, $C2DE
     LDU   A00B_PLANET_GEN_DATA_PTR ; Load ptr
     LEAU  1,U ; Ptr++
     CMPU  #$C450 ; See if at end.
-    BNE   USE_PTR_ASIS ; If not, goto.
+    BNE   DONT_RESET_LAND_DATA_PTR ; If not, goto.
     LDU   #$C350 ; Reset
-USE_PTR_ASIS: ; 0x0062EB, $C2EB
+DONT_RESET_LAND_DATA_PTR: ; 0x0062EB, $C2EB
     STU   A00B_PLANET_GEN_DATA_PTR ; Store back.
     LDA   #$07 ; Load
-    STA   A010_PLANET_SHIFTS_COUNTDOWN ; Store
+    STA   A010_PLANET_GEN_SHIFTS_DELTA ; Store shifts of validity.
     LDA   U ; Load from ptr
-    STA   A00B_PLANET_GEN_SEED ; Reseed
+    STA   A00B_PLANET_GEN_HEIGHT_CHANGES ; Reseed
     RTS
-A00F_STUFF: ; 0x0062F6, $C2F6
-    LDA   COUNTDOWN_A00F ; Load val
+PLANET_IDK_SHIFT_RIGHT: ; 0x0062F6, $C2F6
+    LDA   A00F_SHIFTS_COUNTER_UNK ; Load val
     CMPA  #$07 ; If _ 7
-    BEQ   TIMER_A00F_REACHED ; ==, goto
-    INC   COUNTDOWN_A00F ; ++
-    LDA   SHITED_DATA_A00D ; Load val
+    BEQ   RESEED_DATA ; ==, goto
+    INC   A00F_SHIFTS_COUNTER_UNK ; ++
+    LDA   A00D_WORLD_MOVE_DATA_UNK ; Load val
     LSRA ; Shift off bit.
-    BHS   SKIP_ADD_80 ; If shifted off 1, don't add 80.
-    ADDA  #$80 ; +=80
-SKIP_ADD_80: ; 0x006305, $C305
-    STA   SHITED_DATA_A00D ; Store to.
+    BHS   DONT_SET_BIT_1 ; If shifted off 1, don't add 80.
+    ADDA  #$80 ; Set bit.
+DONT_SET_BIT_1: ; 0x006305, $C305
+    STA   A00D_WORLD_MOVE_DATA_UNK ; Store to.
     RTS
-TIMER_A00F_REACHED: ; 0x006308, $C308
-    LDU   BANK_7_DATA_PTR? ; Load U from
+RESEED_DATA: ; 0x006308, $C308
+    LDU   A009_WORLD_DATA_PTR_UNK ; Load U from
     CMPU  #$C350 ; If U _ val
-    BNE   USE_U_ASIS ; !=, goto.
+    BNE   DONT_RANGE_PTR ; !=, goto.
     LDU   #$C450 ; Reset
-USE_U_ASIS: ; 0x006313, $C313
+DONT_RANGE_PTR: ; 0x006313, $C313
     LEAU  -1,U ; U--
-    STU   BANK_7_DATA_PTR? ; Store to.
-    CLR   COUNTDOWN_A00F ; Clear
+    STU   A009_WORLD_DATA_PTR_UNK ; Store to.
+    CLR   A00F_SHIFTS_COUNTER_UNK ; Clear
     LDA   U ; Load from U
     LSRA ; Shift
-    BHS   STORE_A00D ; If shifted off 0, skip add.
-    ADDA  #$80 ; +=80
-STORE_A00D: ; 0x006320, $C320
-    STA   SHITED_DATA_A00D ; Store to.
+    BHS   DONT_SET_BIT_2 ; If shifted off 0, skip add.
+    ADDA  #$80 ; Set
+DONT_SET_BIT_2: ; 0x006320, $C320
+    STA   A00D_WORLD_MOVE_DATA_UNK ; Store to.
     RTS ; RTS
-A00E_STUFF_UNK: ; 0x006323, $C323
-    LDA   A010_PLANET_SHIFTS_COUNTDOWN ; Get val
+PLANET_GEN_SHIFT_TO_RIGHT: ; 0x006323, $C323
+    LDA   A010_PLANET_GEN_SHIFTS_DELTA ; Get val
     CMPA  #$07 ; If A _ 7
-    BEQ   U_FROM_A00B,LOW_BOUND_C450 ; ==, goto
-    INC   A010_PLANET_SHIFTS_COUNTDOWN ; Inc count
-    LDA   A00B_PLANET_GEN_SEED ; Load val
+    BEQ   RESEED_PLANET_GEN ; ==, goto
+    INC   A010_PLANET_GEN_SHIFTS_DELTA ; Inc count
+    LDA   A00B_PLANET_GEN_HEIGHT_CHANGES ; Load val
     LSRA ; Shift off bit
-    BHS   DONT_ADD_80 ; If shifted 0, goto.
-    ADDA  #$80 ; Add #$80
-DONT_ADD_80: ; 0x006332, $C332
-    STA   A00B_PLANET_GEN_SEED ; Store back
+    BHS   DONT_PUT_BACK ; If shifted 0, goto.
+    ADDA  #$80 ; Put bit back.
+DONT_PUT_BACK: ; 0x006332, $C332
+    STA   A00B_PLANET_GEN_HEIGHT_CHANGES ; Store back
     RTS ; RTS
-U_FROM_A00B,LOW_BOUND_C450: ; 0x006335, $C335
+RESEED_PLANET_GEN: ; 0x006335, $C335
     LDU   A00B_PLANET_GEN_DATA_PTR ; Get U from
     CMPU  #$C350 ; If U _ C350
 L_00633B: ; 0x00633B, $C33B
@@ -17237,13 +17240,13 @@ L_00633B: ; 0x00633B, $C33B
 SKIP_LOADING_U: ; 0x006340, $C340
     LEAU  -1,U ; U-=1
     STU   A00B_PLANET_GEN_DATA_PTR ; Store new U
-    CLR   A010_PLANET_SHIFTS_COUNTDOWN ; Clear
+    CLR   A010_PLANET_GEN_SHIFTS_DELTA ; Clear
     LDA   U ; Get data at U
     LSRA ; get bit off.
-    BHS   COMMIT_A_RTS ; If shifted 0, don't add 80
-    ADDA  #$80 ; +=#$80
-COMMIT_A_RTS: ; 0x00634D, $C34D
-    STA   A00B_PLANET_GEN_SEED ; Store here.
+    BHS   DONT_SET_BIT ; If shifted 0, don't add 80
+    ADDA  #$80 ; Put back shifted.
+DONT_SET_BIT: ; 0x00634D, $C34D
+    STA   A00B_PLANET_GEN_HEIGHT_CHANGES ; Store to.
     RTS ; RTS
 PLANET_HEIGHT_DATA: ; 0x006350, $C350
     .db $2A
@@ -17502,6 +17505,7 @@ PLANET_HEIGHT_DATA: ; 0x006350, $C350
     .db $03
     .db $00
     .db $00 ; End of data.
+DATA_IDK: ; 0x006450, $C450
     .db $25
     .db $70
     .db $07
@@ -17887,117 +17891,118 @@ PLANET_HEIGHT_DATA: ; 0x006350, $C350
     .db $70
     .db $07
 UNK_RTN: ; 0x0065D0, $C5D0
-    PULS  A,B
-    STD   9,U
-    STX   $A000
+    PULS  A,B ; Pull D
+    STD   9,U ; To UOBJ[9]
+    STX   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; X to...?
     LDD   #$0808
-    STD   $A004
+    STD   A003_CURR_PLANET_GEN_DATA_PTR+1 ; D to...
     LDD   #$1732
-    STD   R_A006_SCORE_POS_CHAR
-    LDY   #$B300
-L_0065E4: ; 0x0065E4, $C5E4
-    LDA   $A000
-    CLRB
-    STD   2,Y
-    LDA   $A001
-    STD   4,Y
-    LDA   R_A005_IRQ_STACK_VAL_1
+    STD   R_A006_SCORE_POS_CHAR ; D to...
+    LDY   #$B300 ; Ptr
+LOOP_IDK: ; 0x0065E4, $C5E4
+    LDA   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; Load
+    CLRB ; Clear
+    STD   2,Y ; To Y[2]
+    LDA   A001_CURR_PLANET_GEN_HEIGHT_CHANGES ; Heights
+    STD   4,Y ; D to Y[4]
+    LDA   R_A005_PLANET_DATA_PTR_LOWER ; A from
+    LSRA ; >> 1
+    EORA  R_A005_PLANET_DATA_PTR_LOWER ; A ^ addr
+    LSRA ; >> 2
     LSRA
-    EORA  R_A005_IRQ_STACK_VAL_1
-    LSRA
-    LSRA
-    ROR   $A004
-    ROR   R_A005_IRQ_STACK_VAL_1
-    LDA   $A004
-    ANDA  #$01
-    SUBA  #$01
-    LDB   R_A005_IRQ_STACK_VAL_1
-    STD   6,Y
-    BPL   L_006606
-    COMA
+    ROR   A003_CURR_PLANET_GEN_DATA_PTR+1 ; Rotate
+    ROR   R_A005_PLANET_DATA_PTR_LOWER ; Rotate
+    LDA   A003_CURR_PLANET_GEN_DATA_PTR+1 ; Load val
+    ANDA  #$01 ; Get 0000.0001
+    SUBA  #$01 ; 0 or FF val
+    LDB   R_A005_PLANET_DATA_PTR_LOWER ; B from
+    STD   6,Y ; D to Y[6]
+    BPL   DONT_INVERT ; If B positive, don't invert.
+    COMA ; Invert D
     COMB
-L_006606: ; 0x006606, $C606
-    PSHS  B,A
-    LDA   R_A007_IRQ_STACK_VAL_2
+DONT_INVERT: ; 0x006606, $C606
+    PSHS  B,A ; Save to stack.
+    LDA   R_A007_PLANET_DATA_PTR_HIGHER ; Load val
+    LSRA ; >> 1
+    EORA  R_A007_PLANET_DATA_PTR_HIGHER ; A ^ addr
     LSRA
-    EORA  R_A007_IRQ_STACK_VAL_2
-    LSRA
-    LSRA
-    ROR   R_A006_SCORE_POS_CHAR
-    ROR   R_A007_IRQ_STACK_VAL_2
-    LDA   R_A006_SCORE_POS_CHAR
-    ANDA  #$03
-    SUBA  #$02
-    LDB   R_A007_IRQ_STACK_VAL_2
-    STD   8,Y
-    BPL   L_006621
-    COMA
+    LSRA ; >> 2
+    ROR   R_A006_SCORE_POS_CHAR ; Rotate
+    ROR   R_A007_PLANET_DATA_PTR_HIGHER ; Rotate
+    LDA   R_A006_SCORE_POS_CHAR ; Load
+    ANDA  #$03 ; Get 0000.0011
+    SUBA  #$02 ; FE,FF,0,1 val
+    LDB   R_A007_PLANET_DATA_PTR_HIGHER ; Load val
+    STD   8,Y ; D to Y[8]
+    BPL   DONT_INVERT_2 ; If B positive, don't invert.
+    COMA ; Invert D
     COMB
-L_006621: ; 0x006621, $C621
-    LSRA
+DONT_INVERT_2: ; 0x006621, $C621
+    LSRA ; D >> 1
     RORB
-    ADDD  S++
-    CMPD  #$016A
-    BHS   L_0065E4
-    LDX   #$0000
-    STX   Y
-    LEAY  10,Y
-    CMPY  #$B800
-    BNE   L_0065E4
-    LDX   #$C6AB
-    STX   R_A002
-    LDA   #$38
-    STA   $A001
-L_006641: ; 0x006641, $C641
-    LDA   #$01
+    ADDD  S++ ; D += prev pushed, fix stack.
+    CMPD  #$016A ; If D _ val
+    BHS   LOOP_IDK ; >=, loop.
+    LDX   #$0000 ; X =
+    STX   Y ; Clear Y
+    LEAY  10,Y ; Y += 10
+    CMPY  #$B800 ; If Y _ val
+    BNE   LOOP_IDK ; !=, loop.
+    LDX   #$C6AB ; Re-purpose to data ptr?
+    STX   R_A002_CURR_PLANET_GEN_HEIGHT
+    LDA   #$38 ; Height changes?
+    STA   A001_CURR_PLANET_GEN_HEIGHT_CHANGES
+SETUP_CALLBACK: ; 0x006641, $C641
+    LDA   #$01 ; Setup callback.
     LDX   #$C649
     JMP   JMP_TO_R_A063_OBJ_SETUP_BANKED_HANDLER?
-    LDX   #$0000
-    LDY   #$B300
-    LDA   [R_A002]
-    STA   COLOR_PALETTE_RAM_COPY+11
-    BEQ   L_0066A8
-L_006658: ; 0x006658, $C658
-    LDU   Y
-    STX   U
-    STX   256,U
-    LDD   8,Y
-    ADDD  4,Y
-    CMPA  #$2A
-    BLO   L_006690
-    STD   4,Y
-    STA   1,Y
-    LDD   6,Y
-    ADDD  2,Y
-    CMPA  #$98
-    BHI   L_006690
-    STD   2,Y
-    STA   Y
-    TSTB
-    BMI   L_006682
-    LDD   #$BBBB
-    STD   [Y]
-    BRA   L_006690
-L_006682: ; 0x006682, $C682
-    LDU   Y
-    LDD   #$0B0B
-    STD   U
-    LDD   #$B0B0
-    STD   256,U
-L_006690: ; 0x006690, $C690
-    LEAY  10,Y
-    CMPY  #$B800
-    BNE   L_006658
-    DEC   $A001
-    BNE   L_006641
-    LDU   R_A002
-    LEAU  1,U
-    STU   R_A002
-    LDA   #$04
-    STA   $A001
-    BRA   L_006641
-L_0066A8: ; 0x0066A8, $C6A8
-    JMP   [9,U]
+    LDX   #$0000 ; Clear
+    LDY   #$B300 ; Ptr to height data.
+    LDA   [R_A002_CURR_PLANET_GEN_HEIGHT] ; Load PTR set up above, C6AB default.
+    STA   COLOR_PALETTE_RAM_COPY+11 ; Store to palette.
+    BEQ   JMP_TO_U[9]_PTR ; If 0, goto.
+LOOP_Y_TO_B800: ; 0x006658, $C658
+    LDU   Y ; U from Y.next
+    STX   U ; Clear U
+    STX   256,U ; Clear U,X+1
+    LDD   8,Y ; D from YOBJ[8]
+    ADDD  4,Y ; += YOBJ[4]
+    CMPA  #$2A ; If A _ val
+    BLO   SKIP_IDK ; <, goto.
+    STD   4,Y ; Store back
+    STA   1,Y ; A to YOBJ[1]
+    LDD   6,Y ; D from YOBJ[6]
+    ADDD  2,Y ; D += YOBJ[2]
+    CMPA  #$98 ; If A _ #$98
+    BHI   SKIP_IDK ; >, goto.
+    STD   2,Y ; Store to YOBJ[2]
+    STA   Y ; A to YOBJ[0]
+    TSTB ; Test B
+    BMI   ALT_RTN ; If negative, goto.
+    LDD   #$BBBB ; D =
+    STD   [Y] ; D to Y[0] ptr
+    BRA   SKIP_IDK
+ALT_RTN: ; 0x006682, $C682
+    LDU   Y ; U from Y
+    LDD   #$0B0B ; D = pixels?
+    STD   U ; to U
+    LDD   #$B0B0 ; Pixels?
+    STD   256,U ; To U,X+1
+SKIP_IDK: ; 0x006690, $C690
+    LEAY  10,Y ; Y += 10
+    CMPY  #$B800 ; If Y _ val
+    BNE   LOOP_Y_TO_B800 ; !=, goto.
+    DEC   A001_CURR_PLANET_GEN_HEIGHT_CHANGES ; -- val
+    BNE   SETUP_CALLBACK ; Not done, callback.
+    LDU   R_A002_CURR_PLANET_GEN_HEIGHT ; U from
+    LEAU  1,U ; ++
+    STU   R_A002_CURR_PLANET_GEN_HEIGHT ; Store to
+    LDA   #$04 ; Val
+    STA   A001_CURR_PLANET_GEN_HEIGHT_CHANGES ; To
+    BRA   SETUP_CALLBACK ; Callback.
+JMP_TO_U[9]_PTR: ; 0x0066A8, $C6A8
+    JMP   [9,U] ; Goto UOBJ[9] rtn.
+DATA_UNK: ; 0x0066AB, $C6AB
     .db $FF
     .db $7F
     .db $3F
@@ -18013,6 +18018,7 @@ L_0066A8: ; 0x0066A8, $C6A8
     .db $03
     .db $02
     .db $00
+DIFFICULT_DATA_START: ; 0x0066BA, $C6BA
     .db $14
     .db $00
     .db $00
@@ -18197,6 +18203,7 @@ L_0066A8: ; 0x0066A8, $C6A8
     .db $DC
     .db $C8
     .db $C8
+DIFFICULTY_DATA_END: ; 0x006772, $C772
     .db $00
     .db $00
 L_006774: ; 0x006774, $C774
@@ -18220,12 +18227,12 @@ L_006791: ; 0x006791, $C791
     LDB   #$A5
     LDX   #$C001
     JMP   L_006036
-    JSR   SEED_GEN_FROM_A_MANUAL
+    JSR   GENERATE_LAND_HEIGHT_BUFFER_MANUALLY
     JSR   L_00622A
     BSR   L_006791
     LDU   #$C0D7
     LDX   #$2820
-    JSR   SEED_GEN_FROM_A_MANUAL
+    JSR   GENERATE_LAND_HEIGHT_BUFFER_MANUALLY
     JSR   L_00603C
     LDY   #$C061
     JSR   L_00606D
@@ -18240,12 +18247,12 @@ L_006791: ; 0x006791, $C791
     JSR   JMP_CLEAR_ALL_SCREEN
     LDU   #$C0D7
     LDX   #$2820
-    JSR   SEED_GEN_FROM_A_MANUAL
+    JSR   GENERATE_LAND_HEIGHT_BUFFER_MANUALLY
     JSR   L_00603C
     CLR   $A03A
     LDY   #$C065
     JSR   L_006066
-    JSR   SEED_GEN_FROM_A_MANUAL
+    JSR   GENERATE_LAND_HEIGHT_BUFFER_MANUALLY
     LDA   #$20
     TFR   A>B
     DECB
@@ -18259,6 +18266,6 @@ L_0067EA: ; 0x0067EA, $C7EA
     LEAX  S
     JSR   L_006257
     LDX   #$CC00
-    JSR   L_006039
+    JSR   DEC_A011_WORLD_HEIGHT
     .db $C5
     .db $02
