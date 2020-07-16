@@ -180,22 +180,10 @@ WGT_DATA_B_RAM_COPY:                     .rs 0x01 ;0xA07D
 
 81_TIMER_UNK:                            .rs 0x01 ;0xA081
 
-R_A082_BUTTON_PRESSED_PTRS_UNK_1:        .rs 0x01 ;0xA082
-
-
-	.org $A084
-R_A084_BUTTON_PRESSED_PTRS_UNK_2:        .rs 0x01 ;0xA084
-
-
-	.org $A086
-R_A086_RUN_CALLBACKS?:                   .rs 0x01 ;0xA086
-
-
-	.org $A088
-R_A088_BUTTON_IDK:                       .rs 0x01 ;0xA088
-
-
-	.org $A08A
+R_A082_BUTTON_PRESSED_PTR_A1:            .rs 0x02 ;0xA082 to A083
+R_A084_BUTTON_PRESSED_PTR_A2:            .rs 0x02 ;0xA084 to A085
+R_A086_BUTTON_PRESSED_PTR_B1:            .rs 0x02 ;0xA086 to A087
+R_A088_BUTTON_PRESSED_PTR_B2:            .rs 0x02 ;0xA088 to A089
 R_A08A_UPDATE_SCORE_FLAG?SCORE_CURRENT?: .rs 0x01 ;0xA08A
 
 A08B_CURRENT_PLAYER:                     .rs 0x01 ;0xA08B
@@ -1366,14 +1354,14 @@ LOOP_ADD_4: ; 0x0005E6, $D5E6
     BHS   LOOP_ADD_4 ; If C = 0, loop. FIRE4,THRST8,SMART12,HYPER16,2PS20,1PS24,REVRS28,DOWN32
     LEAU  B,U ; U += B
     PULU  A,B,X ; Fill in D,X from U
-    LDU   R_A082_BUTTON_PRESSED_PTRS_UNK_1 ; Load U from addr
+    LDU   R_A082_BUTTON_PRESSED_PTR_A1 ; Load U from addr
     BNE   U_ALREADY_VALID ; If U != 0, goto.
-    STD   R_A082_BUTTON_PRESSED_PTRS_UNK_1
-    STX   R_A084_BUTTON_PRESSED_PTRS_UNK_2
+    STD   R_A082_BUTTON_PRESSED_PTR_A1
+    STX   R_A084_BUTTON_PRESSED_PTR_A2
     RTS ; Rts
 U_ALREADY_VALID: ; 0x0005F8, $D5F8
-    STD   R_A086_RUN_CALLBACKS? ; Ret this otherwise.
-    STX   R_A088_BUTTON_IDK
+    STD   R_A086_BUTTON_PRESSED_PTR_B1 ; Ret this otherwise.
+    STX   R_A088_BUTTON_PRESSED_PTR_B2
     RTS ; Rts
 CHECK_COINDOOR_INPUT: ; 0x0005FD, $D5FD
     LDA   PIA_ROM_DATA_A_RAM_COPY ; Load A with all pressed last 2 reads.
@@ -3376,7 +3364,7 @@ CALLBACK_BULLET_HIT_PLAYER?: ; 0x00151E, $E51E
     STA   12,X ; Store back.
     LDD   #$F951 ; Load different callback.
     STD   2,X ; Store to obj.
-    JSR   L_002C63
+    JSR   JMP_TO_OBJX_PARTICLES_MOVE?
     LDD   #$D4E4
     JMP   SOUND_SET_PRIORITY_ROUTINE ; Still unsure.
     .db $5E ; Data?
@@ -3797,27 +3785,27 @@ A_LOT_SKIPS_TO_HERE: ; 0x00181A, $E81A
     STA   CURRENT_BANK
     STA   BANKSWITCH ; Switch to bank 2
     BSR   L_001861 ; Sub
-    JSR   L_002C66 ; Sub
+    JSR   JMP_TO_PARTICLE_IDK ; Sub
     JSR   RANDOM_VALUE_FWD+IN_A ; Forward random.
-LOOP_IDK: ; 0x001829, $E829
-    LDX   R_A082_BUTTON_PRESSED_PTRS_UNK_1 ; X at addr
-    BNE   SKIP_IDK ; If !0, goto.
-    LDX   R_A086_RUN_CALLBACKS? ; X from
-    BEQ   U_LIST_A05F ; If 0, goto.
-    LDD   R_A088_BUTTON_IDK ; D from
-    CLR   R_A086_RUN_CALLBACKS? ; Clear
-    CLR   $A087 ; Clear
-    BRA   L_00183F ; Goto
-SKIP_IDK: ; 0x001839, $E839
-    LDD   R_A084_BUTTON_PRESSED_PTRS_UNK_2 ; D from
-    CLR   R_A082_BUTTON_PRESSED_PTRS_UNK_1 ; Clear
-    CLR   $A083 ; Clear
-L_00183F: ; 0x00183F, $E83F
-    ANDB  A0BA_PLAYER_GAME_STATE ; And B with game state
-    BNE   LOOP_IDK ; If not 0, goto.
-    JSR   GET_15B_OBJECT+SCHEDULE ; IDK why exactly.
-    BRA   LOOP_IDK
-U_LIST_A05F: ; 0x001848, $E848
+SCHEDULE_BUTTONS_IF_STATE_RTN: ; 0x001829, $E829
+    LDX   R_A082_BUTTON_PRESSED_PTR_A1 ; Get val
+    BNE   HANDLE_A1 ; If set, make task.
+    LDX   R_A086_BUTTON_PRESSED_PTR_B1 ; X from
+    BEQ   NO_MORE_BUTTON_TASKS ; If 0, goto.
+    LDD   R_A088_BUTTON_PRESSED_PTR_B2 ; D from
+    CLR   R_A086_BUTTON_PRESSED_PTR_B1 ; Clear
+    CLR   R_A086_BUTTON_PRESSED_PTR_B1+1 ; Clear
+    BRA   HANDLE_B1/B2 ; Goto
+HANDLE_A1: ; 0x001839, $E839
+    LDD   R_A084_BUTTON_PRESSED_PTR_A2 ; D from A2
+    CLR   R_A082_BUTTON_PRESSED_PTR_A1 ; Clear
+    CLR   R_A082_BUTTON_PRESSED_PTR_A1+1 ; Clear
+HANDLE_B1/B2: ; 0x00183F, $E83F
+    ANDB  A0BA_PLAYER_GAME_STATE ; B is state test.
+    BNE   SCHEDULE_BUTTONS_IF_STATE_RTN ; If any states set, don't schedule.
+    JSR   GET_15B_OBJECT+SCHEDULE ; A is timer, X is rtn.
+    BRA   SCHEDULE_BUTTONS_IF_STATE_RTN
+NO_MORE_BUTTON_TASKS: ; 0x001848, $E848
     LDU   #$A05F ; Obj handle list.
     BRA   U=U.NEXT,HANDLE_CALLBACK ; Handle
 CALLBACK_PTR_VALID,HANDLE: ; 0x00184D, $E84D
@@ -4332,7 +4320,7 @@ RTS: ; 0x001BE7, $EBE7
     STA   12,X ; Store back.
     LDU   #$F8E2 ; Change handler? Maybe not handler? Graphic?
     STU   2,X
-    JSR   L_002C63 ; Do
+    JSR   JMP_TO_OBJX_PARTICLES_MOVE? ; Do
     LDD   #$0115 ; Score add +150. Lander, swarmer.
     JSR   SCORE_ADD_AB ; Add to score.
     LDD   #$D516 ; D
@@ -4551,7 +4539,7 @@ L_001D77: ; 0x001D77, $ED77
     LDD   10,X ; D from XOBJ[10]
     SUBD  #$0040 ; D -= val
     STD   10,X ; To XOBJ[10]
-    JSR   L_002C63 ; Do
+    JSR   JMP_TO_OBJX_PARTICLES_MOVE? ; Do
     LDD   #$D4E4 ; D =
     JMP   SOUND_SET_PRIORITY_ROUTINE ; Do
     LDU   6,X ; U from XOBJ[6]
@@ -4628,7 +4616,7 @@ LOOP_ON_SCRATCH: ; 0x001E10, $EE10
     JSR   A_FROM_B300+(XOBJ[10]>>6) ; Get A
     STA   12,X ; A to XOBJ[12]
     SUBA  #$0A ; A -= #$0A
-    JSR   L_002C63 ; Do
+    JSR   JMP_TO_OBJX_PARTICLES_MOVE? ; Do
     DEC   A073_SCRATCH_LOOP_WORD? ; Dec scratch loop
     BNE   LOOP_ON_SCRATCH ; != 0, goto.
     LDA   A0DF_RAND_BYTE ; Get random
@@ -5448,7 +5436,7 @@ ADD_TO_SCORE+SOUND_FROM_4_BYTES_PAST: ; 0x002420, $F420
 L_002434: ; 0x002434, $F434
     PSHS  U,Y,X,B,A ; Save
     BSR   HANDLER_IN_BANK_2/XOBJ[8] ; Idk why
-    JSR   L_002C63
+    JSR   JMP_TO_OBJX_PARTICLES_MOVE?
     PULS  A,B,X,Y,U,PC
 CALLBACK_PALETTE_CHANGE: ; 0x00243D, $F43D
     LDX   #$F45B ; Palette ptr
@@ -6082,7 +6070,7 @@ BANK_CHECK_DATA: ; 0x00286E, $F86E
     .db $11
     .db $00 ; END OF DATA
 BUTTONS_PRESSED_STUFF_UNK: ; 0x002886, $F886
-    .db $E5 ; USED IN FAILURE STUFF? FIRE BUTTON STUFF. FMT:[PTR,PTR]
+    .db $E5 ; USED IN FAILURE STUFF? FIRE BUTTON STUFF. FMT:[CALLBACK_PTR,TIMER,STATE_INVALID]
     .db $91
     .db $00
     .db $E8
@@ -7104,9 +7092,9 @@ GFX_DATA_START?: ; 0x0029FB, $F9FB
     .db $00
 JMP_TO_REPLACES_BMP_AND_DOES_ALOT_SPAWN_IN?: ; 0x002C60, $FC60
     JMP   SETUP_PARTICLES_SPAWN_IN
-L_002C63: ; 0x002C63, $FC63
+JMP_TO_OBJX_PARTICLES_MOVE?: ; 0x002C63, $FC63
     JMP   OBJX_PARTICLES_MOVE?
-L_002C66: ; 0x002C66, $FC66
+JMP_TO_PARTICLE_IDK: ; 0x002C66, $FC66
     JMP   PARTICLE_IDK
 SETUP_PARTICLES_SPAWN_IN: ; 0x002C69, $FC69
     PSHS  U,Y,B,A ; Save
@@ -8180,7 +8168,7 @@ CALLBACK_ATTRACT_IDK: ; 0x003475, $C475
     BSR   ATTRACT_REMOVE_LASER
     LDX   R_A18D_OBJ_PTR_ENEMY? ; Obj 3
     JSR   REMOVE_X_FROM_LIST_A065|A06B ; Remove from list...
-    JSR   L_002C63 ; IDK
+    JSR   JMP_TO_OBJX_PARTICLES_MOVE? ; IDK
     LDX   R_A18B_OBJ_PTR_SHIP? ; X obj 2, ship?
     LDD   #$0040
     STD   14,X ; OBJ[14], H speed?
@@ -8292,7 +8280,7 @@ LOOP_ENEMIES: ; 0x00354F, $C54F
     LDX   R_A18D_OBJ_PTR_ENEMY? ; Load OBJ 3
     JSR   REMOVE_X_FROM_LIST_A065|A06B ; Remove from list.
     JSR   LIST_GET_23B,X.next_FROM_$65_ONSCREEN? ; Get new obj on screen.
-    JSR   L_002C63 ; Particle IDK
+    JSR   JMP_TO_OBJX_PARTICLES_MOVE? ; Particle IDK
     LDU   R_A192_OBJ_PTR_SCRATCH ; Load ptr
     LDD   24,U ; PTR+24
     STD   10,X ; To OBJ[10]
