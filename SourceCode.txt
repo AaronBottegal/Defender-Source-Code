@@ -48,8 +48,8 @@ R_A005_PLANET_DATA_PTR_LOWER:            .rs 0x02 ;0xA005 to A006
 R_A007_PLANET_DATA_PTR_HIGHER:           .rs 0x02 ;0xA007 to A008
 A009_WORLD_DATA_PTR_UNK:                 .rs 0x01 ;0xA009
 
-HIGHSCORE_INITIALS_ADDR+2:               .rs 0x01 ;0xA00A
 
+	.org $A00B
 A00B_PLANET_GEN_DATA_PTR:                .rs 0x01 ;0xA00B
 
 
@@ -180,9 +180,19 @@ WGT_DATA_B_RAM_COPY:                     .rs 0x01 ;0xA07D
 
 81_TIMER_UNK:                            .rs 0x01 ;0xA081
 
+R_A082_BUTTON_PRESSED_PTRS_UNK_1:        .rs 0x01 ;0xA082
+
+
+	.org $A084
+R_A084_BUTTON_PRESSED_PTRS_UNK_2:        .rs 0x01 ;0xA084
+
 
 	.org $A086
 R_A086_RUN_CALLBACKS?:                   .rs 0x01 ;0xA086
+
+
+	.org $A088
+R_A088_BUTTON_IDK:                       .rs 0x01 ;0xA088
 
 
 	.org $A08A
@@ -227,7 +237,7 @@ R_A0AB:                                  .rs 0x01 ;0xA0AB
 
 
 	.org $A0AD
-R_A0AD_SOUND_REQ_ACK_FLAG?:              .rs 0x01 ;0xA0AD
+R_A0AD_SOUND_REQ_FLAG?:                  .rs 0x01 ;0xA0AD
 
 
 	.org $A0B0
@@ -237,10 +247,7 @@ SOUND_TO_WRITE:                          .rs 0x01 ;0xA0B0
 	.org $A0B2
 SOUND_PRIORITY_PLAYING:                  .rs 0x01 ;0xA0B2
 
-SOUND_UNK:                               .rs 0x01 ;0xA0B3
-
-
-	.org $A0B5
+SOUND_FLAGS?:                            .rs 0x02 ;0xA0B3 to A0B4
 A0B5_LASER_COUNT?:                       .rs 0x01 ;0xA0B5
 
 ROTATING_COLOR_INDEX:                    .rs 0x01 ;0xA0B6
@@ -981,7 +988,7 @@ B_NOW_NEGATIVE: ; 0x000396, $D396
     JSR   DISP_SHIPS_ALL_PLAYERS
     JSR   SMARTBOMBS_TO_SCREEN
     LDD   #$D4B0 ; Idk why
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET?
+    JSR   SOUND_SET_PRIORITY_ROUTINE
     LDB   #$05 ; Score keep entry.
     JSR   GOTO_B3-C00F_BOOKKEEP_UPDATE_+1 ; Track
 D_IS_ZERO: ; 0x0003C5, $D3C5
@@ -1098,7 +1105,7 @@ USE_XB_PROVIDED: ; 0x000481, $D481
     LDA   7E_TIMER_SLAM? ; Load val.
     BNE   REMOVE_X_FROM_LIST ; If != 0, goto.
     LDD   #$D4AB ; PTR to data table below.
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Works with data table and other vars.
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Works with data table and other vars.
     JSR   BANKSWITCH_TO_3 ; Switch to.
     JSR   [9,U] ; JSR to handler pointer.
     BRA   REMOVE_X_FROM_LIST ; Loop.
@@ -1252,12 +1259,12 @@ WRITE_ROM_PIA_DATA_REGS_W/_#$3F_AND_B_SOUND?: ; 0x000539, $D539
     LDA   #$3F ; Write val
     STA   PIA_ROM_DATA_B ; Store to...
     COMB ; Invert B
-    ANDB  #$3F ; LED's to 0's, other doesn't care
+    ANDB  #$3F ; LED's to 0's, keep data.
     STB   PIA_ROM_DATA_B ; Store to data reg.
     PULS  CC,A,B,PC ; RTS
-SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET?: ; 0x00054D, $D54D
+SOUND_SET_PRIORITY_ROUTINE: ; 0x00054D, $D54D
     PSHS  X,B,A,CC ; Save
-    CLR   R_A0AD_SOUND_REQ_ACK_FLAG? ; Clear loc.
+    CLR   R_A0AD_SOUND_REQ_FLAG? ; Clear loc.
     TFR   D>X ; X=D
     LDA   X ; Get A from X
     CMPA  SOUND_PRIORITY_PLAYING ; If A _ $A0B2
@@ -1267,54 +1274,54 @@ SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET?: ; 0x00054D, $D54D
     ORCC  #$10 ; Mask IRQ so we won't get taken away.
     STX   SOUND_TO_WRITE ; Store X to.
     LDD   #$0101
-    STD   SOUND_UNK ; Set these?
+    STD   SOUND_FLAGS? ; Set these?
 RTS: ; 0x000566, $D566
     PULS  CC,A,B,X,PC ; RTS
 IDK+THRUST+MORE: ; 0x000568, $D568
-    LDA   SOUND_UNK ; Load timer
+    LDA   SOUND_FLAGS? ; Load timer
     BEQ   SOMETHING_TO_DO_WITH_THRUST ; if 0 skip
-    DEC   SOUND_UNK ; Dec if not 0
+    DEC   SOUND_FLAGS? ; Dec if not 0
     BNE   TEST_IRQ_PIA_ROM_A2 ; Goto if not done.
     LDX   SOUND_TO_WRITE ; Load 
-    DEC   $A0B4 ; Dec
+    DEC   SOUND_FLAGS?+1 ; Dec
     BNE   D_FROM_X+1 ; If not 0, do this. Sets timer it seems.
     LEAX  3,X ; X+=3
     STX   SOUND_TO_WRITE ; Store X back
     LDA   X ; Load A from X ptr
-    BNE   STORE_A_TO_$B4 ; If != 0, goto.
-    STA   SOUND_PRIORITY_PLAYING ; Store to otherwise.
+    BNE   STORE_A_TO_SOUND_FLAGS[1] ; If != 0, goto.
+    STA   SOUND_PRIORITY_PLAYING ; Clear addr.
 SOMETHING_TO_DO_WITH_THRUST: ; 0x000580, $D580
     LDA   WGT_DATA_A_RAM_COPY ; Get inputs on wigit A
     BITA  #$02 ; Test thrust pressed
     BNE   THRUST_NOT_PRESSED ; Thrust not pressed, goto.
-    LDA   R_A0AD_SOUND_REQ_ACK_FLAG? ; Load
+    LDA   R_A0AD_SOUND_REQ_FLAG? ; Load
     BEQ   TEST_IRQ_PIA_ROM_A2 ; If 0, goto.
-    CLR   R_A0AD_SOUND_REQ_ACK_FLAG? ; Clear otherwise.
+    CLR   R_A0AD_SOUND_REQ_FLAG? ; Clear otherwise.
     LDB   #$0F ; Load B
     BRA   WRITE_ROM_PIA_WITH_B_RTN ; Always goto.
 THRUST_NOT_PRESSED: ; 0x000590, $D590
-    LDA   R_A0AD_SOUND_REQ_ACK_FLAG? ; Load val
+    LDA   R_A0AD_SOUND_REQ_FLAG? ; Load val
     BNE   TEST_IRQ_PIA_ROM_A2 ; If != 0, goto
     LDA   A0BA_PLAYER_GAME_STATE ; Load val
-    BITA  #$98 ; Test IDK
-    BNE   TEST_IRQ_PIA_ROM_A2 ; If none set, goto
+    BITA  #$98 ; Test 1001.1000
+    BNE   TEST_IRQ_PIA_ROM_A2 ; If set, skip below.
     LDB   #$16 ; Load B
-    STB   R_A0AD_SOUND_REQ_ACK_FLAG? ; Store to
+    STB   R_A0AD_SOUND_REQ_FLAG? ; Store to
     BRA   WRITE_ROM_PIA_WITH_B_RTN ; Goto
-STORE_A_TO_$B4: ; 0x0005A0, $D5A0
-    STA   $A0B4 ; Store A
+STORE_A_TO_SOUND_FLAGS[1]: ; 0x0005A0, $D5A0
+    STA   SOUND_FLAGS?+1 ; Store A
 D_FROM_X+1: ; 0x0005A2, $D5A2
     LDD   1,X ; Get data from X+1
-    STA   SOUND_UNK ; Store A loaded here
+    STA   SOUND_FLAGS? ; Store A loaded here
 WRITE_ROM_PIA_WITH_B_RTN: ; 0x0005A6, $D5A6
-    BSR   WRITE_ROM_PIA_DATA_REGS_W/_#$3F_AND_B_SOUND? ; Write it
+    BSR   WRITE_ROM_PIA_DATA_REGS_W/_#$3F_AND_B_SOUND? ; Write B
 TEST_IRQ_PIA_ROM_A2: ; 0x0005A8, $D5A8
     LDA   PIA_ROM_CTRL_A ; Get CTRL
     BITA  #$40 ; Test C2, SLAM switch
-    BEQ   C2_CLEAR ; If not set, don't seed.
+    BEQ   SLAM_NOT_SET ; If not set, don't seed.
     LDA   #$3C ; Not clear, seed.
     STA   7E_TIMER_SLAM? ; Store
-C2_CLEAR: ; 0x0005B3, $D5B3
+SLAM_NOT_SET: ; 0x0005B3, $D5B3
     LDA   7E_TIMER_SLAM? ; Get value
     BEQ   7E_ZERO ; If 0, goto
     DEC   7E_TIMER_SLAM? ; Dec otherwise
@@ -1331,34 +1338,34 @@ C2_CLEAR: ; 0x0005B3, $D5B3
     BEQ   80_ZERO ; If 0, goto
     DEC   80_TIMER_UNK ; Dec otherwise
 80_ZERO: ; 0x0005CB, $D5CB
-    LDA   WGT_DATA_A_RAM_COPY ; Get copy
-    ORA   WGT_DATA_A_RAM_COPY_OLD ; OR with old.
-    COMA ; Invert.
-    LDB   WGT_DATA_A_RAM_COPY ; Move
+    LDA   WGT_DATA_A_RAM_COPY ; Get newest
+    ORA   WGT_DATA_A_RAM_COPY_OLD ; OR with old, setting 1 for all pressed for 2 frames.
+    COMA ; Invert, getting eligible for new pressed in A
+    LDB   WGT_DATA_A_RAM_COPY ; Newest...
     STB   WGT_DATA_A_RAM_COPY_OLD ; to old
-    LDB   PIA_WGT_DATA_A ; Move
+    LDB   PIA_WGT_DATA_A ; Update newest.
     STB   WGT_DATA_A_RAM_COPY
-    LDB   PIA_WGT_DATA_B ; Move
+    LDB   PIA_WGT_DATA_B ; Update newest.
     STB   WGT_DATA_B_RAM_COPY
-    ANDA  WGT_DATA_A_RAM_COPY ; AND with new, gets newly pressed.
-    BEQ   CHECK_COINDOOR_INPUT ; No new
+    ANDA  WGT_DATA_A_RAM_COPY ; AND eligible to be newly pressed with updated newest buttons.
+    BEQ   CHECK_COINDOOR_INPUT ; No new pressed, do coin door.
     LDU   #$F882 ; Change U...
 FILL_IN_$82-$88: ; 0x0005E5, $D5E5
     CLRB ; Clear
 LOOP_ADD_4: ; 0x0005E6, $D5E6
-    ADDB  #$04 ; Add B
+    ADDB  #$04 ; B += 4
     LSRA ; Shift to carry
-    BHS   LOOP_ADD_4 ; If C = 0, loop.
+    BHS   LOOP_ADD_4 ; If C = 0, loop. FIRE4,THRST8,SMART12,HYPER16,2PS20,1PS24,REVRS28,DOWN32
     LEAU  B,U ; U += B
-    PULU  A,B,X ; Fill in A,B,X from U
-    LDU   $A082 ; Load U from addr
-    BNE   U_IS_VALID ; If U != 0
-    STD   $A082 ; Ret this on null.
-    STX   $A084
+    PULU  A,B,X ; Fill in D,X from U
+    LDU   R_A082_BUTTON_PRESSED_PTRS_UNK_1 ; Load U from addr
+    BNE   U_ALREADY_VALID ; If U != 0, goto.
+    STD   R_A082_BUTTON_PRESSED_PTRS_UNK_1
+    STX   R_A084_BUTTON_PRESSED_PTRS_UNK_2
     RTS ; Rts
-U_IS_VALID: ; 0x0005F8, $D5F8
+U_ALREADY_VALID: ; 0x0005F8, $D5F8
     STD   R_A086_RUN_CALLBACKS? ; Ret this otherwise.
-    STX   $A088
+    STX   R_A088_BUTTON_IDK
     RTS ; Rts
 CHECK_COINDOOR_INPUT: ; 0x0005FD, $D5FD
     LDA   PIA_ROM_DATA_A_RAM_COPY ; Load A with all pressed last 2 reads.
@@ -1667,6 +1674,7 @@ SRAM_C495_LOAD: ; 0x00082B, $D82B
     STA   VAL_FROM_SRAM_C495-C496 ; Store
 RTS: ; 0x000838, $D838
     RTS
+CALLBACK_P1_BUTTON_PRESSED_CALLBACK: ; 0x000839, $D839
     LDA   A0BA_PLAYER_GAME_STATE ; Load
     BPL   LIST_RTN_INSTEAD ; If positive, do list rtn.
     BSR   SRAM_C495_LOAD ; Put to RAM
@@ -1674,10 +1682,11 @@ RTS: ; 0x000838, $D838
     BEQ   LIST_RTN_INSTEAD ; If 0, do instead.
     LDD   #$D4BD ; Ptr to data table idk yet.
 JSR_UNK_BSR_IDK: ; 0x000846, $D846
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Mod stuff.
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Mod stuff.
     BSR   L_000861
 LIST_RTN_INSTEAD: ; 0x00084B, $D84B
     JMP   CALLBACK_REMOVE? ; Lots goes here.
+2P_START_BUTTON_PRESSED_CALLBACK: ; 0x00084E, $D84E
     LDA   A0BA_PLAYER_GAME_STATE ; Load val
     BPL   LIST_RTN_INSTEAD ; If positive, AKA not pointing to ROM?
     BSR   SRAM_C495_LOAD ; Put to RAM
@@ -1831,7 +1840,7 @@ BIT_7_NOT_SET: ; 0x00096E, $D96E
     LDD   #$0300 ; Idk why val
     STD   $A0BD ; To
     STD   $A0BB ; To
-    CLR   R_A0AD_SOUND_REQ_ACK_FLAG? ; Clear
+    CLR   R_A0AD_SOUND_REQ_FLAG? ; Clear
     CLR   A0B5_LASER_COUNT?
     CLR   R_A08A_UPDATE_SCORE_FLAG?SCORE_CURRENT?
     CLR   $A0AF
@@ -1931,7 +1940,7 @@ L_000A46: ; 0x000A46, $DA46
     JSR   CLEAR_SCREEN_FLEX_SETUP ; Clear
     JSR   SAVE_STATE_TO_PLAYER ; Save state to player
     LDD   #$D4B5
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Unsure
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Unsure
     LDY   #$F9C1 ; PTR to BITMAP/BMP
     LDA   $A0BB ; Load val
     BPL   L_000A6B ; If positive, skip ptr change.
@@ -1979,7 +1988,7 @@ CALLBACK_HANDLER_UNK: ; 0x000AB8, $DAB8
     JSR   BANKSWITCH_TO_7 ; To 7
     JSR   JMP_TO_UNK_RTN ; Idk
     JSR   CURRENT_PLAYER_SCORE_TO_SCREEN ; Score to screen.
-    CLR   SOUND_UNK ; Clear idk
+    CLR   SOUND_FLAGS? ; Clear idk
     LDB   #$13 ; Sound?
     JSR   WRITE_ROM_PIA_DATA_REGS_W/_#$3F_AND_B_SOUND?
     JSR   ENEMY_COUNTS_RETURN? ; Load enemy counts.
@@ -2031,7 +2040,7 @@ A08C_CURRENT_PLAYER_1: ; 0x000B2C, $DB2C
     LDA   #$FF ; State
     STA   A0BA_PLAYER_GAME_STATE ; Update
     JSR   PSH_ALL_GOTO_B2-C002 ; To screen.
-    CLR   SOUND_UNK ; Clear
+    CLR   SOUND_FLAGS? ; Clear
     LDB   #$13 ; No sound?
     JSR   WRITE_ROM_PIA_DATA_REGS_W/_#$3F_AND_B_SOUND? ; To
     LDA   #$28 ; Timer
@@ -3363,7 +3372,7 @@ CALLBACK_BULLET_HIT_PLAYER?: ; 0x00151E, $E51E
     STD   2,X ; Store to obj.
     JSR   L_002C63
     LDD   #$D4E4
-    JMP   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Still unsure.
+    JMP   SOUND_SET_PRIORITY_ROUTINE ; Still unsure.
     .db $5E ; Data?
 SETUP_A1A2-A1B1_WITH_99/9A/A9/AA: ; 0x00154B, $E54B
     LDX   #$A1A2 ; Ptr?
@@ -3407,12 +3416,13 @@ TO_NEXT_OBJ: ; 0x00158A, $E58A
     LDX   X ; X to X.next
     BNE   PROCESS_OBJ_UNK ; If not null, goto.
     RTS ; RTS
+CALLBACK_FIRE_BUTTON_PRESSED: ; 0x001591, $E591
     LDA   A0B5_LASER_COUNT? ; Load val
     CMPA  #$04 ; If A _ #$04
     BHS   REMOVE_OBJ+HANDLE ; >=, goto.
     INC   A0B5_LASER_COUNT? ; ++
     LDD   #$D51B
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Difficulty?
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Difficulty?
     LDX   $A0C1 ; Load X with
     LDA   $A0BB ; Load A with
     BPL   LASER_CONTINUE ; If A positive, goto.
@@ -3784,17 +3794,17 @@ A_LOT_SKIPS_TO_HERE: ; 0x00181A, $E81A
     JSR   L_002C66 ; Sub
     JSR   RANDOM_VALUE_FWD+IN_A ; Forward random.
 LOOP_IDK: ; 0x001829, $E829
-    LDX   $A082 ; X at addr
+    LDX   R_A082_BUTTON_PRESSED_PTRS_UNK_1 ; X at addr
     BNE   SKIP_IDK ; If !0, goto.
     LDX   R_A086_RUN_CALLBACKS? ; X from
     BEQ   U_LIST_A05F ; If 0, goto.
-    LDD   $A088 ; D from
+    LDD   R_A088_BUTTON_IDK ; D from
     CLR   R_A086_RUN_CALLBACKS? ; Clear
     CLR   $A087 ; Clear
     BRA   L_00183F ; Goto
 SKIP_IDK: ; 0x001839, $E839
-    LDD   $A084 ; D from
-    CLR   $A082 ; Clear
+    LDD   R_A084_BUTTON_PRESSED_PTRS_UNK_2 ; D from
+    CLR   R_A082_BUTTON_PRESSED_PTRS_UNK_1 ; Clear
     CLR   $A083 ; Clear
 L_00183F: ; 0x00183F, $E83F
     ANDB  A0BA_PLAYER_GAME_STATE ; And B with game state
@@ -3842,6 +3852,7 @@ L_001886: ; 0x001886, $E886
 CLR_AND_RTS: ; 0x001894, $E894
     CLR   $A0DE ; Clear addr
     RTS ; RTS
+REVERSE_BUTTON_PRESSED_CALLBACK: ; 0x001897, $E897
     LDA   $A0AF ; Load val
     BNE   L_0018BE ; If != 0, goto.
     INC   $A0AF ; Inc val
@@ -3863,6 +3874,7 @@ SETUP_CALLBACK: ; 0x0018A6, $E8A6
     CLR   $A0AF ; Clear val
 L_0018BE: ; 0x0018BE, $E8BE
     JMP   CALLBACK_REMOVE? ; Not exactly sure why.
+CALLBACK_SMARTBOMB_PRESSED: ; 0x0018C1, $E8C1
     LDA   $A09A ; Load val
     BNE   SMARTBOMB_BUTTON_HANDLED? ; If not 0, handle.
     LDX   A08D_CURRENT_PLAYER_PTR? ; Get player ptr.
@@ -3872,7 +3884,7 @@ L_0018BE: ; 0x0018BE, $E8BE
     DEC   9,X ; OBJ[9]--, smartbombs.
     JSR   SMARTBOMBS_TO_SCREEN ; Put new count to screen.
     LDD   #$D4D2 ; D val
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Idk rtn yet.
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Idk rtn yet.
 LOOP_ON_SCREEN_LIST: ; 0x0018D8, $E8D8
     LDX   LIST_$65_ON_SCREEN? ; Load list
 LOOP_DESTROY_OBJECTS: ; 0x0018DA, $E8DA
@@ -3911,6 +3923,7 @@ HYPERSPACE_PRESSED: ; 0x001904, $E904
     CLR   $A09A ; Clear hyperspace disable?
 SMARTBOMB_BUTTON_HANDLED?: ; 0x00191C, $E91C
     JMP   CALLBACK_REMOVE? ; Do.
+HYPERSPACE_BUTTON_PRESSED_CALLBACK: ; 0x00191F, $E91F
     LDA   A0BA_PLAYER_GAME_STATE ; Load state
     BITA  #$FD ; Test 1111.1101
     LBNE  JMP_RMV_X+HANDLED ; If any set, goto.
@@ -4137,7 +4150,7 @@ CALLBACK_BAITER?IDK: ; 0x001AB4, $EAB4
     JSR   SPAWN_SOMETHING_IDK ; Do IDK
     BEQ   L_001AD5 ; If Z ret, goto.
     LDD   #$D52F ; Ptr
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET?
+    JSR   SOUND_SET_PRIORITY_ROUTINE
 L_001AD5: ; 0x001AD5, $EAD5
     LDU   2,X ; U from XOBJ[2]
     LEAU  10,U ; U+=10
@@ -4199,7 +4212,7 @@ CALLBACK_UNK: ; 0x001B2B, $EB2B
     .db $20 ; Goes to always.
     .db $D4 ; ANDB dp
     .db $FD ; STD addr
-    .db $39 ; RTS
+    RTS ; RTS
 L_001B36: ; 0x001B36, $EB36
     STA   A073_SCRATCH_LOOP_WORD? ; A to addr.
 LOOP_MAKE_OBJ: ; 0x001B38, $EB38
@@ -4322,7 +4335,7 @@ RTS: ; 0x001BE7, $EBE7
     LDD   #$0115 ; Score add +150. Lander, swarmer.
     JSR   SCORE_ADD_AB ; Add to score.
     LDD   #$D516 ; D
-    JMP   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Do.
+    JMP   SOUND_SET_PRIORITY_ROUTINE ; Do.
 L_001C17: ; 0x001C17, $EC17
     LDX   7,U ; X from UOBJ[7]
     LDB   R_A10C ; B from addr
@@ -4401,7 +4414,7 @@ SUB_IDK: ; 0x001C86, $EC86
     ROLA
     STD   14,X ; D to XOBJ[14]
     LDD   #$D534 ; D = val
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Do IDK
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Do IDK
     CLRB ; Clear B
     LDA   SHIP_SCR_POS_XXYY+1 ; Get ship Y pos.
     SUBA  12,X ; A -= XOBJ[12]
@@ -4535,7 +4548,7 @@ L_001D77: ; 0x001D77, $ED77
     STD   10,X ; To XOBJ[10]
     JSR   L_002C63 ; Do
     LDD   #$D4E4 ; D =
-    JMP   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Do
+    JMP   SOUND_SET_PRIORITY_ROUTINE ; Do
     LDU   6,X ; U from XOBJ[6]
     BEQ   L_001D70 ; If 0, goto.
     LDA   $A0DE ; Load from addr
@@ -4544,7 +4557,7 @@ L_001D77: ; 0x001D77, $ED77
     CMPD  #$F24C ; If D _ val
     BEQ   CHANGE_U[2]_AND_RTS ; ==, goto.
     LDD   #$D4DA ; D =
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Do
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Do
     PSHS  X ; Save XOBJ
     LDX   #$EE73 ; X =
     LDA   #$00 ; A =
@@ -4618,7 +4631,7 @@ LOOP_ON_SCRATCH: ; 0x001E10, $EE10
     LDA   A,X ; A from X[A]
     STA   COLOR_PALETTE_RAM_COPY ; To color 10
     LDD   #$D4E4 ; Val
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Do
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Do
     LDX   #$EE44 ; Callback
     LDA   #$02
 SEED+CALLBACK: ; 0x001E3D, $EE3D
@@ -4640,7 +4653,7 @@ CALLBACK_RAND_TIMING: ; 0x001E54, $EE54
     CMPA  #$10 ; If A _ #$10
     BNE   L_001E05 ; !=, goto.
     LDD   #$D4C7 ; D ptr to
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Do
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Do
     JMP   CALLBACK_REMOVE? ; Goto
 BOMBER_BLOWN_UP?: ; 0x001E65, $EE65
     JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_PAST_JSR ; Do
@@ -4740,7 +4753,7 @@ L_001EFE: ; 0x001EFE, $EEFE
     BSR   SPAWN_SOMETHING_IDK ; Do idk
     BEQ   RTS ; If not successful, rts.
     LDD   #$D525 ; D from
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET?
+    JSR   SOUND_SET_PRIORITY_ROUTINE
 RTS: ; 0x001F14, $EF14
     RTS
 L_001F15: ; 0x001F15, $EF15
@@ -4981,7 +4994,7 @@ L_0020BE: ; 0x0020BE, $F0BE
     STD   16,X ; To XOBJ[16]
     STD   16,Y ; To YOBJ[16]
     LDD   #$D50C ; D ptr to idk
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Do
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Do
     LDD   #$ED91 ; D ptr
     STD   8,Y ; To YOBJ[8]
     LDU   R_A063_CALLBACK_LIST_ADDR? ; Load ptr to others
@@ -4995,7 +5008,7 @@ L_0020BE: ; 0x0020BE, $F0BE
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK
 L_0020FB: ; 0x0020FB, $F0FB
     LDD   #$D511 ; Idk
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET?
+    JSR   SOUND_SET_PRIORITY_ROUTINE
     LDX   7,U ; X from UOBJ[7]
     LDY   9,U ; Y from UOBJ[9]
     LDD   [11,U] ; D from UOBJ[11] ptr. Humanoid ptr?
@@ -5104,7 +5117,7 @@ L_0021BF: ; 0x0021BF, $F1BF
     JSR   SPAWN_SOMETHING_IDK
     BEQ   SETUP_CALLBACK ; Was successful, do.
     LDD   #$D52A ; D val...
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET?
+    JSR   SOUND_SET_PRIORITY_ROUTINE
 SETUP_CALLBACK: ; 0x0021D8, $F1D8
     LDA   #$03 ; Setup callback.
     LDX   #$F15E
@@ -5121,7 +5134,7 @@ SETUP_CALLBACK: ; 0x0021D8, $F1D8
     LDU   9,U ; U from UOBJ[9]
     STU   7,X ; To XOBJ[7]
     LDD   #$D4E9 ; D val?
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET?
+    JSR   SOUND_SET_PRIORITY_ROUTINE
     LDD   #$0000 ; D = 0, again.
     STD   16,U ; Clear UOBJ[16]
     STX   6,U ; X to UOBJ[16]
@@ -5191,7 +5204,7 @@ SKIP_OTHER_LOAD: ; 0x00227C, $F27C
     LDD   #$ED70 ; Ptr to code
     STD   8,X ; Callback of some type.
     LDD   #$D4DF ; Sound
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Do sound.
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Do sound.
     JMP   CALLBACK_REMOVE? ; Handled.
 L_00229D: ; 0x00229D, $F29D
     STA   A073_SCRATCH_LOOP_WORD? ; A to scratch.
@@ -5419,7 +5432,7 @@ ADD_TO_SCORE+SOUND_FROM_4_BYTES_PAST: ; 0x002420, $F420
     BSR   L_002434 ; Particle effects setup?
     PULU  A,B ; Pull sound from 2nd bytes past JSR.
     STU   4,S ; Code position to RTS to.
-    JSR   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET? ; Set sound data
+    JSR   SOUND_SET_PRIORITY_ROUTINE ; Set sound data
     PULS  A,B,U,PC ; RTS
 L_002434: ; 0x002434, $F434
     PSHS  U,Y,X,B,A ; Save
@@ -6057,36 +6070,37 @@ BANK_CHECK_DATA: ; 0x00286E, $F86E
     .db $00
     .db $11
     .db $00 ; END OF DATA
-    .db $E5 ; THIS DATA IS USED IN THE FAILURE STUFF
+BUTTONS_PRESSED_STUFF_UNK: ; 0x002886, $F886
+    .db $E5 ; USED IN FAILURE STUFF? FIRE BUTTON STUFF
     .db $91
     .db $00
     .db $E8
+    .db $00 ; THRUST STUFF
     .db $00
     .db $00
     .db $00
-    .db $00
-    .db $E8
+    .db $E8 ; SMARTBOMB STUFF
     .db $C1
     .db $00
     .db $F8
-    .db $E9
+    .db $E9 ; HYPERSPACE STUFF
     .db $1F
     .db $00
     .db $F8
-    .db $D8
+    .db $D8 ; 2P START STUFF
     .db $4E
     .db $00
     .db $00
-    .db $D8
+    .db $D8 ; 1P START STUFF
     .db $39
     .db $00
     .db $00
-    .db $E8
+    .db $E8 ; REVERSE STUFF
     .db $97
     .db $00
     .db $E8
 DATA_FOR_$82-$88: ; 0x0028A2, $F8A2
-    .db $00 ; fmt: [4 bytes]
+    .db $00 ; fmt: [4 bytes], also DOWN stuff from above?
     .db $00
     .db $00
     .db $00
@@ -6131,6 +6145,7 @@ INIT_DATA_FOR_$A026: ; 0x0028BE, $F8BE
     .db $00
     .db $00
     .db $00
+BMP_IDK: ; 0x0028CE, $F8CE
     .db $05
     .db $08
     .db $F9
@@ -6141,6 +6156,7 @@ INIT_DATA_FOR_$A026: ; 0x0028BE, $F8BE
     .db $93
     .db $D1
     .db $1F
+BMP_IDK: ; 0x0028D8, $F8D8
     .db $04
     .db $08
     .db $FA
@@ -6151,6 +6167,7 @@ INIT_DATA_FOR_$A026: ; 0x0028BE, $F8BE
     .db $39
     .db $D1
     .db $6B
+BMP_IDK: ; 0x0028E2, $F8E2
     .db $04
     .db $08
     .db $FA
@@ -6173,6 +6190,7 @@ DATA_SPAWN_IN_IDK: ; 0x0028EC, $F8EC
     .db $D8
     .db $DB
     .db $00
+BMP_IDK: ; 0x0028F7, $F8F7
     .db $04
     .db $08
     .db $FA
@@ -6183,7 +6201,7 @@ DATA_SPAWN_IN_IDK: ; 0x0028EC, $F8EC
     .db $39
     .db $D1
     .db $6B
-DATA_IDK: ; 0x002901, $F901
+BMP_IDK: ; 0x002901, $F901
     .db $02
     .db $08
     .db $FA
@@ -6194,6 +6212,7 @@ DATA_IDK: ; 0x002901, $F901
     .db $F9
     .db $D1
     .db $0B
+BMP_IDK: ; 0x00290B, $F90B
     .db $02
     .db $08
     .db $FA
@@ -6215,6 +6234,7 @@ HUMANOID_BITMAP: ; 0x002915, $F915
     .db $F9
     .db $D1
     .db $0B
+BMP_IDK: ; 0x00291F, $F91F
     .db $02
     .db $08
     .db $FB
@@ -6225,6 +6245,7 @@ HUMANOID_BITMAP: ; 0x002915, $F915
     .db $F9
     .db $D1
     .db $0B
+BMP_IDK: ; 0x002929, $F929
     .db $04
     .db $08
     .db $FB
@@ -6235,6 +6256,7 @@ HUMANOID_BITMAP: ; 0x002915, $F915
     .db $39
     .db $D1
     .db $6B
+BMP_IDK: ; 0x002933, $F933
     .db $04
     .db $08
     .db $FB
@@ -6245,6 +6267,7 @@ HUMANOID_BITMAP: ; 0x002915, $F915
     .db $39
     .db $D1
     .db $6B
+BMP_IDK: ; 0x00293D, $F93D
     .db $04
     .db $08
     .db $FB
@@ -6255,6 +6278,7 @@ HUMANOID_BITMAP: ; 0x002915, $F915
     .db $39
     .db $D1
     .db $6B
+BMP_IDK: ; 0x002947, $F947
     .db $04
     .db $08
     .db $FC
@@ -6265,13 +6289,18 @@ HUMANOID_BITMAP: ; 0x002915, $F915
     .db $39
     .db $D1
     .db $6B
-CALLBACK?_SHIP_EXPLODE_COUNTDOWN?: ; 0x002951, $F951
-    LSR   HIGHSCORE_INITIALS_ADDR
-    LDD   #$90CC
-    SUBA  $A0D1
-    RTS
+BMP_IDK: ; 0x002951, $F951
+    .db $04
+    .db $08
+    .db $CC
+    .db $90
+    .db $CC
+    .db $90
+    .db $D1
+    .db $39
     .db $D1
     .db $6B
+BMP_IDK: ; 0x00295B, $F95B
     .db $02
     .db $03
     .db $CC
@@ -6282,6 +6311,7 @@ CALLBACK?_SHIP_EXPLODE_COUNTDOWN?: ; 0x002951, $F951
     .db $F1
     .db $D2
     .db $0D
+BMP_IDK: ; 0x002965, $F965
     .db $02
     .db $03
     .db $CC
@@ -6292,6 +6322,7 @@ CALLBACK?_SHIP_EXPLODE_COUNTDOWN?: ; 0x002951, $F951
     .db $F1
     .db $D2
     .db $0D
+SELF_CONTAINED_THING?: ; 0x00296F, $F96F
     .db $08
     .db $01
     .db $F9
@@ -6304,6 +6335,7 @@ CALLBACK?_SHIP_EXPLODE_COUNTDOWN?: ; 0x002951, $F951
     .db $FF
     .db $FF
     .db $FF
+BMP_IDK: ; 0x00297B, $F97B
     .db $03
     .db $04
     .db $CC
@@ -6325,6 +6357,7 @@ BMP_LANDER?: ; 0x002985, $F985
     .db $93
     .db $D1
     .db $1F
+BMP_IDK: ; 0x00298F, $F98F
     .db $05
     .db $08
     .db $CD
@@ -6335,6 +6368,7 @@ BMP_LANDER?: ; 0x002985, $F985
     .db $93
     .db $D1
     .db $1F
+BMP_IDK: ; 0x002999, $F999
     .db $05
     .db $08
     .db $CD
@@ -6345,6 +6379,7 @@ BMP_LANDER?: ; 0x002985, $F985
     .db $93
     .db $D1
     .db $1F
+BMP_IDK: ; 0x0029A3, $F9A3
     .db $06
     .db $04
     .db $CD
@@ -6355,6 +6390,7 @@ BMP_LANDER?: ; 0x002985, $F985
     .db $1F
     .db $D2
     .db $60
+BMP_IDK: ; 0x0029AD, $F9AD
     .db $06
     .db $04
     .db $CE
@@ -6365,6 +6401,7 @@ BMP_LANDER?: ; 0x002985, $F985
     .db $1F
     .db $D2
     .db $60
+BMP_IDK: ; 0x0029B7, $F9B7
     .db $06
     .db $04
     .db $CE
@@ -6407,6 +6444,7 @@ BMP_SMARTBOMB: ; 0x0029D9, $F9D9
     .db $03
     .db $CF
     .db $34
+BMP_IDK: ; 0x0029DD, $F9DD
     .db $06
     .db $06
     .db $CF
@@ -6428,6 +6466,7 @@ BITMAP_IDK: ; 0x0029E7, $F9E7
     .db $3D
     .db $D3
     .db $50
+BMP_IDK: ; 0x0029F1, $F9F1
     .db $08
     .db $06
     .db $CF
@@ -7571,7 +7610,7 @@ JMP_STORE_B@X_BANK0: ; 0x002FD4, $FFD4
 LOAD_B@X_BANK0: ; 0x002FD7, $FFD7
     JMP   LOAD_B[X]_BANK0
 JMP_SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET?: ; 0x002FDA, $FFDA
-    JMP   SET_A0B0-A0B3_WHEN_@D>A0B2_SOUND_SET?
+    JMP   SOUND_SET_PRIORITY_ROUTINE
 DATA_W_#$2CAC: ; 0x002FDD, $FFDD
     .db $D4
     .db $EE
@@ -7996,7 +8035,7 @@ SKIP_CHAR_WITH_SPACE: ; 0x003325, $C325
     JSR   GET_DATA_FROM_SRAM[X]_IN_AB
     STD   HIGHSCORE_INITIALS_ADDR ; Write initials.
     JSR   GET_DATA_FROM_SRAM[X]_IN_A
-    STA   HIGHSCORE_INITIALS_ADDR+2 ; 3x
+    STA   $A00A ; 3x
     STX   R_A164_HIGHSCORE_DATA_POS
     LDX   R_A181_HIGHSCORE_SCR_POS ; Text ptr from
     JSR   JMP_GOTO_PAST_JSR ; Put strings to screen.
@@ -10345,63 +10384,64 @@ JMP_UNKNOWN_TEXT/GFX_RTN_2: ; 0x004023, $C023
     .db $00
     .db $5B
     .db $FF
-    .db $C0
+PTRS_TO_SENTENCES: ; 0x004031, $C031
+    .db $C0 ; PTR TO SENTENCE AUTO FOR AUDIT, GAME ADJUSTMENT
     .db $BD
-    .db $C0
+    .db $C0 ; PTR to SENTENCE MANUAL FOR ROM TEST
     .db $BF
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO FOR RAM TEST
     .db $C1
     .db $00
     .db $00
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO FOR RAM TEST
     .db $C1
     .db $00
     .db $00
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO TO EXIT TEST
     .db $C3
     .db $00
     .db $00
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO FOR CMOS RAM TEST
     .db $C5
     .db $00
     .db $00
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO FOR CMOS RAM TEST
     .db $C5
     .db $00
     .db $00
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO FOR COLOR RAM TEST
     .db $C7
     .db $00
     .db $00
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO TO EXIT TEST
     .db $C3
     .db $00
     .db $00
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO FOR AUDIO TEST
     .db $C9
     .db $00
     .db $00
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO FOR SWITCH TEST
     .db $CB
-    .db $C0
+    .db $C0 ; PTR to SENTENCE MANUAL TO TEST INDIVIDUAL SOUNDS
     .db $CD
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO FOR MONITOR TEST PATTERNS
     .db $CF
     .db $00
     .db $00
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO FOR AUDIT, GAME ADJUSTMENT
     .db $BD
-    .db $C0
+    .db $C0 ; PTR to SENTENCE MANUAL TO STEP THRU PATTERNS
     .db $D1
-    .db $C0
+    .db $C0 ; PTR to SENTENCE AUTO FOR GAME OVER
     .db $D3
-    .db $C0
+    .db $C0 ; PTR to SENTENCE MANUAL TO STEP THRU ADJUSTMENT
     .db $D5
-    .db $C0
+    .db $C0 ; PTR to SENTENCE PRESS HIGHSCORE RESET TO MAKE CHANGE
     .db $DB
     .db $00
     .db $00
-GLB_SENTENCES_START: ; 0x004069, $C069
+WORD_POINTER_SENTENCE_RANGES: ; 0x004069, $C069
     .db $C1 ; SENTENCE INITIAL TESTS INDICATE
     .db $07
     .db $C1 ; SENTENCE UNIT OK
@@ -10557,7 +10597,8 @@ GLB_SENTENCES_START: ; 0x004069, $C069
     .db $C3 ; SENTENCE HALL OF FAME
     .db $0B
     .db $C3 ; SENTENCE PTR TO A006, A008, A00C
-    .db $21 ; WORD POINTERS AFTER THIS.
+    .db $21
+WORD_PTR_GROUPS: ; 0x004105, $C105
     .db $C3 ; ADJUSTMENT
     .db $2B
     .db $C4 ; INITIAL
@@ -11108,6 +11149,7 @@ GLB_SENTENCES_START: ; 0x004069, $C069
     .db $13
     .db $A0 ; PTR to $A00C
     .db $0C
+WORDS_RAW_BYTES: ; 0x00432B, $C32B
     .db $41 ; ADJUSTMENT
     .db $44
     .db $4A
@@ -11985,6 +12027,7 @@ TEXT_GRAPHICS_INFO: ; 0x0045E3, $C5E3
     .db $08
     .db $CA ; PTR 44
     .db $37
+TEXT_BITMAP_LIBRARY: ; 0x004697, $C697
     .db $00 ; TEXT_BITMAP_0,18
     .db $00
     .db $00
@@ -13230,8 +13273,8 @@ MANIPULATE_D: ; 0x004C3E, $CC3E
     ROLA
     ORB   #$0F ; D |= 0x000F, setting all shifted to 0's.
     RTS ; Leave
-BMP_LIB_START?: ; 0x004C49, $CC49
-    .db $00
+BMP_LIBRARY_START: ; 0x004C49, $CC49
+    .db $00 ; From here on is one of the bitmap tables.
     .db $00
     .db $00
     .db $00
