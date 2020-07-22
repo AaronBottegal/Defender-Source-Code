@@ -71,7 +71,7 @@ R_A016_UNK:                              .rs 0x01 ;0xA016
 A017_WORLD_MOVEMENT_MASKED:              .rs 0x02 ;0xA017 to A018
 
 	.org $A020
-R_A020_SCREEN_POS_HORIZ?CHANGE?:         .rs 0x01 ;0xA020
+R_A020_SCREEN_POS_HORIZ?:                .rs 0x01 ;0xA020
 R_A021:                                  .rs 0x01 ;0xA021
 R_A022_SCR_CHANGE_UNK:                   .rs 0x01 ;0xA022
 
@@ -109,26 +109,26 @@ TEXT_PTR_UNK:                            .rs 0x02 ;0xA059 to A05A
 
 	.org $A05D
 TICKS_HAPPENED_COUNTER?:                 .rs 0x01 ;0xA05D
-R_A05E:                                  .rs 0x01 ;0xA05E
-LIST_?B_CALLBACKS?:                      .rs 0x01 ;0xA05F
+R_A05E_SLOWDOWN_FLAG?:                   .rs 0x01 ;0xA05E
+LIST_CALLBACKS_GENERIC?:                 .rs 0x01 ;0xA05F
 
 	.org $A061
-LIST_15B_OBJECTS_AVAILABLE:              .rs 0x01 ;0xA061
+LIST_15B_CALLBACKS_AVAILABLE:            .rs 0x01 ;0xA061
 
 	.org $A063
-R_A063_CALLBACK_LIST_ADDR?:              .rs 0x01 ;0xA063 - Default is A05F
+R_A063_CALLBACK_LIST_ADDR?:              .rs 0x01 ;0xA063 - Only ever set to $A05F.
 
 	.org $A065
-LIST_$65_ON_SCREEN?IN_WORLD?:            .rs 0x01 ;0xA065
+LIST_$65_ON_SCREEN:                      .rs 0x01 ;0xA065
 
 	.org $A067
-LIST_23B_UNUSED_OBJS?:                   .rs 0x01 ;0xA067
+LIST_23B_LARGE_POOL:                     .rs 0x01 ;0xA067
 
 	.org $A069
-LIST_23B_OBJECTS_AVAILABLE:              .rs 0x01 ;0xA069
+LIST_23B_CALLBACKS_AVAILABLE_SMALL_LIST: .rs 0x01 ;0xA069
 
 	.org $A06B
-LIST_$6B_UNK:                            .rs 0x01 ;0xA06B
+LIST_$6B_OFFSCREEN?:                     .rs 0x01 ;0xA06B
 
 	.org $A06D
 LIST_BULLETS?:                           .rs 0x01 ;0xA06D
@@ -159,21 +159,24 @@ R_A086_BUTTON_PRESSED_PTR_B1:            .rs 0x02 ;0xA086 to A087
 R_A088_BUTTON_PRESSED_PTR_B2:            .rs 0x02 ;0xA088 to A089
 R_A08A_UPDATE_SCORE_FLAG?SCORE_CURRENT?: .rs 0x01 ;0xA08A
 A08B_CURRENT_PLAYER:                     .rs 0x01 ;0xA08B
-A08C_CURRENT_PLAYER_COUNT:               .rs 0x01 ;0xA08C
+A08C_CURRENT_PLAYER_COUNT_1/2:           .rs 0x01 ;0xA08C
 A08D_CURRENT_PLAYER_PTR?:                .rs 0x02 ;0xA08D to A08E
 IRQ_CMD_LOC:                             .rs 0x03 ;0xA08F to A091
 R_A092_PROCESSING_LAST?:                 .rs 0x01 ;0xA092
 
 	.org $A097
-R_A097:                                  .rs 0x01 ;0xA097
+R_A097_SCANNER_DOTS_END_PTR:             .rs 0x01 ;0xA097
 
 	.org $A099
 ENEMY_UNK_SPAWNED?BULLET?:               .rs 0x01 ;0xA099
+R_A09A_UNK:                              .rs 0x01 ;0xA09A
+R_A09B_PTR_TO_A11A:                      .rs 0x01 ;0xA09B
 
 	.org $A09F
 PTR_TO_A162_POOL:                        .rs 0x01 ;0xA09F
 
-	.org $A0A2
+	.org $A0A1
+R_A0A1_PTR_TO_ZEROS?:                    .rs 0x01 ;0xA0A1
 VIDEO_BITS_LOCATION_COPY:                .rs 0x02 ;0xA0A2 to A0A3
 LASER_HOLES_POINTER_VAL:                 .rs 0x01 ;0xA0A4
 
@@ -184,7 +187,7 @@ RANDOM_PALETTE_ROTATION_DEFENDER_LOGO?:  .rs 0x01 ;0xA0A6
 PTR_TO_A1A2_POOL:                        .rs 0x01 ;0xA0A8
 
 	.org $A0AB
-R_A0AB:                                  .rs 0x02 ;0xA0AB to A0AC
+R_A0AB_SRAM_C481_P1_NEXT_SHIP:           .rs 0x02 ;0xA0AB to A0AC
 R_A0AD_SOUND_REQ_FLAG?:                  .rs 0x01 ;0xA0AD
 STARS_NUM_TO_CHANGE?:                    .rs 0x01 ;0xA0AE
 REVERSE_BLOCK_FLAG:                      .rs 0x01 ;0xA0AF
@@ -195,23 +198,32 @@ SOUND_PRIORITY_PLAYING:                  .rs 0x01 ;0xA0B2
 SOUND_FLAGS?:                            .rs 0x02 ;0xA0B3 to A0B4
 A0B5_LASER_COUNT?:                       .rs 0x01 ;0xA0B5
 ROTATING_COLOR_INDEX:                    .rs 0x01 ;0xA0B6
-R_A0B7_UNK_ATTRACT_CHECKS:               .rs 0x01 ;0xA0B7
+R_A0B7_UNK_ATTRACT_CHECKS_AND_GAMESTART: .rs 0x01 ;0xA0B7
 
 	.org $A0BA
 A0BA_PLAYER_GAME_STATE:                  .rs 0x01 ;0xA0BA
 SHIP_DIRECTION?:                         .rs 0x01 ;0xA0BB
 
 	.org $A0BD
-R_A0BD_SHIP_DIR/UNK:                     .rs 0x01 ;0xA0BD
+R_A0BD_SHIP_UNK/DIR?:                    .rs 0x01 ;0xA0BD
 
 	.org $A0BF
 SHIP_SCR_POS_XXYY:                       .rs 0x02 ;0xA0BF to A0C0
+R_A0C1_UNK:                              .rs 0x02 ;0xA0C1 to A0C2
+R_A0C3_UNK:                              .rs 0x01 ;0xA0C3
 
 	.org $A0C5
 PLAYER.VPOS:                             .rs 0x01 ;0xA0C5
 
-	.org $A0CA
+	.org $A0C7
+R_A0C7:                                  .rs 0x01 ;0xA0C7
+
+	.org $A0C9
+R_A0C9:                                  .rs 0x01 ;0xA0C9
 PLAYER_V_MOMENTUM:                       .rs 0x01 ;0xA0CA
+
+	.org $A0CC
+R_A0CC_SCREEN_POS_RELATED?:              .rs 0x01 ;0xA0CC
 
 	.org $A0CE
 IDFK_HIT_DETECTED_WRD:                   .rs 0x02 ;0xA0CE to A0CF
@@ -260,11 +272,10 @@ R_A0F8_PARTICLE?_IDK:                    .rs 0x01 ;0xA0F8
 	.org $A0FA
 A0FA_HUMANOID_COUNT?:                    .rs 0x01 ;0xA0FA
 R_A0FB_ENEMY_IDK_COUNT:                  .rs 0x01 ;0xA0FB
-
-	.org $A0FE
+R_A0FC_TO_ENEMY_COUNT:                   .rs 0x01 ;0xA0FC
+R_A0FD_TO_ENEMY_COUNT?:                  .rs 0x01 ;0xA0FD
 R_A0FE_ENEMY_IDK_COUNT:                  .rs 0x01 ;0xA0FE
-
-	.org $A100
+R_A0FF_UNK:                              .rs 0x01 ;0xA0FF
 R_A100:                                  .rs 0x01 ;0xA100
 R_A101:                                  .rs 0x01 ;0xA101
 R_A102:                                  .rs 0x01 ;0xA102
@@ -370,7 +381,7 @@ R_A196_ATTRACT_TEXT_CURRENT:             .rs 0x02 ;0xA196 to A197
 R_A198_ATTRACT_NEXT_PTR:                 .rs 0x02 ;0xA198 to A199
 
 	.org $A1C6
-R_A1C6:                                  .rs 0x02 ;0xA1C6 to A1C7
+R_A1C6_SRAM_C481_P2_NEXT_SHIP:           .rs 0x02 ;0xA1C6 to A1C7
 R_A1C8:                                  .rs 0x01 ;0xA1C8
 R_A1C9_P1_SHIPS:                         .rs 0x01 ;0xA1C9
 
@@ -406,58 +417,58 @@ SET_UP_CALLBACK_IN_CURRENT_CALLBACK: ; 0x000001, $D001
     JMP   U=U.NEXT,HANDLE_CALLBACK
 CALLBACK_TASK_REMOVE: ; 0x00000A, $D00A
     LDX   R_A063_CALLBACK_LIST_ADDR? ; X from callback list.
-    BSR   XOBJ_BACK_TO_AVAILABLE_LIST ; Remove from all obj list.
+    BSR   XOBJ_REMOVED_FROM_CALLBACKS ; Remove from all obj list.
     LEAU  X ; U is X obj, A05F->next.next?
     JMP   U=U.NEXT,HANDLE_CALLBACK ; Goto U handle.
-XOBJ[6]_BACK_TO_AVAILABLE_LIST: ; 0x000013, $D013
+XOBJ[6]_REMOVED_FROM_CALLBACKS: ; 0x000013, $D013
     LDX   6,X ; X from OBJ[6]
-XOBJ_BACK_TO_AVAILABLE_LIST: ; 0x000015, $D015
+XOBJ_REMOVED_FROM_CALLBACKS: ; 0x000015, $D015
     PSHS  U,B,A ; Save what we clobber.
     LDU   #$A05F ; Load list callbacks?
-OBJX_REMOVE_FROM_A05F_TO_AVAILABLE: ; 0x00001A, $D01A
+OBJX_REMOVE_FROM_ULIST_TO_AVAILABLE: ; 0x00001A, $D01A
     CMPX  U ; If X _ U.Next
     BNE   U_TO_NEXT ; !=, goto. Order: U -> X -> U->next.next/X.next
     LDD   X ; D = X.next
     STD   U ; Move to U.next. X now removed from order
     LDA   6,X ; Get data in OBJ[6]
     BEQ   OBJ_SIZE_15B ; If OBJ[6] = 0, put back to 15B list.
-    LDD   LIST_23B_OBJECTS_AVAILABLE ; D = List obj
-    STX   LIST_23B_OBJECTS_AVAILABLE ; Replace OBJ with X
+    LDD   LIST_23B_CALLBACKS_AVAILABLE_SMALL_LIST ; D = List obj
+    STX   LIST_23B_CALLBACKS_AVAILABLE_SMALL_LIST ; Replace OBJ with X
     BRA   X.NEXT_FROM_REPLACED ; goto
 OBJ_SIZE_15B: ; 0x00002C, $D02C
-    LDD   LIST_15B_OBJECTS_AVAILABLE ; Load list obj
-    STX   LIST_15B_OBJECTS_AVAILABLE ; Replace OBJ with X
+    LDD   LIST_15B_CALLBACKS_AVAILABLE ; Load list obj
+    STX   LIST_15B_CALLBACKS_AVAILABLE ; Replace OBJ with X
 X.NEXT_FROM_REPLACED: ; 0x000030, $D030
     STD   X ; Replaced obj is new head's .next
     LEAX  U ; X is original U->next.next, continuing passed list.
     PULS  A,B,U,PC ; RTS
 U_TO_NEXT: ; 0x000036, $D036
     LDU   U ; U=U.next, next list item.
-    BNE   OBJX_REMOVE_FROM_A05F_TO_AVAILABLE ; if U != NULL, continue search.
+    BNE   OBJX_REMOVE_FROM_ULIST_TO_AVAILABLE ; if U != NULL, continue search.
 SYSTEM_PANIC: ; 0x00003A, $D03A
     NOP ; If it never finds X to remove, runs this. Idk why nop.
-    JMP   DEFENDER_GAME_TITLE? ; Assume crash?
+    JMP   DEFENDER_GAME_INIT,ATTRACT ; Assume crash?
 GET_OBJ_23B+INIT: ; 0x00003E, $D03E
     PSHS  U,Y,A ; Save
-    LDU   LIST_23B_OBJECTS_AVAILABLE ; Get head obj.
+    LDU   LIST_23B_CALLBACKS_AVAILABLE_SMALL_LIST ; Get head obj.
     BNE   U_!NULL ; If list has obj. Unintentional jump into inst?
     .db $BD ; JSR NOP+JMP
 U_!NULL: ; 0x000045, $D045
     SUBB  $A03A ; SUBB $DP3A
     LDY   U ; Get Y from U.next
-    STY   LIST_23B_OBJECTS_AVAILABLE ; New head, U is detatched from list.
+    STY   LIST_23B_CALLBACKS_AVAILABLE_SMALL_LIST ; New head, U is detatched from list.
     LDA   #$01
     STA   6,U ; OBJ[6] flag.
     LDA   S ; Get A from stack.
     BRA   SCHEDULE_OBJ@U_TO_A063_PTR ; Goto
 SCHEDULE_15B_CALLBACK_TYPE=A_CB=X: ; 0x000055, $D055
     PSHS  U,Y,A ; Save
-    LDU   LIST_15B_OBJECTS_AVAILABLE ; Load PTR
+    LDU   LIST_15B_CALLBACKS_AVAILABLE ; Load PTR
     BNE   PTR_NOT_NULL ; If valid, go here. Should have done BEQ PANIC instead.
     JSR   SYSTEM_PANIC ; Reboot.
 PTR_NOT_NULL: ; 0x00005E, $D05E
     LDY   U ; Y = U.next
-    STY   LIST_15B_OBJECTS_AVAILABLE ; Store. U is now removed from this list.
+    STY   LIST_15B_CALLBACKS_AVAILABLE ; Store. U is now removed from this list.
     CLR   6,U ; Clear OBJ[6], 15B.
 SCHEDULE_OBJ@U_TO_A063_PTR: ; 0x000066, $D066
     STX   2,U ; X passed to OBJ[2], handler.
@@ -480,7 +491,7 @@ X_TO_X.NEXT: ; 0x000081, $D081
     LDA   5,X ; Load OBJ[5]
     CMPA  #$02 ; If OBJ[5] _ #$02
     BEQ   X_TO_X.NEXT ; ==, keep going.
-    BSR   XOBJ_BACK_TO_AVAILABLE_LIST ; Delete
+    BSR   XOBJ_REMOVED_FROM_CALLBACKS ; Delete
     BRA   X_TO_X.NEXT ; Always traverse again.
 RTS: ; 0x000093, $D093
     PULS  A,X,PC ; RTS
@@ -498,13 +509,13 @@ RTS: ; 0x000093, $D093
     PULS  A,B,Y,U,PC ; RTS, restore.
 LIST_GET_23B,X.next_FROM_$65_ONSCREEN?: ; 0x0000AD, $D0AD
     PSHS  U,B,A ; Save
-    LDX   LIST_23B_UNUSED_OBJS? ; Get obj
+    LDX   LIST_23B_LARGE_POOL ; Get obj
     BNE   VALID_OBJ ; If valid, goto.
     JSR   SYSTEM_PANIC ; Reboot.
 VALID_OBJ: ; 0x0000B6, $D0B6
     LDD   X ; Get X.next
-    STD   LIST_23B_UNUSED_OBJS? ; Store to list. X now not in list.
-    LDD   LIST_$65_ON_SCREEN?IN_WORLD? ; Get other list obj
+    STD   LIST_23B_LARGE_POOL ; Store to list. X now not in list.
+    LDD   LIST_$65_ON_SCREEN ; Get other list obj
     STD   X ; Store LIST_$65 to X.next
     CLRA ; CLRD
     CLRB
@@ -520,8 +531,8 @@ CMP_NEXT_LOOP_A065|A06B: ; 0x0000CC, $D0CC
 REMOVE_U.NEXT: ; 0x0000D0, $D0D0
     LDY   [U] ; Get Obj->Obj.next
     STY   U ; Store to U.next, removing X.
-    LDY   LIST_23B_UNUSED_OBJS? ; Remember
-    STX   LIST_23B_UNUSED_OBJS? ; store removed to loc
+    LDY   LIST_23B_LARGE_POOL ; Remember
+    STX   LIST_23B_LARGE_POOL ; store removed to loc
     STY   X ; Store remembered to new.next
     PULS  X,Y,U,PC ; RTS
 X_NOT_NEXT: ; 0x0000E0, $D0E0
@@ -805,23 +816,23 @@ GFX_CLEAR_12X6: ; 0x000350, $D350
     LDX   #$0000 ; Clear
     LEAY  X ; Clear
     BRA   GFX_CLR_12X6 ; Do.
-SCORE_ADD_AB: ; 0x000360, $D360
+SCORE_ADD_AB??_IDK: ; 0x000360, $D360
     PSHS  U,Y,X,B,A ; Save
     ORCC  #$01 ; Set CC.c
     ROL   R_A08A_UPDATE_SCORE_FLAG?SCORE_CURRENT? ; Flag?
     LSRA ; If 1 if shifted off, multiplies value passed by 10
     PSHS  A ; Save
     LDA   #$00 ; Clear if next not taken.
-    BCC   SKIP_TIMES_TEN ; If A was odd, take.
-    ASLB ; High B...
-    ROLA ; to A
-    ASLB
+    BCC   SKIP_D_SHIFTED_4 ; If A was odd, take.
+    ASLB ; D << 4
     ROLA
     ASLB
     ROLA
     ASLB
-    ROLA ; 4x
-SKIP_TIMES_TEN: ; 0x000375, $D375
+    ROLA
+    ASLB
+    ROLA
+SKIP_D_SHIFTED_4: ; 0x000375, $D375
     JSR   GET_PLAYER_PTR_IN_X_FROM_A08B ; Player 1 or 2?
     STD   A073_SCRATCH_LOOP_WORD? ; Store D to loc.
     LDB   #$03 ; Load B
@@ -842,25 +853,25 @@ LOOP_STILL_POSITIVE: ; 0x000388, $D388
     DECB ; Minus another
     BPL   LOOP_STILL_POSITIVE ; If still not negative, loop.
 B_NOW_NEGATIVE: ; 0x000396, $D396
-    LDD   R_A0AB ; Get D
-    BEQ   DONT_AWARD_EXTRA_SHIP ; D is 0.
-    LEAX  1,X ; X+1
+    LDD   R_A0AB_SRAM_C481_P1_NEXT_SHIP ; Get D
+    BEQ   DONT_AWARD_EXTRA_SHIP ; D is 0, never extra ships.
+    LEAX  1,X ; PLAYER PTR += 1
     LEAY  3,X ; Y = X+3
     BSR   TEST_IF_AWARD_EXTRA_SHIP
-    BCS   DONT_AWARD_EXTRA_SHIP ; If OBJX state is lower than OBJY?
-    LDA   1,Y ; Get val
-    ADDA  R_A0AB+1 ; Add with val
+    BCS   DONT_AWARD_EXTRA_SHIP ; If last CMP SCORE_0000XX<CMP, goto.
+    LDA   1,Y ; Get current extra ship score 00XX00
+    ADDA  R_A0AB_SRAM_C481_P1_NEXT_SHIP+1 ; Add with sram val
     DAA ; Adjust
     STA   1,Y ; Store back
-    LDA   Y ; Get val
-    ADCA  R_A0AB ; Add with carry
+    LDA   Y ; Get current extra schip score XX0000
+    ADCA  R_A0AB_SRAM_C481_P1_NEXT_SHIP ; Add with sram val.
     DAA ; Adjust
-    STA   Y ; Store back
-    INC   6,X ; Inc ships.
-    INC   8,X ; Inc smartbombs.
-    JSR   DISP_SHIPS_ALL_PLAYERS
+    STA   Y ; Store back. Contains next score to give a ship if above.
+    INC   6,X ; Inc ships, PLAYER[6+1], PLAYER[7]
+    INC   8,X ; Inc smartbombs, PLAYER[8+1], PLAYER[9]
+    JSR   DISP_SHIPS_ALL_PLAYERS ; Update UI
     JSR   SMARTBOMBS_TO_SCREEN
-    LDD   #$D4B0 ; Idk why
+    LDD   #$D4B0 ; Sound.
     JSR   SOUND_SET_SOUND_PRIORITIED
     LDB   #$05 ; Score keep entry.
     JSR   GOTO_B3-C00F_BOOKKEEP_UPDATE_+1 ; Track
@@ -872,7 +883,7 @@ TEST_IF_AWARD_EXTRA_SHIP: ; 0x0003CA, $D3CA
     PSHS  B,A ; Save
     LDD   X ; Load D from X
     CMPD  Y ; Compare to Y
-    BNE   RTS ; RTS, figured.
+    BNE   RTS ; RTS, figured. BCC here would fix bug?
     LDA   2,X ; Compare score digits 2 instead.
     CMPA  2,Y ; Compare
 RTS: ; 0x0003D7, $D3D7
@@ -1275,7 +1286,7 @@ DISP_SHIPS_ALL_PLAYERS: ; 0x000629, $D629
     LDX   #$0F14 ; Scr pos, X:30,Y14
     LDA   R_A1C9_P1_SHIPS ; Load ship count?
     BSR   DISPLAY_SHIPS ; Disp
-    LDA   A08C_CURRENT_PLAYER_COUNT
+    LDA   A08C_CURRENT_PLAYER_COUNT_1/2
     DECA ; See if 1
     BEQ   RTS_SHIPS ; Was 1, leave.
     LDX   #$7114
@@ -1310,18 +1321,18 @@ DISPLAY_SETUP_INGAME: ; 0x000665, $D665
     BSR   DRAW_SCANNER_OUTLINES ; Put scanner to screen.
     BSR   DISP_SHIPS_ALL_PLAYERS ; Ships.
     BSR   SMARTBOMBS_TO_SCREEN ; Smartbombs.
-    LDA   A08C_CURRENT_PLAYER_COUNT ; Load which player?
+    LDA   A08C_CURRENT_PLAYER_COUNT_1/2 ; Load which player?
 SCORE_LOOP: ; 0x000678, $D678
     JSR   PLAYER_PASSED_SCORE_TO_SCREEN ; Put that player to screen.
     DECA
-    BNE   SCORE_LOOP ; Loop again.
+    BNE   SCORE_LOOP ; Loop again to show both.
     PULS  A,B,X,Y,U,PC ; RTS
 SMARTBOMBS_TO_SCREEN: ; 0x000680, $D680
     PSHS  U,Y,X,B,A
     LDX   #$291B ; Pos P1
     LDA   R_A1CB_P1_SMARTBOMBS ; Get count.
     BSR   DISPLAY_SMARTBOMBS_SUB
-    LDA   A08C_CURRENT_PLAYER_COUNT ; Player count
+    LDA   A08C_CURRENT_PLAYER_COUNT_1/2 ; Player count
     DECA ; DEC
     BEQ   RTS_SMARTBOMBS ; Is only 1 player, leave.
     LDX   #$8B1B ; Pos P2
@@ -1425,7 +1436,7 @@ WGT_PIA_CTRL_A: ; 0x000736, $D736
     .db $34 ; C2 OUT+LOW, OUTPUT REG
 WGT_PIA_CTRL_B: ; 0x000737, $D737
     .db $3E ; C2 OUT+HIGH, OUTPUT REG, C1 L2H
-DEFENDER_GAME_TITLE?: ; 0x000738, $D738
+DEFENDER_GAME_INIT,ATTRACT: ; 0x000738, $D738
     ORCC  #$FF ; Mask interrupts.
     LDS   #$BFFF ; Set S to top of RAM.
     LDA   #$A0
@@ -1467,49 +1478,49 @@ COMMIT_B_AS_IS: ; 0x000785, $D785
     LDD   #$A55A ; Not sure of val, ptr?
     STD   A0E0_RAND_WORD ; Seed random.
     LDD   #$FF70 ; PTR to 0's?
-    STD   $A0A1 ; Store to...
+    STD   R_A0A1_PTR_TO_ZEROS? ; Store to...
     CLR   VIDEO_BITS_LOCATION_COPY+1 ; NULL?
     LDB   #$FF ; D=A0FF
-    STD   PIA_ROM_DATA_A_RAM_COPY ; Store...
+    STD   PIA_ROM_DATA_A_RAM_COPY ; Store as pressed.
     JSR   SAVE_BANK+SET_WATCHDOG_NONFLIPPED ; Set screen+other
     JSR   BANKSWITCH_TO_3 ; Goto bank
     JSR   JMP_TO_HIGHSCORES_TO_RAM ; Move initial to RAM.
     BSR   LIST_INIT_A05F,A061,A063,A069 ; Inits some lists.
-    BSR   GAME_OBJECTS_INIT ; Does tons with pools of memory.
+    BSR   GAME_DATA_INIT_SUB ; Does tons with pools of memory.
     JSR   SETUP_TEXT+UNK ; Sets up idk, also bankswitches?
     LDX   #$D825 ; PTR to JMP to schedule attract start.
     LDA   #$01 ; Type
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X ; Sets up callback.
-    COM   A0BA_PLAYER_GAME_STATE ; Invert state.
+    COM   A0BA_PLAYER_GAME_STATE ; Invert state, to FF?
     ANDCC #$00 ; Unmask IRQ's
     JMP   CORE_GAME/TASK_LOOP? ; Jumps to...
-GAME_OBJECTS_INIT: ; 0x0007B6, $D7B6
+GAME_DATA_INIT_SUB: ; 0x0007B6, $D7B6
     BSR   SETUP_$A026_TO_$A035
-    JSR   LASER_HOLES_POOL_CREATION
-    JSR   INIT_STARS
+    JSR   LASER_HOLES_POOL_CREATE
+    JSR   INIT_ALL_STARS
     BSR   CHAIN_LIST_$67,NULL_$65_$6B_$6D
-    JSR   SETUP_A1A2-A1B1_WITH_99/9A/A9/AA
-    JMP   SETUP_POOL_4162
+    JSR   SETUP_A1A2-A1C1_WITH_99/9A/A9/AA
+    JMP   SETUP_RANDOM_VALUES_A162-A182,A182-A1A2 ; Abuses RTS.
 LIST_INIT_A05F,A061,A063,A069: ; 0x0007C6, $D7C6
     PSHS  X,B,A ; Save
     CLRA
     CLRB
     LDX   #$AAC5 ; PTR to list start?
-    STX   LIST_15B_OBJECTS_AVAILABLE ; Store ptr
+    STX   LIST_15B_CALLBACKS_AVAILABLE ; Store ptr
 LOOP_CREATE_LIST_15: ; 0x0007CF, $D7CF
     LEAX  15,X ; Add 15 to X
     STX   -15,X ; Store current X to last. AKA creating a list.
-    CMPX  #$AF1B ; End of list, 0x4A entries.
+    CMPX  #$AF1B ; End of list, 0x4A entries, 74.
     BNE   LOOP_CREATE_LIST_15
     STD   X ; NULL OBJ.next
-    STD   LIST_?B_CALLBACKS? ; Null whatever list this is.
+    STD   LIST_CALLBACKS_GENERIC? ; Null whatever list this is.
     LDX   #$AF2A ; PTR to next list.
-    STX   LIST_23B_OBJECTS_AVAILABLE ; Point to this list.
-LOOP_CREATE_LIST_23: ; 0x0007E1, $D7E1
+    STX   LIST_23B_CALLBACKS_AVAILABLE_SMALL_LIST ; Point to this list, small.
+CREATE_SHORT_23B_OBJ_LIST: ; 0x0007E1, $D7E1
     LEAX  23,X ; Add 23 bytes.
     STX   -23,X ; Store this to PREV.next
-    CMPX  #$AF86 ; End of list, 4 entries.
-    BNE   LOOP_CREATE_LIST_23
+    CMPX  #$AF86 ; End of list, 4 entries. Dont think these are ever used?
+    BNE   CREATE_SHORT_23B_OBJ_LIST
     STD   X ; Null OBJ.next
     LDX   #$A05F ; Initial location.
     STX   R_A063_CALLBACK_LIST_ADDR? ; For list.
@@ -1528,19 +1539,19 @@ CHAIN_LIST_$67,NULL_$65_$6B_$6D: ; 0x000805, $D805
     PSHS  X,B,A,CC ; Save
     ORCC  #$FF ; Mask interrupts?
     LDX   #$A23C ; Initial
-    STX   LIST_23B_UNUSED_OBJS? ; Store to...
-LIST_23B_LOOP: ; 0x00080E, $D80E
+    STX   LIST_23B_LARGE_POOL ; Store ptr to first in list.
+LIST_23B_CREATE_LOOP: ; 0x00080E, $D80E
     LEAX  23,X ; Space
     STX   -23,X ; Store PREV.next
-    CMPX  #$AAAE ; End of pool. 5E items.
-    BNE   LIST_23B_LOOP ; Loop
+    CMPX  #$AAAE ; End of pool. 0x5E items. 94.
+    BNE   LIST_23B_CREATE_LOOP ; Loop
     CLRA ; Clear D
     CLRB
     STD   X ; NULL OBJ.next
-    STD   LIST_$6B_UNK ; Null
-    STD   LIST_$65_ON_SCREEN?IN_WORLD? ; Null
+    STD   LIST_$6B_OFFSCREEN? ; Null
+    STD   LIST_$65_ON_SCREEN ; Null
     STD   LIST_BULLETS? ; Null
-    PULS  CC,A,B,X,PC ; RTS
+    PULS  CC,A,B,X,PC ; RTS, interrupts back.
 GOTO_B1_C000_ATTRACT_START: ; 0x000825, $D825
     JSR   BANKSWITCH_TO_1
     JMP   JMP_ATTRACT_START?
@@ -1555,42 +1566,42 @@ RTS: ; 0x000838, $D838
     RTS
 CALLBACK_P1_BUTTON_PRESSED_CALLBACK: ; 0x000839, $D839
     LDA   A0BA_PLAYER_GAME_STATE ; Load
-    BPL   TASK_REMOVE_JMP ; If positive, do list rtn.
+    BPL   TASK_REMOVE_JMP ; If positive, delete task.
     BSR   SRAM_C495_LOAD ; Put to RAM
     LDA   VAL_FROM_SRAM_C495-C496 ; Load
     BEQ   TASK_REMOVE_JMP ; If 0, do instead.
-    LDD   #$D4BD ; Ptr to data table idk yet.
-JSR_UNK_BSR_IDK: ; 0x000846, $D846
-    JSR   SOUND_SET_SOUND_PRIORITIED ; Mod stuff.
-    BSR   UNK_SUB
+    LDD   #$D4BD ; Sound
+SET_SOUND_SETUP_GAME: ; 0x000846, $D846
+    JSR   SOUND_SET_SOUND_PRIORITIED ; Play
+    BSR   SETUP_GAME_START?
 TASK_REMOVE_JMP: ; 0x00084B, $D84B
     JMP   CALLBACK_TASK_REMOVE ; Lots goes here.
 2P_START_BUTTON_PRESSED_CALLBACK: ; 0x00084E, $D84E
     LDA   A0BA_PLAYER_GAME_STATE ; Load val
-    BPL   TASK_REMOVE_JMP ; If positive, remove task.
+    BPL   TASK_REMOVE_JMP ; If positive, delete task.
     BSR   SRAM_C495_LOAD ; Put to RAM
     LDA   VAL_FROM_SRAM_C495-C496 ; Load credits?
     CMPA  #$02 ; If _ #$02
     BCS   TASK_REMOVE_JMP ; <, dont play game. Credits count?
-    BSR   UNK_SUB
-    LDD   #$D4C2 ; Idk why val.
-    BRA   JSR_UNK_BSR_IDK ; Mod and list.
-UNK_SUB: ; 0x000861, $D861
-    CLR   R_A038 ; Clear
-    NOP
-    LDA   R_A0B7_UNK_ATTRACT_CHECKS ; Load
-    BEQ   RTS ; RTS if 0?
+    BSR   SETUP_GAME_START?
+    LDD   #$D4C2 ; Sound
+    BRA   SET_SOUND_SETUP_GAME ; Goto above.
+SETUP_GAME_START?: ; 0x000861, $D861
+    CLR   R_A038 ; Clear unk
+    NOP ; NOP
+    LDA   R_A0B7_UNK_ATTRACT_CHECKS_AND_GAMESTART ; Load
+    BEQ   RTS ; RTS if 0.
 CALLBACK_UNK: ; 0x000868, $D868
-    LDA   A0BA_PLAYER_GAME_STATE
+    LDA   A0BA_PLAYER_GAME_STATE ; Load game state.
     BPL   UI_UPDATE_STUFF ; If is positive, goto.
-    JSR   DESCHEDULE_CALLBACKS_NOT_TYPE_2 ; Find something.
+    JSR   DESCHEDULE_CALLBACKS_NOT_TYPE_2 ; Deschedule.
     JSR   CLEAR_ALL_SCREEN ; Clear the entire screen.
     LDA   #$7F
     STA   A0BA_PLAYER_GAME_STATE ; Store initial state.
     LDA   #$01
     STA   A08B_CURRENT_PLAYER ; Store
-    STA   SHOW_PLAYER_TEXT_FLAG? ; Enable text, 2 player?
-    CLR   A08C_CURRENT_PLAYER_COUNT ; Clear?
+    STA   SHOW_PLAYER_TEXT_FLAG? ; Enable text always?
+    CLR   A08C_CURRENT_PLAYER_COUNT_1/2 ; Clear?
     LDX   #$A1C2 ; Load ptr to player data?
 CLEAR_DATA_LOOP: ; 0x000881, $D881
     CLR   X+ ; Clear
@@ -1600,35 +1611,35 @@ CLEAR_DATA_LOOP: ; 0x000881, $D881
     JSR   GET_DATA_FROM_SRAM[X]_IN_A ; Get data
     ANDA  #$0F ; Get bottom bits just to make sure corruption isn't too rewarding.
     STA   R_A1C9_P1_SHIPS ; Store to P1 ships.
-    LDB   #$0A ; Idk val. Enemies wave 1?
+    LDB   #$0A ; Idk val.
     STD   R_A1CB_P1_SMARTBOMBS ; Ships and smartbomb count always same, B is IDK.
     CLR   R_A039 ; Clear
     NOP ; NOP
     LDX   #$A1C2 ; Ptr to P1 data?
-    JSR   END_WAVE_EXTRAS_HUMANOIDS+DIFFICULTY
+    JSR   END_WAVE_EXTRAS_HUMANOIDS+DIFFICULTY ; Do difficulty into player.
     LDX   #$C481 ; Get SRAM
     JSR   GET_DATA_FROM_SRAM[X]_IN_AB ; Get data in.
-    STD   R_A0AB ; Store to, word.
-    STD   R_A1C6 ; Store to, word.
+    STD   R_A0AB_SRAM_C481_P1_NEXT_SHIP ; Store to, word.
+    STD   R_A1C6_SRAM_C481_P2_NEXT_SHIP ; Store to, word.
     CLR   R_A1C8 ; Clear BYTE.
     LDX   #$A1C2 ; PTR to P1 data
 LOOP_COPY_P1_DATA_TO_P2: ; 0x0008B2, $D8B2
     LDA   X+ ; Get data in player.
     STA   60,X ; Store to player 2. Off by 1 because of X+ above.
-    CMPX  #$A1FF ; Compare to end P1 data.
+    CMPX  #$A1FF ; Compare to end P1 data, P2 start.
     BNE   LOOP_COPY_P1_DATA_TO_P2
     LDX   #$D919 ; Ptr to bookkeep 7 below.
     LDA   #$00 ; Idk val
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X ; Do this.
 UI_UPDATE_STUFF: ; 0x0008C4, $D8C4
-    INC   A08C_CURRENT_PLAYER_COUNT ; Inc players in game.
+    INC   A08C_CURRENT_PLAYER_COUNT_1/2 ; Inc players in game.
     LDA   VAL_FROM_SRAM_C495-C496 ; Load A
     ADDA  #$99 ; Add 99...
     DAA ; Adjust...
     STA   VAL_FROM_SRAM_C495-C496 ; Store back.
     LDX   #$C47D ; Ptr
     JSR   STORE_A_TO_SRAM[X]_BANKED ; Put A here???
-    LDA   A08C_CURRENT_PLAYER_COUNT ; Load players?
+    LDA   A08C_CURRENT_PLAYER_COUNT_1/2 ; Load players?
     DECA ; Dec
     BEQ   RTS ; If was 0 originally, RTS.
     JSR   DISPLAY_SETUP_INGAME ; Update display if not.
@@ -1664,38 +1675,39 @@ SETUP_IRQ_RTN+WATCHDOG+WIDGET_B_CTRL+BANK@S: ; 0x0008FF, $D8FF
     STA   CURRENT_BANK ; Restore.
     STA   BANKSWITCH
     PULS  A,X,PC ; Restore regs+RTS
-UPDATE_BOOKKEEP_7+GAME_START?: ; 0x000919, $D919
+GAME_START: ; 0x000919, $D919
     LDB   #$07 ; Bookkeep to increase.
     JSR   GOTO_B3-C00F_BOOKKEEP_UPDATE_+1 ; ++ it
-WAVE_INIT?: ; 0x00091E, $D91E
-    JSR   GAME_OBJECTS_INIT ; Init wave?
+WAVE_START: ; 0x00091E, $D91E
+    JSR   GAME_DATA_INIT_SUB ; Init game data.
     JSR   DESCHEDULE_CALLBACKS_NOT_TYPE_2 ; Sort them into two others.
     LDA   #$7F ; Store to
     STA   A0BA_PLAYER_GAME_STATE ; Status of some type?
     LDX   R_A063_CALLBACK_LIST_ADDR? ; Get list ptr from here.
-    CMPX  LIST_?B_CALLBACKS? ; If X _ $A05F
-    BNE   SKIP_X_MOVE ; !=, goto
+    CMPX  LIST_CALLBACKS_GENERIC? ; If X _ $A05F
+    BNE   SCHEDULE_TIMER_CALLBACK ; !=, goto
     LDX   X ; Move to next obj.
-    BEQ   DONT_SETUP_U ; If NULL, goto
-SKIP_X_MOVE: ; 0x000932, $D932
+    BEQ   INIT_SOME_LISTS ; If NULL, goto
+SCHEDULE_TIMER_CALLBACK: ; 0x000932, $D932
     LDA   #$0F ; Countdown
     LDX   #$D93A ; Handler
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK ; Leaves
+CALLBACK_GAME_START_IDK: ; 0x00093A, $D93A
     LDA   7F_TIMER_UNK ; Load val
     ORA   80_TIMER_UNK ; Combine
-    ORA   7F_TIMER_UNK ; No function if ran from 93A?
-    BNE   SKIP_X_MOVE ; If any set, goto. Always taken possibly?
-DONT_SETUP_U: ; 0x000942, $D942
+    ORA   7F_TIMER_UNK ; Or again? Junk inst?
+    BNE   SCHEDULE_TIMER_CALLBACK ; If any set, reschedule wait???
+INIT_SOME_LISTS: ; 0x000942, $D942
     JSR   LIST_INIT_A05F,A061,A063,A069 ; List init stuff.
     LDX   #$D950 ; Handler
-    LDA   #$00 ; Countdown
-    JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X ; Add to player?
-    JMP   CORE_GAME/TASK_LOOP?
-HANDLER_UNK: ; 0x000950, $D950
+    LDA   #$00 ; Type
+    JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X ; Add callback.
+    JMP   CORE_GAME/TASK_LOOP? ; Goto main loop. Isn't it already running??? Mistake maybe?
+CALLBACK_GAMEPLAY_SETUP?: ; 0x000950, $D950
     CLRA
     JSR   BANKSWITCH_TO_A ; IO bank.
     LDA   PIA_WGT_DATA_B ; Get widget input
-    BPL   BIT_7_NOT_SET ; If UP not pressed, go here?
+    BPL   SET_UP_GAMEPLAY_VARS
     JSR   CLEAR_ALL_SCREEN ; Clear all screen otherwise? rofl.
     LDA   A08B_CURRENT_PLAYER ; Load val
     DECA ; --
@@ -1708,49 +1720,49 @@ SKIP_WATCHDOG_OTHER: ; 0x000968, $D968
     LDA   #$FF ; Set all buttons to on.
     STA   WGT_DATA_A_RAM_COPY
     STA   WGT_DATA_A_RAM_COPY_OLD
-BIT_7_NOT_SET: ; 0x00096E, $D96E
+SET_UP_GAMEPLAY_VARS: ; 0x00096E, $D96E
     CLRA ; Clear D
     CLRB
-    STD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Clear
+    STD   R_A020_SCREEN_POS_HORIZ? ; Clear
     STD   R_A022_SCR_CHANGE_UNK ; Clear
     JSR   BANKSWITCH_TO_7 ; Bank 7
     JSR   JMP_TO_GENERATE_LAND_DATA_B300-B6FF ; Prep for land.
     JSR   JMP_TO_DRAW_LAND_UNK ; Draw land.
     JSR   CLEAR_GAME_SCREEN ; Clear the screen.
     LDD   #$0300 ; Idk why val
-    STD   R_A0BD_SHIP_DIR/UNK ; To
+    STD   R_A0BD_SHIP_UNK/DIR? ; To
     STD   SHIP_DIRECTION? ; To
     CLR   R_A0AD_SOUND_REQ_FLAG? ; Clear
-    CLR   A0B5_LASER_COUNT?
-    CLR   R_A08A_UPDATE_SCORE_FLAG?SCORE_CURRENT?
-    CLR   REVERSE_BLOCK_FLAG
-    CLR   $A09A
+    CLR   A0B5_LASER_COUNT? ; Zero
+    CLR   R_A08A_UPDATE_SCORE_FLAG?SCORE_CURRENT? ; Clear
+    CLR   REVERSE_BLOCK_FLAG ; Dont block reverse
+    CLR   R_A09A_UNK
     CLR   ENEMY_UNK_SPAWNED?BULLET? ; These
     LDX   #$A11A ; Idk why val
-    STX   $A09B
-    JSR   GET_PLAYER_PTR_IN_X_FROM_A08B
-    STX   A08D_CURRENT_PLAYER_PTR?
+    STX   R_A09B_PTR_TO_A11A
+    JSR   GET_PLAYER_PTR_IN_X_FROM_A08B ; Get player ptr.
+    STX   A08D_CURRENT_PLAYER_PTR? ; Store to.
     LDA   8,X ; Get PLAYER[8], wave?
     ANDA  #$07 ; Range
-    LDU   #$DB53 ; PTR
+    LDU   #$DB53 ; PTR to level colors.
     LDA   A,U ; Load from ptr
     STA   COLOR_PALETTE_RAM_COPY+5 ; Store to wave color?
-    DEC   7,X ; Dec PLAYER[7]
+    DEC   7,X ; Dec PLAYER[7], ship count.
     JSR   DISPLAY_SETUP_INGAME ; Show display.
     LDD   #$2080 ; Unsure val
-    STD   $A0C1
-    STD   SHIP_SCR_POS_XXYY
+    STD   R_A0C1_UNK
+    STD   SHIP_SCR_POS_XXYY ; Ship screen pos.
     LDD   #$2000 ; Unsure val
-    STD   $A0C3
+    STD   R_A0C3_UNK
     LDD   #$0800 ; Unsure val.
-    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add?
-    STD   $A0CC ; Store to
+    ADDD  R_A020_SCREEN_POS_HORIZ? ; Add?
+    STD   R_A0CC_SCREEN_POS_RELATED? ; Store to
     LDD   #$8000 ; VPOS?
     STD   PLAYER.VPOS ; Store to
     CLRA ; Clear with A/B/D now.
     CLRB
-    STD   $A0C7
-    STA   $A0C9
+    STD   R_A0C7
+    STA   R_A0C9
     STD   PLAYER_V_MOMENTUM
     LDX   #$E9E3 ; Callback
     LDA   #$00 ; Timer
@@ -1772,7 +1784,7 @@ BIT_7_NOT_SET: ; 0x00096E, $D96E
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X
     LDA   SHOW_PLAYER_TEXT_FLAG?
     BEQ   SKIP_SHOW_PLAYER_TEXT ; If == 0, skip player text.
-    LDB   A08C_CURRENT_PLAYER_COUNT ; Load count.
+    LDB   A08C_CURRENT_PLAYER_COUNT_1/2 ; Load count.
     DECB
     BEQ   SKIP_SHOW_PLAYER_TEXT ; If 1, goto.
     LDU   #$C0EF ; SENTENCE PTR PLAYER ONE
@@ -1788,15 +1800,15 @@ DONT_MOVE_U: ; 0x000A11, $DA11
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK ; Setup task it seems. Needs more digging.
 SKIP_SHOW_PLAYER_TEXT: ; 0x000A1F, $DA1F
     JSR   CLEAR_GAME_SCREEN ; Clear the game screen.
-    LDB   #$05 ; Not sure val
+    LDB   #$05 ; Game state 0000.0101
     LDX   A08D_CURRENT_PLAYER_PTR? ; Get player data pointer
-    LDA   10,X ; Load PLAYER[10]
-    BSR   OR_B_WITH_2_IF_NOT_ZERO ; Manip B possibly.
+    LDA   10,X ; Load PLAYER[10], HUMANOID COUNT
+    BSR   SET_GAME_STATE_B_HAS_PLANET_IF_NOT_ZERO ; Manip B possibly.
     LDA   #$60 ; Timer?
     LDX   #$DA32 ; Callback?
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK ; I need to figure this out more apparently
 CALLBACK_MAIN?: ; 0x000A32, $DA32
-    JSR   L_000C1E
+    JSR   INIT_HUMANOIDS? ; Do with spawn in?
     BSR   GAME_STATE_CLEARED_HUMANOID_STATE_SET
     CLR   SHOW_PLAYER_TEXT_FLAG? ; Clear show text flag.
     JMP   IDK_BUT_CAN_END_WAVE
@@ -1804,16 +1816,16 @@ GAME_STATE_CLEARED_HUMANOID_STATE_SET: ; 0x000A3C, $DA3C
     CLRB
 GAME_STATE_SET_HUMANOID_AND_WRITE_FROM_B: ; 0x000A3D, $DA3D
     LDA   A0FA_HUMANOID_COUNT? ; Load count...
-OR_B_WITH_2_IF_NOT_ZERO: ; 0x000A3F, $DA3F
-    BNE   HAS_HUMANOIDS
+SET_GAME_STATE_B_HAS_PLANET_IF_NOT_ZERO: ; 0x000A3F, $DA3F
+    BNE   SET_GAME_STATE
     ORB   #$02 ; Set bit, planet blown up.
-HAS_HUMANOIDS: ; 0x000A43, $DA43
+SET_GAME_STATE: ; 0x000A43, $DA43
     STB   A0BA_PLAYER_GAME_STATE ; Store state.
     RTS
 HYPERSPACE_DIED_ON_REENTRY: ; 0x000A46, $DA46
     LDB   #$58 ; Game state died?
     BSR   GAME_STATE_SET_HUMANOID_AND_WRITE_FROM_B ; Set state.
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Move
+    LDD   R_A020_SCREEN_POS_HORIZ? ; Move
     STD   R_A022_SCR_CHANGE_UNK
     LDX   SHIP_SCR_POS_XXYY ; Pos from
     LDD   #$0806 ; Size
@@ -1833,14 +1845,14 @@ DONT_LOAD_OTHER_BITMAP: ; 0x000A6B, $DA6B
     TFR   U>X ; OBJ U to X
     LDU   R_A063_CALLBACK_LIST_ADDR? ; Obj U from var
     STX   11,U ; X to OBJ[11]
-    LDD   $A0C1 ; Pos
+    LDD   R_A0C1_UNK ; Pos
     LDY   11,U ; BMP ptr, OBJ[11]
     JSR   GFX_BANK2_CHR_CLEAR ; Clear off screen.
     LDA   #$02 ; Countdown
     LDX   #$DA8C ; Handler
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK ; Setup
 CALLBACK_HANDLER_UNK: ; 0x000A8C, $DA8C
-    LDD   $A0C1 ; Pos
+    LDD   R_A0C1_UNK ; Pos
     LDY   11,U ; BMP ptr
     JSR   GFX_BANK2_CHR_TO_SCREEN ; To screen
     LDX   7,U ; X from OBJ[7]
@@ -1863,7 +1875,7 @@ LOADED_PTR_ZERO: ; 0x000AA8, $DAA8
 CALLBACK_HANDLER_UNK: ; 0x000AB8, $DAB8
     CLR   COLOR_PALETTE_RAM_COPY ; Color back to 0
     JSR   DESCHEDULE_CALLBACKS_NOT_TYPE_2 ; Do IDK
-    LDX   $A0C1 ; X from
+    LDX   R_A0C1_UNK ; X from
     LEAX  1027,X ; +IDK
     JSR   BANKSWITCH_TO_7 ; To 7
     JSR   JMP_TO_UNK_RTN ; Idk
@@ -1880,7 +1892,7 @@ WAVE_NOT_OVER: ; 0x000ADE, $DADE
     LDX   A08D_CURRENT_PLAYER_PTR? ; Load player ptr
     LDB   7,X ; Load PLAYER[7]
     BNE   PLAYER_GAME_NOT_OVER ; If not 0, goto.
-    LDB   A08C_CURRENT_PLAYER_COUNT ; Load B with same?
+    LDB   A08C_CURRENT_PLAYER_COUNT_1/2 ; Load B with same?
     DECB ; DEC
     BEQ   A08C_CURRENT_PLAYER_1 ; If was 1
     EORA  #$03 ; Invert player val in A
@@ -1904,7 +1916,7 @@ PLAYER_GAME_NOT_OVER: ; 0x000B15, $DB15
     LDA   A08B_CURRENT_PLAYER ; Current
 LOOP_PLAYER_PTR: ; 0x000B17, $DB17
     INCA ; INC
-    CMPA  A08C_CURRENT_PLAYER_COUNT ; Compare?
+    CMPA  A08C_CURRENT_PLAYER_COUNT_1/2 ; Compare?
     BLS   DONT_LOAD_ONE ; <=, goto...?
     LDA   #$01
 DONT_LOAD_ONE: ; 0x000B1E, $DB1E
@@ -1913,7 +1925,7 @@ DONT_LOAD_ONE: ; 0x000B1E, $DB1E
     BEQ   LOOP_PLAYER_PTR ; If 0, goto.
     STA   A08B_CURRENT_PLAYER ; Store A to current
     INC   SHOW_PLAYER_TEXT_FLAG? ; Inc IDK
-    JMP   UPDATE_BOOKKEEP_7+GAME_START? ; Bookkeep, never returns.
+    JMP   GAME_START ; Bookkeep, never returns.
 A08C_CURRENT_PLAYER_1: ; 0x000B2C, $DB2C
     LDU   #$C075 ; PTR to SENTENCE GAME OVER
     LDX   #$3E80 ; POS
@@ -2049,7 +2061,7 @@ SHIFTED_OFF_ZERO: ; 0x000C01, $DC01
     STD   16,X ; Clear OBJ[16],OBJ[17]
     STD   14,X ; OBJ[14],OBJ[15]
     STD   6,X ; OBJ[6],OBJ[7]
-    STX   LIST_$65_ON_SCREEN?IN_WORLD? ; Store to list?
+    STX   LIST_$65_ON_SCREEN ; Store to list?
     STX   Y++ ; Store to Y? Idk what Y is.
     DEC   A073_SCRATCH_LOOP_WORD?+1 ; Dec val.
     BNE   LOOP_FILL_OUT
@@ -2114,36 +2126,36 @@ LOOP_$67_TO_$65: ; 0x000C77, $DC77
     JSR   RANDOM_VALUE_FWD+IN_A ; Get random.
     ANDA  #$3F ; Get bits.
     ADDA  #$80 ; Set top.
-    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add with this.
+    ADDD  R_A020_SCREEN_POS_HORIZ? ; Add with this.
     STD   10,X ; Store to OBJ[10]
-    LDA   $A0FF ; Load val
-    BEQ   UN_RTN_IDK ; If 0, goto.
+    LDA   R_A0FF_UNK ; Load val
+    BEQ   EXIT_OBJ_TO_ONSCREEN ; If 0, goto.
     CMPA  #$06 ; IF A _ 6
     BLS   DONT_CAP_TO_6 ; <=, goto.
     LDA   #$06 ; Cap at 6
 DONT_CAP_TO_6: ; 0x000C96, $DC96
     LEAY  X ; X to Y
     JSR   UNK_MAKE_OBJ_DETAILS_FROM_OBJ@Y? ; Make other obj?
-    LDX   LIST_23B_UNUSED_OBJS? ; Get list ptr
+    LDX   LIST_23B_LARGE_POOL ; Get list ptr
     STX   Y ; Store to Y.next
-    STY   LIST_23B_UNUSED_OBJS? ; Makes Y new head?
+    STY   LIST_23B_LARGE_POOL ; Makes Y new head?
     NEGA ; Invert original A
-    ADDA  $A0FF ; Add with val
-    STA   $A0FF ; Store back
+    ADDA  R_A0FF_UNK ; Add with val
+    STA   R_A0FF_UNK ; Store back
     BNE   LOOP_$67_TO_$65 ; If not 0, continue.
-UN_RTN_IDK: ; 0x000CA9, $DCA9
+EXIT_OBJ_TO_ONSCREEN: ; 0x000CA9, $DCA9
     LDA   R_A0FE_ENEMY_IDK_COUNT ; Load val
     BEQ   NO_ENEMIES_1 ; If 0, skip.
     JSR   L_001F15
     CLR   R_A0FE_ENEMY_IDK_COUNT
 NO_ENEMIES_1: ; 0x000CB2, $DCB2
-    LDA   $A0FD
+    LDA   R_A0FD_TO_ENEMY_COUNT?
     STA   R_A114_ENEMY_IDK_COUNT
     BEQ   NO_ENEMIES_2
-    CLR   $A0FD
+    CLR   R_A0FD_TO_ENEMY_COUNT?
     JSR   L_001B36
 NO_ENEMIES_2: ; 0x000CBE, $DCBE
-    LDA   $A0FC
+    LDA   R_A0FC_TO_ENEMY_COUNT
     STA   R_A113_ENEMY_IDK_COUNT
     BEQ   RTS ; If 0, RTS
 L_000CC5: ; 0x000CC5, $DCC5
@@ -2153,9 +2165,9 @@ L_000CC5: ; 0x000CC5, $DCC5
 CAP_AT_3: ; 0x000CCB, $DCCB
     PSHS  A
     JSR   L_00229D
-    LDA   $A0FC
+    LDA   R_A0FC_TO_ENEMY_COUNT
     SUBA  S+
-    STA   $A0FC
+    STA   R_A0FC_TO_ENEMY_COUNT
     BNE   L_000CC5
 RTS: ; 0x000CD8, $DCD8
     RTS
@@ -2180,7 +2192,7 @@ CALLBACK_SET_HERE_IDK: ; 0x000CEA, $DCEA
     JSR   END_OF_WAVE
     LDX   A08D_CURRENT_PLAYER_PTR?
     INC   7,X ; PLAYER[7], wave?
-    JMP   WAVE_INIT? ; Next wave.
+    JMP   WAVE_START ; Next wave.
 WAVE_CONTINUE?: ; 0x000D09, $DD09
     CMPA  #$08 ; 8 enemies left?
     BHI   MORE_THAN_8_ENEMIES ; >, goto
@@ -2361,7 +2373,7 @@ DONT_CAP_WAVE_BONUS: ; 0x000E55, $DE55
     ASLB
     ASLB
     ASLB
-    JSR   SCORE_ADD_AB ; Add to score
+    JSR   SCORE_ADD_AB??_IDK ; Add to score
     STX   7,U ; Screen pos to player data.
     LDA   #$04 ; Callback timer.
     LDX   #$DE66 ; Callback area.
@@ -2527,9 +2539,9 @@ DONT_SET_PALETTE: ; 0x000F89, $DF89
 SKIP_BANK7_RTN: ; 0x000F9A, $DF9A
     LDA   #$02
     STA   BANKSWITCH ; Bank to 2
-    LDD   $A0A1 ; Load val
+    LDD   R_A0A1_PTR_TO_ZEROS? ; Load val
     JSR   SHIP_MOVE_RTN ; IDK
-    LDD   $A0A1 ; Load val again
+    LDD   R_A0A1_PTR_TO_ZEROS? ; Load val again
     JSR   IRQ_RTN_MOVE_OBJS?_A065 ; IDK
     JSR   MOVE_OBJ_LIST_A065? ; IDK
 LEAVE_IRQ_RTN: ; 0x000FAC, $DFAC
@@ -2569,9 +2581,9 @@ IRQ_INITIAL_P2: ; 0x000FC3, $DFC3
 SKIP_JSR: ; 0x000FF4, $DFF4
     LDA   #$02 ; Bank 2
     STA   BANKSWITCH
-    LDD   $A0A1 ; Load val
+    LDD   R_A0A1_PTR_TO_ZEROS? ; Load val
     JSR   SHIP_MOVE_RTN
-    LDD   $A0A1 ; Load val
+    LDD   R_A0A1_PTR_TO_ZEROS? ; Load val
     JSR   IRQ_RTN_MOVE_OBJS?_A065
     BRA   LEAVE_IRQ_RTN ; Leaves
 VIDEO_COUNTER_BITS_UNDER_#$58: ; 0x001005, $E005
@@ -2608,15 +2620,15 @@ VIDEO_COUNTER_>_4: ; 0x001031, $E031
     JSR   BULLET_RELATED?
     JSR   MOVE_OBJ_LIST_A065?
     JMP   LEAVE_IRQ_RTN
-INIT_STARS: ; 0x001052, $E052
+INIT_ALL_STARS: ; 0x001052, $E052
     LDX   #$AF9D ; Ptr to stars data.
     LDB   #$10 ; Num stars?
-    STB   STARS_NUM_TO_CHANGE? ; Idk why
+    STB   STARS_NUM_TO_CHANGE? ; Seed change count when initing.
     CLRB
 LOOP_MORE_STARS: ; 0x00105A, $E05A
     JSR   RANDOM_VALUE_FWD+IN_A ; Get val.
     CMPA  #$9C ; If _ #$9C
-    BCC   LOOP_MORE_STARS ; >=, get another number. This is to be anywhere on the screen col wise.
+    BCC   LOOP_MORE_STARS ; >=, get another number. Invalid column byte.
     STA   X ; <9C gets stored,  STAR[0]
 TRY_NEW_RANDOM_VAL: ; 0x001063, $E063
     JSR   RANDOM_VALUE_FWD+IN_A ; Get val.
@@ -2630,7 +2642,7 @@ TRY_NEW_RANDOM_VAL: ; 0x001063, $E063
     ANDB  #$77 ; Limit bits on each nibble.
     LEAX  4,X ; X+=4, next star.
     CMPX  #$AFDD ; End star data, total 16 stars.
-    BNE   LOOP_MORE_STARS ; Do more.
+    BNE   LOOP_MORE_STARS ; Set up all 16.
 RTS_STARS: ; 0x00107D, $E07D
     RTS ; RTS
 STARS_UPDATE?: ; 0x00107E, $E07E
@@ -2638,7 +2650,7 @@ STARS_UPDATE?: ; 0x00107E, $E07E
     BITA  #$20 ; Test bit
     BNE   RTS_STARS ; If not set, RTS
     LDX   #$AF9D ; Load, stars PTR
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load val
+    LDD   R_A020_SCREEN_POS_HORIZ? ; Load val
     ANDB  #$80 ; Clear bottom 7
     STD   R_A06F_POS_UNK ; Store
     LDD   R_A022_SCR_CHANGE_UNK ; Load
@@ -2735,14 +2747,14 @@ STAR_HPOS_IS_VALID: ; 0x001132, $E132
     STB   1,X ; Store B to XXYY ptr?
 RTS: ; 0x001148, $E148
     RTS
-SETUP_POOL_4162: ; 0x001149, $E149
+SETUP_RANDOM_VALUES_A162-A182,A182-A1A2: ; 0x001149, $E149
     LDX   #$A162 ; PTR
     STX   PTR_TO_A162_POOL ; Store
 LOOP_RANDOM: ; 0x00114E, $E14E
     JSR   RANDOM_VALUE_FWD+IN_A ; Get random.
-    STA   32,X ; Store to X+32
+    STA   32,X ; Store to X+32, pool is from A162 to A1A2?
     STA   X+ ; Store to X
-    CMPX  #$A183 ; End?
+    CMPX  #$A183 ; END? MISTAKE off by one? First +32 writes A182 lol. Off by 1.
     BNE   LOOP_RANDOM ; Loop
     RTS ; Leave
 DRAW_THRUST_TO_LEFT: ; 0x00115C, $E15C
@@ -2829,7 +2841,7 @@ SHIP_MOVE_RTN: ; 0x001213, $E213
     BLS   RTS_A_MESSED_UP ; <=, goto.
     CMPB  SHIP_SCR_POS_XXYY+1 ; If B _ Loc
     BHI   RTS_A_MESSED_UP ; >, goto.
-    LDA   R_A0BD_SHIP_DIR/UNK ; Load val
+    LDA   R_A0BD_SHIP_UNK/DIR? ; Load val
     BMI   Diff_JSR_set ; If negative, goto.
     JSR   CLEAR_THING
     JSR   CLEAR_THRUST_MOVING_RIGHT
@@ -2839,7 +2851,7 @@ Diff_JSR_set: ; 0x001231, $E231
     JSR   CLEAR_THRUST_MOVING_LEFT
 SKIP_OTHER_SET: ; 0x001237, $E237
     LDD   SHIP_DIRECTION? ; Move val
-    STD   R_A0BD_SHIP_DIR/UNK
+    STD   R_A0BD_SHIP_UNK/DIR?
     BMI   D_NEGATIVE ; If negative, goto.
     JSR   OTHER_BITMAP+MOVE
     JSR   DRAW_THRUST_TO_LEFT
@@ -2853,7 +2865,7 @@ OTHER_BITMAP+MOVE: ; 0x00124A, $E24A
 MOVE_THING: ; 0x00124E, $E24E
     LDA   $A0C4 ; Load
     ASLA ; Into carry
-    LDD   $A0C1 ; Move
+    LDD   R_A0C1_UNK ; Move
     STD   SHIP_SCR_POS_XXYY
     JMP   GFX_16X6_MOVE+ADJUST ; Put to screen
 BITMAP+MOVE: ; 0x001258, $E258
@@ -2867,7 +2879,7 @@ MOVEMENT_STUFF_PLAYERS+IDK: ; 0x001263, $E263
     BITA  #$40 ; Test bit
     LBNE  RTS ; RTS if set.
     CLR   R_A06F_POS_UNK ; Clear
-    LDD   $A0C7 ; Load
+    LDD   R_A0C7 ; Load
     COMA ; Invert
     COMB
     ADDD  #$0001 ; +1
@@ -2881,24 +2893,24 @@ SKIP_INVERT_A: ; 0x001278, $E278
     ADDD  $A0C8 ; Add to
     STD   $A0C8 ; Store
     LDA   R_A06F_POS_UNK ; Load
-    ADCA  $A0C7 ; Add with carry
-    STA   $A0C7 ; Store
-    LDD   $A0C7 ; Load into D
+    ADCA  R_A0C7 ; Add with carry
+    STA   R_A0C7 ; Store
+    LDD   R_A0C7 ; Load into D
     LDA   WGT_DATA_A_RAM_COPY ; Get input
     BITA  #$02 ; Test if thrust
     BEQ   THRUST_NOT_PRESSED ; If 1, taken
     CLR   R_A06F_POS_UNK ; Clear
-    LDD   R_A0BD_SHIP_DIR/UNK ; Load
+    LDD   R_A0BD_SHIP_UNK/DIR? ; Load
     BPL   SKIP_INVERT_A ; If positive, goto
     COM   R_A06F_POS_UNK ; Invert
 SKIP_INVERT_A: ; 0x001296, $E296
     ADDD  $A0C8 ; Add with
     STD   $A0C8 ; Store to
     LDA   R_A06F_POS_UNK ; Load
-    ADCA  $A0C7 ; Add with carry
-    STA   $A0C7 ; Store to
+    ADCA  R_A0C7 ; Add with carry
+    STA   R_A0C7 ; Store to
 THRUST_NOT_PRESSED: ; 0x0012A0, $E2A0
-    LDD   $A0C7 ; Get word
+    LDD   R_A0C7 ; Get word
     ASRA ; A >> into B
     RORB
     ASRA ; A >> into B
@@ -2908,7 +2920,7 @@ THRUST_NOT_PRESSED: ; 0x0012A0, $E2A0
     RORA ; Bring B into A...
     STA   $A094 ; Store
     STB   $A093 ; Store
-    LDA   R_A0BD_SHIP_DIR/UNK ; Load
+    LDA   R_A0BD_SHIP_UNK/DIR? ; Load
     BMI   A_DIFF_VAL_SKIP_CLEARS_IF_NEGATIVE ; If negative, goto.
     LDA   #$20 ; Load with val
     TSTB ; Test B
@@ -2925,7 +2937,7 @@ SKIP_CLEARS: ; 0x0012C1, $E2C1
     LDB   $A094 ; Load
     ADDA  $A093 ; Add
     STA   $A093 ; Store
-    SUBD  $A0C3 ; Sub value with loc
+    SUBD  R_A0C3_UNK ; Sub value with loc
     BEQ   CLEAR_95 ; If 0, goto
     BCS   CMPD_TO_#$FF00 ; If value subbed was higher, goto.
     CMPD  #$0100 ; Subbed was lower.
@@ -2933,7 +2945,7 @@ SKIP_CLEARS: ; 0x0012C1, $E2C1
     LDD   #$0040 ; Load with
     STD   $A095 ; Store to.
     LDD   #$0100 ; Load
-    ADDD  $A0C3 ; Add with
+    ADDD  R_A0C3_UNK ; Add with
     BRA   D_TO_C3 ; Goto
 CMPD_TO_#$FF00: ; 0x0012DF, $E2DF
     CMPD  #$FF00 ; Comp to
@@ -2941,7 +2953,7 @@ CMPD_TO_#$FF00: ; 0x0012DF, $E2DF
     LDD   #$FFC0 ; Load val
     STD   $A095 ; Store to
     LDD   #$FF00 ; Load val
-    ADDD  $A0C3 ; Store to
+    ADDD  R_A0C3_UNK ; Store to
     BRA   D_TO_C3
 CLEAR_95: ; 0x0012F1, $E2F1
     CLRA
@@ -2949,11 +2961,11 @@ CLEAR_95: ; 0x0012F1, $E2F1
     STD   $A095 ; Clear
     LDD   $A093 ; Move
 D_TO_C3: ; 0x0012F7, $E2F7
-    STD   $A0C3 ; Store
-    STA   $A0C1 ; Store to
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load
+    STD   R_A0C3_UNK ; Store
+    STA   R_A0C1_UNK ; Store to
+    LDD   R_A020_SCREEN_POS_HORIZ? ; Load
     STD   R_A022_SCR_CHANGE_UNK ; Store
-    LDD   $A0C7 ; Load
+    LDD   R_A0C7 ; Load
     CMPD  #$0100 ; If D _ val
     BLT   DONT_APPLY_MAX ; <, set
     LDD   #$0100 ; Max
@@ -2962,18 +2974,18 @@ DONT_APPLY_MAX: ; 0x00130A, $E30A
     BGT   DONT_APPLY_MIN ; If >, don't apply min.
     LDD   #$FF00 ; Min
 DONT_APPLY_MIN: ; 0x001313, $E313
-    STD   $A0C7 ; Store
-    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add with
+    STD   R_A0C7 ; Store
+    ADDD  R_A020_SCREEN_POS_HORIZ? ; Add with
     SUBD  $A095 ; Sub from
-    STD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Store to
-    LDD   $A0C3 ; Load
+    STD   R_A020_SCREEN_POS_HORIZ? ; Store to
+    LDD   R_A0C3_UNK ; Load
     LSRA ; A >> 2, into B
     RORB
     LSRA
     RORB
     ANDB  #$E0 ; Only bits added in.
-    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add with
-    STD   $A0CC ; Store to
+    ADDD  R_A020_SCREEN_POS_HORIZ? ; Add with
+    STD   R_A0CC_SCREEN_POS_RELATED? ; Store to
     LDB   PLAYER.VPOS ; Load
     LDA   WGT_DATA_B_RAM_COPY
     LSRA ; Test UP bit
@@ -3012,7 +3024,7 @@ COMMIT_D: ; 0x00136D, $E36D
     STD   PLAYER_V_MOMENTUM ; Store momentum.
     ADDD  PLAYER.VPOS ; Add to player VPos
     STD   PLAYER.VPOS ; Store to VPos
-    STA   $A0C2 ; Store here too, idk why.
+    STA   R_A0C1_UNK+1 ; Store here too, idk why.
 RTS: ; 0x001375, $E375
     RTS ; Leave
 MOVE_OBJ_LIST_A065?: ; 0x001376, $E376
@@ -3067,7 +3079,7 @@ OBJ[4]_IS_ZERO: ; 0x0013C2, $E3C2
     CMPB  1,S ; S[1]
     BLS   X_TO_X.next ; If B <=, goto.
     LDD   10,X ; Load OBJ[10]
-    SUBD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Sub with val
+    SUBD  R_A020_SCREEN_POS_HORIZ? ; Sub with val
     CMPD  #$2580 ; Compare to val
     BCC   X_TO_X.next ; If D >= Val, goto.
     LDY   2,X ; OBJ[2], callback.
@@ -3094,7 +3106,7 @@ SPAWNS_SOMETHING_IF_UNDER_20_WITH_6_PAST_JSR: ; 0x0013F3, $E3F3
     CMPA  #$14 ; If A _ #$14, cap?
     BCC   RTS_TO_PC_JSR'D+6 ; >=, goto.
     LDD   10,X ; Load OBJ[10]
-    SUBD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Sub with
+    SUBD  R_A020_SCREEN_POS_HORIZ? ; Sub with
     CMPD  #$2580 ; Idk why val
     BCC   RTS_TO_PC_JSR'D+6 ; >= CMP'd, RTS
     ASLB ; D << 2
@@ -3104,7 +3116,7 @@ SPAWNS_SOMETHING_IF_UNDER_20_WITH_6_PAST_JSR: ; 0x0013F3, $E3F3
     LDB   12,X ; B from OBJ[12]
     CMPB  #$2A ; Off screen top
     BLS   RTS_TO_PC_JSR'D+6 ; <=, goto.
-    LDX   LIST_23B_UNUSED_OBJS? ; Get objs in list.
+    LDX   LIST_23B_LARGE_POOL ; Get objs in list.
     BEQ   RTS_TO_PC_JSR'D+6 ; RTS if none.
     STD   4,X ; D to OBJ[4]
     STD   10,X ; D to OBJ[10]
@@ -3126,7 +3138,7 @@ SPAWNS_SOMETHING_IF_UNDER_20_WITH_6_PAST_JSR: ; 0x0013F3, $E3F3
     STA   21,X ; To OBJ[21], [22]
     STA   22,X
     LDD   X ; D from X.next
-    STD   LIST_23B_UNUSED_OBJS? ; Remove list entry taken.
+    STD   LIST_23B_LARGE_POOL ; Remove list entry taken.
     LDD   LIST_BULLETS? ; Load list first entry
     STD   X ; Store to X.next
     INC   ENEMY_UNK_SPAWNED?BULLET? ; Inc bullets?
@@ -3142,7 +3154,7 @@ BULLET_RELATED?: ; 0x001453, $E453
     LDA   A0BA_PLAYER_GAME_STATE ; Load val
     BITA  #$20 ; Test bit
     BNE   RTS ; If set, RTS.
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load val
+    LDD   R_A020_SCREEN_POS_HORIZ? ; Load val
     ANDB  #$E0 ; Clear bottom B
     STD   $A09D ; Store to
     LDD   R_A022_SCR_CHANGE_UNK ; Load val
@@ -3238,16 +3250,16 @@ L_001507: ; 0x001507, $E507
     JMP   X_TO_X.NEXT_BULLET? ; Next bullet.
 CALLBACK_BULLET_HIT_PLAYER?: ; 0x00151E, $E51E
     LDD   #$0025
-    JSR   SCORE_ADD_AB ; Score +25, hit by bullet?
+    JSR   SCORE_ADD_AB??_IDK ; Score +25, hit by bullet?
     DEC   ENEMY_UNK_SPAWNED?BULLET? ; Dec counter.
     JSR   REMOVE_X_FROM_LIST_A06D ; Remove from list.
-    JSR   HANDLER_IN_BANK_2/XOBJ[8]
+    JSR   CLEAR_OBJ_GFX_OFF_SCREEN
     LDD   10,X ; D from OBJ[10]
     LSRA ; D >> 2
     RORB
     LSRA
     RORB
-    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add with val
+    ADDD  R_A020_SCREEN_POS_HORIZ? ; Add with val
     STD   10,X ; D to OBJ[10]
     LDA   12,X ; Load A with OBJ[12]
     SUBA  #$02 ; Sub 2
@@ -3258,7 +3270,7 @@ CALLBACK_BULLET_HIT_PLAYER?: ; 0x00151E, $E51E
     LDD   #$D4E4
     JMP   SOUND_SET_SOUND_PRIORITIED ; Still unsure.
     .db $5E ; Data?
-SETUP_A1A2-A1B1_WITH_99/9A/A9/AA: ; 0x00154B, $E54B
+SETUP_A1A2-A1C1_WITH_99/9A/A9/AA: ; 0x00154B, $E54B
     LDX   #$A1A2 ; Ptr?
     STX   PTR_TO_A1A2_POOL
 LOOP_NOT_DONE: ; 0x001550, $E550
@@ -3289,10 +3301,10 @@ PROCESS_OBJ_UNK: ; 0x00156F, $E56F
 REMOVE_BULLET_FROM_SCR?: ; 0x001579, $E579
     LDU   X ; Load next obj
     STU   Y ; To previous, removing OBJ X
-    LDU   LIST_23B_UNUSED_OBJS? ; Load list
+    LDU   LIST_23B_LARGE_POOL ; Load list
     STU   X ; List to X.next
-    STX   LIST_23B_UNUSED_OBJS? ; X is new head.
-    JSR   HANDLER_IN_BANK_2/XOBJ[8]
+    STX   LIST_23B_LARGE_POOL ; X is new head.
+    JSR   CLEAR_OBJ_GFX_OFF_SCREEN
     DEC   ENEMY_UNK_SPAWNED?BULLET?
     LEAX  Y ; X is now X.prev
 TO_NEXT_OBJ: ; 0x00158A, $E58A
@@ -3307,7 +3319,7 @@ CALLBACK_FIRE_BUTTON_PRESSED: ; 0x001591, $E591
     INC   A0B5_LASER_COUNT? ; ++
     LDD   #$D51B
     JSR   SOUND_SET_SOUND_PRIORITIED ; Difficulty?
-    LDX   $A0C1 ; Load X with
+    LDX   R_A0C1_UNK ; Load X with
     LDA   SHIP_DIRECTION? ; Load A with
     BPL   LASER_CONTINUE_TO_RIGHT ; If A positive, goto.
     JMP   LASER_HANDLE_TO_LEFT ; Otherwise.
@@ -3434,7 +3446,7 @@ LOOP_CLEAR_LASER_LEFT: ; 0x001690, $E690
 ONE_LESS_LASER: ; 0x00169A, $E69A
     DEC   A0B5_LASER_COUNT? ; 1 less laser on screen.
     JMP   CALLBACK_TASK_REMOVE
-LASER_HOLES_POOL_CREATION: ; 0x00169F, $E69F
+LASER_HOLES_POOL_CREATE: ; 0x00169F, $E69F
     LDX   #$A142 ; PTR?
     STX   LASER_HOLES_POINTER_VAL ; Put to.
 LOOP_MORES_HOLES: ; 0x0016A4, $E6A4
@@ -3454,7 +3466,7 @@ SKIP_ADD_10: ; 0x0016B2, $E6B2
     RTS
 HIT_DETECT_VS_LIST_ONSCREEN?: ; 0x0016BA, $E6BA
     LDX   #$A065 ; List to check hits against.
-HIT_DETECT_VS_LIST_MANUAL: ; 0x0016BD, $E6BD
+HIT_DETECT_VS_LIST_PASSED_IN_X: ; 0x0016BD, $E6BD
     STD   HIT_DETECT_UPPER_LEFT_XXYY ; D from addr
     ADDD  U ; D += WWHH of sprite.
     STD   HIT_DETECT_BOTTOM_RIGHT_XXYY ; Store to
@@ -3629,51 +3641,51 @@ WAIT_FOR_IRQ_RAN: ; 0x0017C3, $E7C3
     LDB   A0BA_PLAYER_GAME_STATE ; Get B
     BITB  #$7D ; Test 0111.1101 bits.
     BEQ   NONE_SET
-    CLR   R_A05E ; Clear?
-    BRA   A_LOT_SKIPS_TO_HERE
+    CLR   R_A05E_SLOWDOWN_FLAG? ; Clear?
+    BRA   SKIP_SLOWDOWN_CODE
 NONE_SET: ; 0x0017D3, $E7D3
-    ASLA ; Shift
-    ADDA  R_A05E ; Add with
-    SUBA  #$04 ; Sub
+    ASLA ; Ticks happened * 2
+    ADDA  R_A05E_SLOWDOWN_FLAG? ; += this val
+    SUBA  #$04 ; -= 4
     BPL   IS_STILL_POSITIVE
     CLRA ; Clear if negative.
 IS_STILL_POSITIVE: ; 0x0017DB, $E7DB
-    STA   R_A05E ; Store
+    STA   R_A05E_SLOWDOWN_FLAG? ; Store 0 or val.
     CMPA  #$02 ; If _ 2
-    BCS   A_LOT_SKIPS_TO_HERE ; <, go.
+    BCS   SKIP_SLOWDOWN_CODE ; <, goto.
     LDB   #$03 ; Move
-    STB   STARS_NUM_TO_CHANGE?
+    STB   STARS_NUM_TO_CHANGE? ; Change to 3 stars updating.
     CMPA  #$02
-    BLS   A_LOT_SKIPS_TO_HERE ; <=, go.
-    LDA   #$02 ; Move
-    STA   R_A05E
+    BLS   SKIP_SLOWDOWN_CODE ; <=, goto. Don't remove stuff from screen.
+    LDA   #$02 ; Slowdown value.
+    STA   R_A05E_SLOWDOWN_FLAG?
 LIST_A065_RTN_IDK: ; 0x0017ED, $E7ED
-    LDY   #$A065 ; List
-LOOP_FIND_IDK: ; 0x0017F1, $E7F1
+    LDY   #$A065 ; List, on screen.  Y=LIST/CURR, X=LIST.NEXT
+LOOP_ALL_ONSCREEN: ; 0x0017F1, $E7F1
     LDX   Y ; X = Y.next
-    BEQ   A_LOT_SKIPS_TO_HERE ; If NULL, goto.
-    LDA   20,X ; Get data in X
-    BEQ   OBJ[20]_WAS_ZERO ; If 0, goto.
-    LEAY  X ; Y is now X.next
-    BRA   LOOP_FIND_IDK
-OBJ[20]_WAS_ZERO: ; 0x0017FE, $E7FE
-    LDU   X ; Y.next.next
-    STU   Y ; ...to Y.next
+    BEQ   SKIP_SLOWDOWN_CODE ; No more objects left.
+    LDA   20,X ; OBJ[20], block move offscreen.
+    BEQ   OBJECT_IS_MOVABLE ; If 0, goto.
+    LEAY  X ; Y is now X.next, skipping object.
+    BRA   LOOP_ALL_ONSCREEN
+OBJECT_IS_MOVABLE: ; 0x0017FE, $E7FE
+    LDU   X ; U = OBJ.next
+    STU   Y ; U to PREV.next. X removed from list.
     LDD   A0DF_RAND_BYTE ; Get value from.
     ANDA  #$3F ; And...
     ADDA  #$60 ; Add
-    ADDD  10,X ; Add
-    STD   10,X ; Store to...
-    JSR   HANDLER_IN_BANK_2/XOBJ[8] ; Does tons. Scanner?
+    ADDD  10,X ; Add to world pos.
+    STD   10,X ; Store to obj.
+    JSR   CLEAR_OBJ_GFX_OFF_SCREEN ; Clear off screen.
     LDD   #$0000
-    STD   4,X ; Clear
-    LDU   LIST_$6B_UNK ; Get obj at head
-    STX   LIST_$6B_UNK ; Store new head obj.
-    STU   X ; Set old head obj to HEAD.next
-A_LOT_SKIPS_TO_HERE: ; 0x00181A, $E81A
+    STD   4,X ; Clear, not on screen.
+    LDU   LIST_$6B_OFFSCREEN? ; Move X object to A06B list, extending list. U = List head
+    STX   LIST_$6B_OFFSCREEN? ; Store new head, our X obj.
+    STU   X ; Set old head obj to HEAD.next, extending list with new obj.
+SKIP_SLOWDOWN_CODE: ; 0x00181A, $E81A
     LDA   #$02
     STA   CURRENT_BANK
-    STA   BANKSWITCH ; Switch to bank 2
+    STA   BANKSWITCH ; Switch to bank 2, for gfx?
     BSR   L_001861 ; Sub
     JSR   JMP_TO_PARTICLE_FWD? ; Sub
     JSR   RANDOM_VALUE_FWD+IN_A ; Forward random.
@@ -3702,7 +3714,7 @@ CALLBACK_PTR_VALID,HANDLE: ; 0x00184D, $E84D
     DEC   4,U ; OBJ[4]--
     BNE   U=U.NEXT,HANDLE_CALLBACK ; If not 0, don't call handler.
     STU   R_A063_CALLBACK_LIST_ADDR? ; Callback focused on to addr.
-    JMP   [2,U] ; Run handler.
+    JMP   [2,U] ; Run handler callback.
 U=U.NEXT,HANDLE_CALLBACK: ; 0x001856, $E856
     LDU   U ; U = U.next
     BNE   CALLBACK_PTR_VALID,HANDLE ; If valid ptr, goto.
@@ -3711,10 +3723,10 @@ U=U.NEXT,HANDLE_CALLBACK: ; 0x001856, $E856
 L_001861: ; 0x001861, $E861
     LDA   A0BA_PLAYER_GAME_STATE ; Load state
     BITA  #$10 ; Test bit
-    BNE   SHIP_NOT_HIT ; If set, CLEAR+RTS
+    BNE   HIT_DETECT_LEAVE ; If set, don't check.
     LDD   SHIP_SCR_POS_XXYY ; Load ship pos.
     LDU   #$F9C1 ; Load U with
-    TST   R_A0BD_SHIP_DIR/UNK ; Test byte.
+    TST   R_A0BD_SHIP_UNK/DIR? ; Test byte.
     BPL   DONT_LOAD_OTHER_SHIP_DIRECTION ; If positive, goto.
     LDU   #$F9CB ; If negative, load instead.
 DONT_LOAD_OTHER_SHIP_DIRECTION: ; 0x001873, $E873
@@ -3724,8 +3736,8 @@ DONT_LOAD_OTHER_SHIP_DIRECTION: ; 0x001873, $E873
     PULS  A,B,U ; Restore GFX ptr, SCR_POS of ship.
     BNE   SHIP_HIT ; If hit returned true, goto.
     LDX   #$A06D ; Load ptr to other list, bullets?
-    JSR   HIT_DETECT_VS_LIST_MANUAL ; Do
-    BEQ   SHIP_NOT_HIT ; If 0 ret, RTS
+    JSR   HIT_DETECT_VS_LIST_PASSED_IN_X ; Do
+    BEQ   HIT_DETECT_LEAVE ; If 0 ret, RTS
 SHIP_HIT: ; 0x001886, $E886
     LDX   #$DA46 ; Set up callback to death.
     LDA   #$00 ; Type
@@ -3733,14 +3745,14 @@ SHIP_HIT: ; 0x001886, $E886
     LDA   A0BA_PLAYER_GAME_STATE ; Game state
     ORA   #$08 ; Set bit. Player dead.
     STA   A0BA_PLAYER_GAME_STATE ; Store to.
-SHIP_NOT_HIT: ; 0x001894, $E894
+HIT_DETECT_LEAVE: ; 0x001894, $E894
     CLR   R_A0DE ; Clear addr
     RTS ; RTS
 REVERSE_BUTTON_PRESSED_CALLBACK: ; 0x001897, $E897
     LDA   REVERSE_BLOCK_FLAG ; Load val
     BNE   REMOVE_CALLBACK_UNHANDLED ; If set, goto.
     INC   REVERSE_BLOCK_FLAG ; ++?
-    LDD   R_A0BD_SHIP_DIR/UNK ; D from
+    LDD   R_A0BD_SHIP_UNK/DIR? ; D from
     COMB ; Invert
     COMA
     ADDD  #$0001 ; Add 1
@@ -3759,18 +3771,18 @@ SETUP_CALLBACK_WAIT_UNPRESS: ; 0x0018A6, $E8A6
 REMOVE_CALLBACK_UNHANDLED: ; 0x0018BE, $E8BE
     JMP   CALLBACK_TASK_REMOVE ; Remove callback.
 CALLBACK_SMARTBOMB_PRESSED: ; 0x0018C1, $E8C1
-    LDA   $A09A ; Load val
+    LDA   R_A09A_UNK ; Load val
     BNE   SMARTBOMB_BUTTON_HANDLED? ; If not 0, handle.
     LDX   A08D_CURRENT_PLAYER_PTR? ; Get player ptr.
     LDA   9,X ; Load OBJ[9]
     BEQ   SMARTBOMB_BUTTON_HANDLED? ; Request denied.
-    INC   $A09A ; Inc this.
+    INC   R_A09A_UNK ; Inc this.
     DEC   9,X ; OBJ[9]--, smartbombs.
     JSR   SMARTBOMBS_TO_SCREEN ; Put new count to screen.
     LDD   #$D4D2 ; D val
     JSR   SOUND_SET_SOUND_PRIORITIED ; Idk rtn yet.
 LOOP_ON_SCREEN_LIST: ; 0x0018D8, $E8D8
-    LDX   LIST_$65_ON_SCREEN?IN_WORLD? ; Load list
+    LDX   LIST_$65_ON_SCREEN ; Load list
 LOOP_DESTROY_OBJECTS: ; 0x0018DA, $E8DA
     BEQ   POST_SMARTBOMB_HANDLERS ; If NULL, goto.
     LDD   4,X ; D from OBJ[4]
@@ -3804,7 +3816,7 @@ HYPERSPACE_PRESSED: ; 0x001904, $E904
     LDA   #$0A ; Callback setup
     LDX   #$E91A
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK
-    CLR   $A09A ; Clear hyperspace disable?
+    CLR   R_A09A_UNK ; Clear hyperspace disable?
 SMARTBOMB_BUTTON_HANDLED?: ; 0x00191C, $E91C
     JMP   CALLBACK_TASK_REMOVE ; Do.
 HYPERSPACE_BUTTON_PRESSED_CALLBACK: ; 0x00191F, $E91F
@@ -3825,7 +3837,7 @@ LOOP_REMOVE_ALL_FROM_LIST_6D: ; 0x001936, $E936
 L_00193F: ; 0x00193F, $E93F
     CLR   ENEMY_UNK_SPAWNED?BULLET? ; Clear count
     LDD   A0DF_RAND_BYTE ; Random both.
-    STD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; To 2x
+    STD   R_A020_SCREEN_POS_HORIZ? ; To 2x
     STD   R_A022_SCR_CHANGE_UNK
     LSRB ; Shift B
     BCC   VAL_SHIFTED_0 ; If 0 shifted off, goto.
@@ -3836,39 +3848,39 @@ VAL_SHIFTED_0: ; 0x001952, $E952
     LDX   #$FD00 ; Idk val
     LDD   #$7000 ; Idk val
 VAL_SHIFTED_1: ; 0x001958, $E958
-    STD   $A0C3 ; Val to
+    STD   R_A0C3_UNK ; Val to
     STX   SHIP_DIRECTION? ; Val to
     LDB   A0E0_RAND_WORD ; Get random
     LSRB ; Shift
     ADDB  #$2A ; Add 2A
     STB   PLAYER.VPOS ; Store to VPOS
-    STD   $A0C1 ; Store IDK
+    STD   R_A0C1_UNK ; Store IDK
     CLRA ; Clear
     CLRB
-    STA   $A0C9 ; Clear
-    STD   $A0C7 ; Clear
+    STA   R_A0C9 ; Clear
+    STD   R_A0C7 ; Clear
     STD   PLAYER_V_MOMENTUM ; Clear
     JSR   GOTO_B7-C000,DRAW_LAND_UNK ; Do IDK
     LDB   #$50 ; IDK Val
     JSR   GAME_STATE_SET_HUMANOID_AND_WRITE_FROM_B ; Set
     JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Spawn the ship in.
-    .db $F9
+    .db $F9 ; BMP
     .db $C1
-    .db $ED
+    .db $ED ; PLAYER HIT?
     .db $BC
-    .db $00
+    .db $00 ; UNK
     .db $00
     LDD   #$0000 ; Load
     STD   14,X ; Clear OBJ[14]
     STD   16,X ; OBJ[16]
     LDD   PLAYER.VPOS ; Load VPOS
     STD   12,X ; to OBJ[12]
-    LDD   $A0C3 ; Load
+    LDD   R_A0C3_UNK ; Load
     LSRA ; D >> 2
     RORB
     LSRA
     RORB
-    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add
+    ADDD  R_A020_SCREEN_POS_HORIZ? ; Add
     STD   10,X ; To OBJ[10]
     LDA   SHIP_DIRECTION? ; Val direction
     BPL   DONT_SET_OTHER_HANDLER? ; To right, true.
@@ -3912,7 +3924,7 @@ CALLBACK_ONSCREEN_HANDLE_IDK: ; 0x0019E3, $E9E3
     LDA   #$02
     LDX   #$E9EE
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK ; Callback
-    JSR   PROCESS_IDK ; Do
+    JSR   PROCESS_TO_OFFSCREEN? ; Do
     JSR   PROCESS_LIST_A06D_BULLETS? ; Do
     LDA   #$02 ; Setup callback.
     LDX   #$E9FC
@@ -3922,53 +3934,53 @@ CALLBACK_ONSCREEN_HANDLE_IDK: ; 0x0019E3, $E9E3
     LDA   #$04 ; Callback setup.
     LDX   #$E9E3
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK
-PROCESS_IDK: ; 0x001A0A, $EA0A
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; D from
+PROCESS_TO_OFFSCREEN?: ; 0x001A0A, $EA0A
+    LDD   R_A020_SCREEN_POS_HORIZ? ; D from
     SUBD  #$0C80 ; D -= val
     STD   A073_SCRATCH_LOOP_WORD? ; To scratch.
-    LDX   #$A065 ; X to list.
+    LDX   #$A065 ; List PTR, on screen.
     BRA   PROCESS_NEXT
-PROCESS_LOOP: ; 0x001A16, $EA16
-    LDD   10,X ; D from XOBJ[10]
-    SUBD  A073_SCRATCH_LOOP_WORD? ; Sub with scratch.
+PROCESS_TO_OFFSCREEN_LOOP: ; 0x001A16, $EA16
+    LDD   10,X ; D from XOBJ[10], HPOS?
+    SUBD  A073_SCRATCH_LOOP_WORD? ; -= with scratch.
     CMPD  #$3E80 ; CMP to val.
-    BCS   PROCESS_NEXT ; If <, goto next.
+    BCS   PROCESS_NEXT ; If D < CMP, goto next.
     LDU   X ; U = X.next
-    STU   Y ; X.next to Prev.next
-    LDU   LIST_$6B_UNK ; Load list
-    STU   X ; X.next is list.
-    STX   LIST_$6B_UNK ; New head to list.
+    STU   Y ; To PREV.next, removing item from list.
+    LDU   LIST_$6B_OFFSCREEN? ; Load list offscreen.
+    STU   X ; X.next is list loaded.
+    STX   LIST_$6B_OFFSCREEN? ; Remove node to this list head.
     LEAX  Y ; X from prev obj.
 PROCESS_NEXT: ; 0x001A2C, $EA2C
-    LEAY  X ; Y = XOBJ
+    LEAY  X ; Y is prev obj.
     LDX   X ; X to X.next
-    BNE   PROCESS_LOOP
+    BNE   PROCESS_TO_OFFSCREEN_LOOP
     RTS
 INIT_PROCESS_OBJ_INTO_ONSCREEN_LIST: ; 0x001A33, $EA33
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load val
+    LDD   R_A020_SCREEN_POS_HORIZ? ; Load val
     SUBD  #$0C80 ; Subtract
     STD   A073_SCRATCH_LOOP_WORD? ; Store to scratchpad
-    LDX   #$A06B ; List ptr
+    LDX   #$A06B ; List ptr, offscreen.
     BRA   PROCESS_OBJ_X
-PROCESS_OBJ_INTO_ONSCREEN_LIST: ; 0x001A3F, $EA3F
-    LDD   16,X ; D from OBJ[16]
+PROCESS_OBJ_INTO_ONSCREEN_LIST+MOVE_LOOP: ; 0x001A3F, $EA3F
+    LDD   16,X ; D from OBJ[16], VSPEED?
     ASLB ; D << 3
     ROLA
     ASLB
     ROLA
     ASLB
     ROLA
-    ADDD  12,X ; Add with OBJ[12]
+    ADDD  12,X ; Add with OBJ[12], VPOS?
     CMPA  #$2A ; If A _ #$2A
     BCC   DONT_WRAP_TO_F0 ; >=, goto.
     LDA   #$F0 ; If < val, load this.
 DONT_WRAP_TO_F0: ; 0x001A50, $EA50
     CMPA  #$F0 ; If A _ #$F0
     BLS   DONT_WRAP_TO_2A
-    LDA   #$2A
+    LDA   #$2A ; Wrap to top of screen.
 DONT_WRAP_TO_2A: ; 0x001A56, $EA56
-    STD   12,X ; Store to OBJ[12]
-    LDD   14,X ; Load OBJ[14]
+    STD   12,X ; Store to OBJ[12], VPOS?
+    LDD   14,X ; Load OBJ[14], h movement?
     ASLB ; D << 3
     ROLA
     ASLB
@@ -3976,20 +3988,20 @@ DONT_WRAP_TO_2A: ; 0x001A56, $EA56
     ASLB
     ROLA
     ADDD  10,X ; Add to OBJ[10]
-    STD   10,X ; Store to OBJ[10]
-    SUBD  A073_SCRATCH_LOOP_WORD? ; Subtrack scratchpad.
+    STD   10,X ; Store to OBJ[10], HPOS?
+    SUBD  A073_SCRATCH_LOOP_WORD? ; Subtrack calc'd.
     CMPD  #$3E80 ; Compare to val
-    BCC   PROCESS_OBJ_X ; >=, skip.
+    BCC   PROCESS_OBJ_X ; >=, skip adding to onscreen list.
     LDU   X ; Load X.next
     STU   Y ; Store to Y.next, removing from whatever list it is in.
-    LDU   LIST_$65_ON_SCREEN?IN_WORLD? ; Load list
+    LDU   LIST_$65_ON_SCREEN ; Load list
     STU   X ; Store LIST.next to X.next
-    STX   LIST_$65_ON_SCREEN?IN_WORLD? ; Store X to LIST.next
+    STX   LIST_$65_ON_SCREEN ; Make X new head.
     LEAX  Y ; X from previous.
 PROCESS_OBJ_X: ; 0x001A78, $EA78
     LEAY  X ; Previous in Y
     LDX   X ; X to X.next
-    BNE   PROCESS_OBJ_INTO_ONSCREEN_LIST ; Process if not NULL
+    BNE   PROCESS_OBJ_INTO_ONSCREEN_LIST+MOVE_LOOP ; Process if not NULL
     RTS ; Leave
     NEGA
 MAKE_BAITER_RTN?: ; 0x001A80, $EA80
@@ -3998,17 +4010,17 @@ MAKE_BAITER_RTN?: ; 0x001A80, $EA80
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X ; Not exactly sure good name for rtn.
     LEAU  X ; X to U
     JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Fill out obj info.
-    .db $F9
+    .db $F9 ; BMP PTR
     .db $A3
-    .db $EB
+    .db $EB ; DESTROYED HANDLER?
     .db $2B
-    .db $33
+    .db $33 ; IDK
     .db $33
     STX   7,U ; X to UOBJ[7]
     STU   6,X ; U to XOBJ[6]
     LDD   A0DF_RAND_BYTE ; Get random
     ANDA  #$1F ; Bottom bits.
-    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Add with
+    ADDD  R_A020_SCREEN_POS_HORIZ? ; Add with
     STD   10,X ; Store to OBJ[10]
     LSRB ; B >> 1
     ADDB  #$2A ; Add with
@@ -4056,7 +4068,7 @@ MOVE_IDK_ALT?: ; 0x001AF5, $EAF5
     LDD   #$4001 ; Move
     STD   A073_SCRATCH_LOOP_WORD?
     LDD   10,X ; D from XOBJ[10]
-    SUBD  $A0CC ; Sub with
+    SUBD  R_A0CC_SCREEN_POS_RELATED? ; Sub with
     BMI   DONT_NEGATE_SCRATCH[0] ; If now negative, goto.
     NEG   A073_SCRATCH_LOOP_WORD? ; Invert scratch.
 DONT_NEGATE_SCRATCH[0]: ; 0x001B02, $EB02
@@ -4065,7 +4077,7 @@ DONT_NEGATE_SCRATCH[0]: ; 0x001B02, $EB02
     BLS   DONT_USE_SCRATCH[0]_TO_D? ; <=, goto.
     LDB   A073_SCRATCH_LOOP_WORD? ; B random
     SEX ; Extend sign
-    ADDD  $A0C7 ; Add with addr
+    ADDD  R_A0C7 ; Add with addr
     STD   14,X ; To OBJ[14]
 DONT_USE_SCRATCH[0]_TO_D?: ; 0x001B12, $EB12
     LDA   12,X ; A from OBJ[12]
@@ -4096,11 +4108,11 @@ L_001B36: ; 0x001B36, $EB36
     STA   A073_SCRATCH_LOOP_WORD? ; A to addr.
 LOOP_MAKE_OBJ: ; 0x001B38, $EB38
     JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Make obj
-    .db $F8
+    .db $F8 ; BMP
     .db $F7
-    .db $EB
+    .db $EB ; HIT HANDLER
     .db $74
-    .db $CC
+    .db $CC ; IDK
     .db $CC
     JSR   RANDOM_VALUE_FWD+IN_A ; Get rand
     LDD   A0E0_RAND_WORD ; D random
@@ -4171,11 +4183,11 @@ L_001BB0: ; 0x001BB0, $EBB0
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X ; Setup
     LEAU  X ; Save X in U
     JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR
-    .db $F9
+    .db $F9 ; BMP
     .db $7B
-    .db $EB
+    .db $EB ; HIT HANDLER
     .db $E9
-    .db $24
+    .db $24 ; UNK
     .db $24
     LDD   10,Y ; OBJ[10] move. Not sure what Y is.
     STD   10,X
@@ -4192,7 +4204,7 @@ L_001BB0: ; 0x001BB0, $EBB0
     LDA   R_A10D ; Load val
     JSR   GET_NEW_A_THAT_IS_<=_CURRENT
     STA   11,U ; Store to OBJ[11]
-    STX   LIST_$65_ON_SCREEN?IN_WORLD? ; Add to this list.
+    STX   LIST_$65_ON_SCREEN ; Add to this list.
     DEC   A073_SCRATCH_LOOP_WORD? ; Dec loop counter.
     BNE   LOOP_MAKE_THIS_OBJ
 RTS: ; 0x001BE7, $EBE7
@@ -4200,7 +4212,7 @@ RTS: ; 0x001BE7, $EBE7
     DEC   R_A116_ENEMY_IDK_COUNT ; Dec count
     JSR   REMOVE_X_FROM_LISTS_AND+HANDLE_STUFF ; Remove from list.
     PSHS  X ; Save obj
-    JSR   XOBJ[6]_BACK_TO_AVAILABLE_LIST ; Pull from this list too.
+    JSR   XOBJ[6]_REMOVED_FROM_CALLBACKS ; Pull from this list too.
     PULS  X ; Restory obj.
     LDD   10,X ; D from OBJ[10]
     SUBD  #$0040 ; Subtract val
@@ -4212,13 +4224,13 @@ RTS: ; 0x001BE7, $EBE7
     STU   2,X
     JSR   JMP_TO_OBJX_PARTICLES_MOVE? ; Do
     LDD   #$0115 ; Score add +150. Lander, swarmer.
-    JSR   SCORE_ADD_AB ; Add to score.
+    JSR   SCORE_ADD_AB??_IDK ; Add to score.
     LDD   #$D516 ; D
     JMP   SOUND_SET_SOUND_PRIORITIED ; Do.
 L_001C17: ; 0x001C17, $EC17
     LDX   7,U ; X from UOBJ[7]
     LDB   R_A10C ; B from addr
-    LDY   $A0CC ; Y from addr
+    LDY   R_A0CC_SCREEN_POS_RELATED? ; Y from addr
     CMPY  10,X ; CMPY XOBJ[10]
     BCC   SKIP_INVERT_1 ; >=, goto.
     NEGB ; Invert B otherwise.
@@ -4261,7 +4273,7 @@ CAP_NEGATIVE: ; 0x001C4B, $EC4B
     SEX ; Extend to D
     ADDD  16,X ; D += XOBJ[16]
     STD   16,X ; D to XOBJ[16]
-    LDD   $A0CC ; D from
+    LDD   R_A0CC_SCREEN_POS_RELATED? ; D from
     SUBD  10,X ; D -= XOBJ[10]
     ADDD  #$12C0 ; += val
     CMPD  #$2580 ; CMP to val
@@ -4275,7 +4287,7 @@ SKIP_SUB: ; 0x001C7E, $EC7E
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK
 SUB_IDK: ; 0x001C86, $EC86
     PSHS  X ; Save X
-    LDD   $A0CC ; D from
+    LDD   R_A0CC_SCREEN_POS_RELATED? ; D from
     SUBD  10,X ; D -= XOBJ[10]
     EORA  14,X ; Invert on XOBJ[14]
     BMI   SKIP_XOBJ[16]_UPDATE ; Result negative, goto.
@@ -4326,12 +4338,12 @@ CALLBACK_HUMANOID_STUFF?: ; 0x001CC9, $ECC9
 DONT_RESET_POOL_PTR: ; 0x001CD5, $ECD5
     STX   7,U ; X from UOBJ[7]
     LDX   X ; X to X.next
-    BEQ   SETUP_ECC9_CALLBACK ; If 0, goto.
+    BEQ   SETUP_HUMANOIDS_CALLBACK ; If 0, goto.
     LDD   4,X ; D from XOBJ[4]
-    BEQ   SETUP_ECC9_CALLBACK ; If 0, goto.
+    BEQ   SETUP_HUMANOIDS_CALLBACK ; If 0, goto.
     LDD   8,X ; D from XOBJ[8]
     CMPD  #$ED70 ; If D _ val
-    BNE   SETUP_ECC9_CALLBACK ; != val, goto.
+    BNE   SETUP_HUMANOIDS_CALLBACK ; != val, goto.
     LDD   2,X ; D from XOBJ[2]
     CMPD  #$F90B ; If D _ val
     BHI   L_001D1E ; >, goto.
@@ -4394,7 +4406,7 @@ L_001D4A: ; 0x001D4A, $ED4A
     SEX ; Extend B to D
     ADDD  10,X ; D += POS
     STD   10,X ; Store new pos.
-SETUP_ECC9_CALLBACK: ; 0x001D51, $ED51
+SETUP_HUMANOIDS_CALLBACK: ; 0x001D51, $ED51
     LDA   #$02
     LDX   #$ECC9
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK
@@ -4451,11 +4463,12 @@ L_001D77: ; 0x001D77, $ED77
 CHANGE_U[2]_AND_RTS: ; 0x001DB7, $EDB7
     LDD   #$F24C ; D =
     STD   2,U ; D to UOBJ[2], changing handler?
+CALLBACK_HIT_UNUSED?: ; 0x001DBC, $EDBC
     CLRA ; Idk why
     PULS  A,B,PC ; RTS
 L_001DBF: ; 0x001DBF, $EDBF
     BSR   L_001D77
-    JMP   XOBJ[6]_BACK_TO_AVAILABLE_LIST
+    JMP   XOBJ[6]_REMOVED_FROM_CALLBACKS
 L_001DC4: ; 0x001DC4, $EDC4
     LEAY  X ; Y = X
     PSHS  U,X,A ; Save
@@ -4493,7 +4506,7 @@ LOOP_#$40_TIMES: ; 0x001E00, $EE00
     DECA ; Loop--
     BNE   LOOP_#$40_TIMES ; != 0, loop. B125->B1A4
 LOOP_CREATE_EXPLOSIONS?: ; 0x001E05, $EE05
-    LDX   LIST_23B_UNUSED_OBJS? ; Load list
+    LDX   LIST_23B_LARGE_POOL ; Load list
     LDD   #$F9F1 ; Ptr to BMP
     STD   2,X ; D to XOBJ[2]
     LDB   #$02 ; = val
@@ -4501,7 +4514,7 @@ LOOP_CREATE_EXPLOSIONS?: ; 0x001E05, $EE05
 LOOP_ON_SCRATCH: ; 0x001E10, $EE10
     JSR   RANDOM_VALUE_FWD+IN_A ; Get rand
     ANDA  #$3F ; Keep 0011.1111
-    ADDD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; D += addr
+    ADDD  R_A020_SCREEN_POS_HORIZ? ; D += addr
     STD   10,X ; To XOBJ[10]
     JSR   A_FROM_WORLD_HEIGHT_FROM_XOBJ[10] ; Get A
     STA   12,X ; A to XOBJ[12]
@@ -4520,7 +4533,7 @@ LOOP_ON_SCRATCH: ; 0x001E10, $EE10
     LDA   #$02
 SEED+CALLBACK: ; 0x001E3D, $EE3D
     LDB   #$08 ; Seed idk
-    STB   R_A05E ; Idk reg.
+    STB   R_A05E_SLOWDOWN_FLAG? ; Idk reg.
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK ; Do
 CALLBACK_CONTINUE_EXPLOSION?: ; 0x001E44, $EE44
     CLR   COLOR_PALETTE_RAM_COPY ; Clear palette val.
@@ -4540,30 +4553,30 @@ CALLBACK_RAND_TIMING: ; 0x001E54, $EE54
     LDD   #$D4C7 ; D ptr to
     JSR   SOUND_SET_SOUND_PRIORITIED ; Final explosion sound?
     JMP   CALLBACK_TASK_REMOVE ; Done.
-BOMBER_BLOWN_UP?: ; 0x001E65, $EE65
+BOMBER_THING?: ; 0x001E65, $EE65
     JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Do
-    .db $F9
+    .db $F9 ; BMP
     .db $DD
-    .db $ED
+    .db $ED ; HIT HANDLER
     .db $BC
-    .db $00
+    .db $00 ; UNK
     .db $00
     LDD   #$0125 ; + 250
     BRA   SCORE_ADD+MORE ; Goto
 CALLBACK_HUMANOID_DOWN?: ; 0x001E73, $EE73
     JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR
-    .db $F9
+    .db $F9 ; BMP
     .db $E7
-    .db $ED
+    .db $ED ; HIT HANDLER, SPECIAL UNUSED VALUE?
     .db $BC
-    .db $00
+    .db $00 ; UNK
     .db $00
     LDD   #$0150 ; +500, putting humanoid down?
 SCORE_ADD+MORE: ; 0x001E7F, $EE7F
-    JSR   SCORE_ADD_AB ; Add D to score.
+    JSR   SCORE_ADD_AB??_IDK ; Add D to score.
 CALLBACK_UNK: ; 0x001E82, $EE82
     LDY   7,U ; Y from UOBJ[7]
-    LDD   $A0C7 ; D from
+    LDD   R_A0C7 ; D from
     STD   14,X ; D to XOBJ[14]
     LDD   #$0000 ; Clear D
     STD   16,X ; Clear XOBJ[16]
@@ -4579,7 +4592,7 @@ YOBJ[12]_IS_NEGATIVE_SUBS: ; 0x001EA1, $EEA1
     SUBD  #$2000
 SKIP_SUB_WAS_POSITIVE: ; 0x001EA4, $EEA4
     STD   12,X ; D to XOBJ[12]
-    STX   LIST_$65_ON_SCREEN?IN_WORLD? ; X to list?
+    STX   LIST_$65_ON_SCREEN ; X to list?
     STX   7,U ; X to UOBJ[7]
     LDA   #$32 ; Callback
     LDX   #$EEB2 ; Callback addr
@@ -4612,7 +4625,7 @@ SPAWN_SOMETHING_BULLET?: ; 0x001EBA, $EEBA
     LDB   A0DF_RAND_BYTE ; B rand
     CMPB  #$78 ; If B _ #$78
     BLS   B_IS_<=_#$78 ; <=, goto.
-    LDD   $A0C7 ; D from
+    LDD   R_A0C7 ; D from
     ASLB ; D << 2
     ROLA
     ASLB
@@ -4657,12 +4670,12 @@ LOOP_MAKE_ENEMY_IDK: ; 0x001F19, $EF19
     JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Data to it.
     .db $F8 ; BMP
     .db $CE
-    .db $EF ; HANDLER_IDK
+    .db $EF ; HIT HANDLER
     .db $6D
-    .db $CC ; Hit player handler?
+    .db $CC ; UNK
     .db $33
     JSR   RANDOM_VALUE_FWD+IN_A ; Get random
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load
+    LDD   R_A020_SCREEN_POS_HORIZ? ; Load
     SUBD  #$2580 ; Subtract
     STD   $A075 ; Store
     LDD   A0E0_RAND_WORD ; Loasd
@@ -4694,7 +4707,7 @@ DONT_ADD_8000: ; 0x001F43, $EF43
 HANDLER_IDK: ; 0x001F6D, $EF6D
     DEC   R_A115_ENEMY_IDK_COUNT
     JSR   REMOVE_XOBJ_FROM_ACTIVE?_AND_SCORE+SCORE/SND_FROM_4_BYTES_PAST
-    .db $01 ; Points
+    .db $01 ; Points 150?
     .db $15
     .db $D4 ; Sound
     .db $F8
@@ -4703,7 +4716,7 @@ NOT_RAN_IF_NO_HUMANOIDS?: ; 0x001F78, $EF78
     PSHS  X ; Save
     LDA   A0FA_HUMANOID_COUNT? ; Get count
     BEQ   RTS ; If 0, RTS.
-    LDX   $A09B ; X from val
+    LDX   R_A09B_PTR_TO_A11A ; X from val
 LOOP_X+=2: ; 0x001F80, $EF80
     LEAX  2,X ; +=2
     CMPX  #$A15A ; Compare to
@@ -4712,11 +4725,11 @@ LOOP_X+=2: ; 0x001F80, $EF80
 DONT_RESET: ; 0x001F8A, $EF8A
     LDD   X ; Load from
     BNE   A09B_UPDATED,WRITE_OBJ_[9]_[11] ; !=0, goto
-    CMPX  $A09B ; X _ ADDR
+    CMPX  R_A09B_PTR_TO_A11A ; X _ ADDR
     BNE   LOOP_X+=2 ; !=, goto.
     PULS  X,PC ; RTS
 A09B_UPDATED,WRITE_OBJ_[9]_[11]: ; 0x001F94, $EF94
-    STX   $A09B ; X to addr
+    STX   R_A09B_PTR_TO_A11A ; X to addr
     STD   9,U ; D to UOBJ[9]
     STX   11,U ; X to UOBJ[11]
 RTS: ; 0x001F9A, $EF9A
@@ -4734,12 +4747,12 @@ HUMANOIDS_NOT_ZERO: ; 0x001FA7, $EFA7
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X ; Setup
     LEAU  X ; Obj X to U
     JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Fill out info past.
-    .db $F9 ; OBJ
+    .db $F9 ; BMP
     .db $85
-    .db $F2 ; Destroyed handler?
+    .db $F2 ; HIT HANDLER
     .db $0B
-    .db $44 ; IDK
-    .db $33 ; IDK
+    .db $44 ; UNK
+    .db $33
     JSR   RANDOM_VALUE_FWD+IN_A ; Random value
     LDD   A0E0_RAND_WORD ; Random word
     STD   10,X ; to OBJ[10]
@@ -4946,14 +4959,14 @@ CALLBACK_UNK_LANDER_TO_HUMANOID?: ; 0x00213E, $F13E
 CALLBACK_ENTRY_LOC: ; 0x00215E, $F15E
     LDX   7,U ; X from YOBJ[U]
     LDB   R_A10A ; B from addr
-    LDY   $A0CC ; Y from addr
+    LDY   R_A0CC_SCREEN_POS_RELATED? ; Y from addr
     CMPY  10,X ; CMPY to XOBJ[10]
     BGE   DONT_INVERT_B ; >=, goto.
     NEGB
 DONT_INVERT_B: ; 0x00216C, $F16C
     SEX ; Extend to D
     STD   14,X ; To XOBJ[14]
-    LDD   $A0CC ; D from addr
+    LDD   R_A0CC_SCREEN_POS_RELATED? ; D from addr
     SUBD  10,X ; D -= XOBJ[10]
     ADDD  #$017C ; += val
     CMPD  #$0700 ; CMP to val
@@ -5069,7 +5082,7 @@ CALLBACK_IDK: ; 0x00224C, $F24C
     LDA   PLAYER.VPOS ; Gedt VPOS
     ADDA  #$0A ; += VAL
     STA   12,X ; To XOBJ[12]
-    LDD   $A0CC ; D from
+    LDD   R_A0CC_SCREEN_POS_RELATED? ; D from
     ADDD  #$0080 ; += val
     STD   10,X ; To XOBJ[10]
     JSR   A_FROM_WORLD_HEIGHT_FROM_XOBJ[10] ; Get A
@@ -5125,7 +5138,7 @@ MORE_NEW_OBJS: ; 0x0022C1, $F2C1
     .db $29
     .db $F3 ; Destroy handler.
     .db $BC
-    .db $88 ; IDK
+    .db $88 ; UNK
     .db $88
     LDB   A073_SCRATCH_LOOP_WORD?+1 ; B from scratch
     SEX ; Extend to D
@@ -5137,14 +5150,14 @@ MORE_NEW_OBJS: ; 0x0022C1, $F2C1
     LSRA ; D >> 1
     RORB
     ADDA  A073_SCRATCH_LOOP_WORD? ; A +=
-    ADDD  $A0CC ; D += addr
+    ADDD  R_A0CC_SCREEN_POS_RELATED? ; D += addr
     ADDA  #$80 ; A += #$80?
     STD   10,X ; D to XOBJ[10]
     LDA   #$50 ; Val
     STA   12,X ; to XOBJ[12]
     STA   16,U ; And XOBJ[16]
     STU   6,X ; U to XOBJ[6]
-    STX   LIST_$65_ON_SCREEN?IN_WORLD? ; X now list head?
+    STX   LIST_$65_ON_SCREEN ; X now list head?
     LDA   A073_SCRATCH_LOOP_WORD? ; A from scratch
     ASLA ; A << 1, *2 is reason here?
     ADDA  #$05 ; += 5
@@ -5256,7 +5269,7 @@ SETUP_CALLBACK: ; 0x0023B4, $F3B4
     LDX   #$F2F7
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK
     JSR   REMOVE_XOBJ_FROM_LISTS_A065|A06B_AND_SCORE+SOUND_FROM_4B_PAST_JSR ; Score+Sound
-    .db $01 ; +250
+    .db $01 ; Points 250?
     .db $25
     .db $D5 ; Sound
     .db $02
@@ -5272,7 +5285,7 @@ FIND_X=*Y: ; 0x0023CA, $F3CA
     DEC   15,U ; Dec UOBJ[15]
     BNE   RTS ; Not 0, RTS.
     LEAX  U ; X = U
-    JSR   XOBJ_BACK_TO_AVAILABLE_LIST ; Remove/to other.
+    JSR   XOBJ_REMOVED_FROM_CALLBACKS ; Remove/to other.
 RTS: ; 0x0023DB, $F3DB
     RTS
 MAKE_BULLET_IF_SLOTS_AVAILABLE?: ; 0x0023DC, $F3DC
@@ -5281,11 +5294,11 @@ MAKE_BULLET_IF_SLOTS_AVAILABLE?: ; 0x0023DC, $F3DC
 L_0023E0: ; 0x0023E0, $F3E0
     BCC   RTS ; Don't spawn bullet?
     JSR   SPAWNS_SOMETHING_IF_UNDER_20_WITH_6_PAST_JSR
-    .db $E4 ; Handler
+    .db $E4 ; Handler code? Bullets no BMP?
     .db $98
-    .db $F9 ; Bitmap
+    .db $F9 ; BMP
     .db $5B
-    .db $E5 ; Another callback?
+    .db $E5 ; CALLBACK HIT PLAYER?
     .db $1E
     BEQ   RTS ; If nothing spawned, RTS.
     LDB   A0E0_RAND_WORD ; Otherwise, do this. Random speed?
@@ -5300,20 +5313,21 @@ RTS: ; 0x0023FA, $F3FA
     RTS
 REMOVE_X_FROM_LISTS_AND+HANDLE_STUFF: ; 0x0023FB, $F3FB
     JSR   REMOVE_X_FROM_LIST_A065|A06B
-HANDLER_IN_BANK_2/XOBJ[8]: ; 0x0023FE, $F3FE
+CLEAR_OBJ_GFX_OFF_SCREEN: ; 0x0023FE, $F3FE
     PSHS  U,Y,X,B,A ; Save
-    JSR   BANKSWITCH_TO_2 ; Switch to bank 2
-    LDD   4,X ; D from OBJ[4]
-    LDY   2,X ; Y from OBJ[2]
-    JSR   [8,Y] ; JSR to ADDR at Y+8
+    JSR   BANKSWITCH_TO_2 ; Switch to bank 2. Ensure gfx info all available.
+    LDD   4,X ; D from OBJ[4], POS
+    LDY   2,X ; Y from OBJ[2], GFX_DATA
+    JSR   [8,Y] ; JSR to ADDR at GFX_DATA[8], Clear off screen subrtn.
     PULS  A,B,X,Y,U,PC ; RTS+Restore
+UNUSED_CALLBACK?: ; 0x00240D, $F40D
     PSHS  X
-    JSR   XOBJ[6]_BACK_TO_AVAILABLE_LIST
+    JSR   XOBJ[6]_REMOVED_FROM_CALLBACKS
     PULS  X
     BRA   ADD_TO_SCORE+SOUND_FROM_4_BYTES_PAST
 REMOVE_XOBJ_FROM_ACTIVE?_AND_SCORE+SCORE/SND_FROM_4_BYTES_PAST: ; 0x002416, $F416
     PSHS  X ; Save obj ptr
-    JSR   XOBJ[6]_BACK_TO_AVAILABLE_LIST ; Remove it
+    JSR   XOBJ[6]_REMOVED_FROM_CALLBACKS ; Remove it
     PULS  X ; Restore obj ptr
 REMOVE_XOBJ_FROM_LISTS_A065|A06B_AND_SCORE+SOUND_FROM_4B_PAST_JSR: ; 0x00241D, $F41D
     JSR   REMOVE_X_FROM_LIST_A065|A06B ; IDK what this list is.
@@ -5321,16 +5335,16 @@ ADD_TO_SCORE+SOUND_FROM_4_BYTES_PAST: ; 0x002420, $F420
     PSHS  U,B,A
     LDU   4,S ; U from S[4], aka addr that called us.
     PULU  A,B ; Pull add from first 2 bytes past JSR.
-    JSR   SCORE_ADD_AB ; Add val pulled. Generic rtn this is?
-    BSR   L_002434 ; Particle effects setup?
+    JSR   SCORE_ADD_AB??_IDK ; Add val pulled. Generic rtn this is?
+    BSR   L_002434 ; Particle effect.
     PULU  A,B ; Pull sound from 2nd bytes past JSR.
     STU   4,S ; Code position to RTS to.
     JSR   SOUND_SET_SOUND_PRIORITIED ; Set sound data
     PULS  A,B,U,PC ; RTS
 L_002434: ; 0x002434, $F434
     PSHS  U,Y,X,B,A ; Save
-    BSR   HANDLER_IN_BANK_2/XOBJ[8] ; Idk why
-    JSR   JMP_TO_OBJX_PARTICLES_MOVE?
+    BSR   CLEAR_OBJ_GFX_OFF_SCREEN ; Take off screen
+    JSR   JMP_TO_OBJX_PARTICLES_MOVE? ; Make particles?
     PULS  A,B,X,Y,U,PC
 CALLBACK_PALETTE_CHANGE: ; 0x00243D, $F43D
     LDX   #$F45B ; Palette ptr
@@ -5850,8 +5864,8 @@ WRONG_CHECKSUM_NO_IRQ: ; 0x0027CE, $F7CE
     BSR   WRITE_B_TO_ROM_DATA_PIA_REGS+BANK3 ; Turn on.
     JSR   JMP_BOOTUP_ROM_FAILURE
 RUG_PASS_SRAM_CHECK: ; 0x0027D5, $F7D5
-    JSR   JMP_SRAM_CHECK_UNK ; SRAM check to see if menu?
-    JMP   DEFENDER_GAME_TITLE? ; Goto game if SRAM check didn't take over.
+    JSR   JMP_SRAM_CHECK_UNK ; SRAM check to see if menu? Can take over the flow and not come back.
+    JMP   DEFENDER_GAME_INIT,ATTRACT ; Goto game if we got back.
 STORE_B[X]_BANK0: ; 0x0027DB, $F7DB
     PSHS  A,CC ; Save A,CC
     LDA   CURRENT_BANK ; Load bank
@@ -5875,7 +5889,7 @@ LOAD_B[X]_BANK0: ; 0x0027F1, $F7F1
 SETUP_TEXT+UNK: ; 0x002800, $F800
     PSHS  B,A ; Save B,A
     CLR   SENTENCE_PTR_WORD_ON ; Clear
-    CLR   UNK_$49_SYS_MENU_FLAG?
+    CLR   UNK_$49_SYS_MENU_FLAG? ; Clear, not in menu?
     LDA   #$03
     STA   CURRENT_BANK ; Bank info without switching?
     STA   UNK_$48 ; Set
@@ -6039,15 +6053,15 @@ INIT_DATA_FOR_$A026: ; 0x0028BE, $F8BE
     .db $00
     .db $00
 BMP_IDK: ; 0x0028CE, $F8CE
-    .db $05
-    .db $08
-    .db $F9
+    .db $05 ; Bitmaps start here. WIDTH_BYTES, 2x for pixels.
+    .db $08 ; HEIGHT
+    .db $F9 ; PTR to BMP_EVEN
     .db $FB
-    .db $FA
+    .db $FA ; PTR to BMP_ODD
     .db $23
-    .db $D1
+    .db $D1 ; PTR to PUT_ON_SCREEN RTN
     .db $93
-    .db $D1
+    .db $D1 ; PTR to CLEAR_FROM_SCREEN RTN
     .db $1F
 BMP_IDK: ; 0x0028D8, $F8D8
     .db $04
@@ -6370,7 +6384,7 @@ BMP_IDK: ; 0x0029F1, $F9F1
     .db $22
     .db $F5
     .db $7B
-GFX_DATA_START?: ; 0x0029FB, $F9FB
+GFX_BMP_SET_START: ; 0x0029FB, $F9FB
     .db $00
     .db $00
     .db $03
@@ -6996,9 +7010,9 @@ SETUP_PARTICLES_SPAWN_IN: ; 0x002C69, $FC69
     PSHS  B,A ; Save to stack.
     LDD   DATA_W_#$F8EC ; Get data from ROM
     STD   2,X ; Store to BMP
-    STX   LIST_$65_ON_SCREEN?IN_WORLD? ; Store obj to list.
+    STX   LIST_$65_ON_SCREEN ; Store obj to list.
     LDD   10,X ; Load OBJ[10]
-    SUBD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Sub with change.
+    SUBD  R_A020_SCREEN_POS_HORIZ? ; Sub with change.
     CMPD  #$2600 ; Compare to idk val
     BHI   ALL_PARTICLES_TAKEN_UP ; D >= val, goto.
     LDY   R_A0E2_PARTICLE_SPAWN_PTR ; Load Y from
@@ -7043,7 +7057,7 @@ RTS: ; 0x002CCA, $FCCA
 OBJX_PARTICLES_MOVE?: ; 0x002CCC, $FCCC
     PSHS  U,Y,B,A ; Save
     LDD   10,X ; Load OBJ[10]
-    SUBD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; Sub
+    SUBD  R_A020_SCREEN_POS_HORIZ? ; Sub
     CMPA  #$26 ; CMP
     BHI   RTS+RESTORE ; >, goto.
     STD   R_A0E9_PARTICLE_FOCUS/MULTIUSE? ; D to
@@ -7118,7 +7132,7 @@ CHECK_EACH_PARTICLE: ; 0x002D43, $FD43
     STD   Y ; Clear PARTICLE[0], really destroyed.
     BRA   NEXT_PARTICLE_SLOT
 DONT_DESTROY_PARTICLE: ; 0x002D5E, $FD5E
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; D from
+    LDD   R_A020_SCREEN_POS_HORIZ? ; D from
     ANDB  #$C0 ; Get bits 1100.0000
     PSHS  B,A ; Save val
     LDD   R_A022_SCR_CHANGE_UNK ; D from
@@ -7142,7 +7156,7 @@ CHECK_EACH_PARTICLE[0]_NEGATIVE: ; 0x002D7E, $FD7E
     BPL   PARTICLE[0]_NEGATIVE ; Now positive, goto.
     LDX   10,Y ; PARTICLE[10] is the object attached to this particulation.
     LDD   10,X ; D from XOBJ[10], OBJ pos?
-    SUBD  R_A020_SCREEN_POS_HORIZ?CHANGE? ; D -= val
+    SUBD  R_A020_SCREEN_POS_HORIZ? ; D -= val
     ADDA  #$0C ; A += #$0C
     BITA  #$C0 ; Test 1100.0000
     BEQ   A:7-A:6_NOT_SET ; If not set, goto.
@@ -7413,7 +7427,8 @@ PARTICLE_PTR_DATA: ; 0x002F48, $FF48
     .db $00
     .db $00
     .db $00
-    .db $00
+POINTER_POINTS_HERE_ZEROS: ; 0x002F70, $FF70
+    .db $00 ; to 0x2F9C, 44 bytes.
     .db $00
     .db $00
     .db $00
@@ -7546,18 +7561,18 @@ DATA_W_#$2CAC: ; 0x002FDD, $FFDD
 
 JMP_ATTRACT_START?: ; 0x003000, $C000
     JMP   ATTRACT_START? ; Main screen loop?
-    JMP   L_003CAD
+    JMP   RTN_CLEAR_UNK
 ATTRACT_START?: ; 0x003006, $C006
     JSR   DESCHEDULE_CALLBACKS_NOT_TYPE_2 ; Sort
     LDA   #$FF ; Player state.
     STA   A0BA_PLAYER_GAME_STATE ; Game state.
-    JSR   INIT_STARS ; Init stars
+    JSR   INIT_ALL_STARS ; Init stars
     LDA   VAL_FROM_SRAM_C495-C496 ; Get sram val
     STA   R_A183_VAL_FROM_SRAM ; Store
     CLRA
     STA   R_A184 ; Clear
     STA   R_A178_LEAVE_INITIAL_FLAG? ; Clear
-    LDA   R_A0B7_UNK_ATTRACT_CHECKS ; A from addr.
+    LDA   R_A0B7_UNK_ATTRACT_CHECKS_AND_GAMESTART ; A from addr.
     LBEQ  FIRST_ATTRACT_INTRO_WILLIAMS? ; If 0, goto.
     LDX   #$C8F4 ; Show credits handler.
     LDA   #$00
@@ -7832,7 +7847,7 @@ INITIAL_MOVEMENT_SAME: ; 0x003252, $C252
     LDA   #$03
     STA   R_A17F
     BRA   SETUP_INITIAL_CHANGE_CALLBACK ; Goto
-    LDU   $A0FF
+    LDU   R_A0FF_UNK
 SHOW_HIGH_SCORE_TABLES?: ; 0x003263, $C263
     CLR   POOL_A162_TO_A182/DRAW_CMD_TMP? ; Clear drawn last.
     JSR   DESCHEDULE_CALLBACKS_NOT_TYPE_2 ; Sort objs.
@@ -7979,7 +7994,7 @@ ATTRACT_GAME_DEMO_MAIN: ; 0x003351, $C351
     STD   12,X ; To OBJ[12]
     LDD   #$F901 ; PTR to BMP?
     STD   2,X ; OBJ[2]
-    STX   LIST_$65_ON_SCREEN?IN_WORLD? ; Object is root onscreen.
+    STX   LIST_$65_ON_SCREEN ; Object is root onscreen.
     LDD   #$6666 ; Idk val
     STD   18,X ; OBJ[18]
     STX   R_A189_OBJ_PTR_HUMANOID? ; Store obj pointer here.
@@ -7993,7 +8008,7 @@ ATTRACT_GAME_DEMO_MAIN: ; 0x003351, $C351
     STD   12,X ; OBJ[12]
     LDD   #$F9C1 ; Bitmap IDK
     STD   2,X ; BMP ptr?
-    STX   LIST_$65_ON_SCREEN?IN_WORLD? ; Add to screen list.
+    STX   LIST_$65_ON_SCREEN ; Add to screen list.
     LDD   #$0000
     STD   18,X ; Clear OBJ[18]
     STX   R_A18B_OBJ_PTR_SHIP? ; Store OBJ to
@@ -8036,7 +8051,7 @@ ATTRACT_GAME_DEMO_INIT: ; 0x00343C, $C43C
     JSR   CHAIN_LIST_$67,NULL_$65_$6B_$6D ; Setup enemies?
     JSR   CLEAR_ALL_SCREEN ; Clear screen.
     LDD   #$0000
-    STD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Clear
+    STD   R_A020_SCREEN_POS_HORIZ? ; Clear
     STD   R_A022_SCR_CHANGE_UNK ; Clear
     JSR   JMP_GOTO_PAST_JSR ; Draw land.
     .db $F4
@@ -8057,7 +8072,7 @@ LOOP_ADD_256: ; 0x003467, $C467
     LEAU  256,U ; Y += 256
     CMPU  7,X ; If U _ XOBJ[7]
     BLS   LOOP_ADD_256 ; <=, goto.
-    JMP   XOBJ_BACK_TO_AVAILABLE_LIST ; Give obj back. RTS's back to callee.
+    JMP   XOBJ_REMOVED_FROM_CALLBACKS ; Give obj back. RTS's back to callee.
 CALLBACK_ATTRACT_IDK: ; 0x003475, $C475
     BSR   ATTRACT_REMOVE_LASER
     LDX   R_A18D_OBJ_PTR_ENEMY? ; Obj 3
@@ -8094,7 +8109,7 @@ L_0034B5: ; 0x0034B5, $C4B5
     STD   12,X
     LDD   #$F9E7 ; BMP
     STD   2,X
-    STX   LIST_$65_ON_SCREEN?IN_WORLD? ; Replace.
+    STX   LIST_$65_ON_SCREEN ; Replace.
     LDD   #$0000
     STD   18,X ; Clear idk
     STX   R_A190_OBJ_PTR_INIT_LANDER/SCORE? ; Obj tmp
@@ -8375,7 +8390,7 @@ HAS_BEEN_RESEEDED: ; 0x003728, $C728
     LDD   #$B412 ; Another?
     STD   R_A16F ; Ptr to
     LDD   #$0000
-    STD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Clear
+    STD   R_A020_SCREEN_POS_HORIZ? ; Clear
     LDD   #$0C00 ; Not sure of val.
     STD   R_A171
     LDD   #$B304 ; Yet another pointer idk.
@@ -8454,7 +8469,7 @@ DONT_OR_B_1: ; 0x0037FC, $C7FC
     STU   D,X ; U to A0B8?
 ANY_BITS_SET: ; 0x003820, $C820
     LDA   #$01
-    STA   R_A0B7_UNK_ATTRACT_CHECKS ; Set to 1
+    STA   R_A0B7_UNK_ATTRACT_CHECKS_AND_GAMESTART ; Set to 1
     LDX   #$C8F4 ; Schedule credits to screen.
     LDA   #$00
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X
@@ -8587,7 +8602,7 @@ CALLBACK_REDRAW_WILLIAMS_MEDIUM: ; 0x00392E, $C92E
     STA   DRAW_STEPS_COUNT_SEED_VAL ; Seed to lower value now since rewritten.
     JMP   CALLBACK_TASK_REMOVE ; We're done here.
 DISPLAY_PREVIOUS_GAMES_SCORES: ; 0x003936, $C936
-    LDA   A08C_CURRENT_PLAYER_COUNT
+    LDA   A08C_CURRENT_PLAYER_COUNT_1/2
 LOOP_SHOW_SCORES: ; 0x003938, $C938
     BEQ   RTS ; Don't show none.
     JSR   PLAYER_PASSED_SCORE_TO_SCREEN
@@ -9429,6 +9444,7 @@ DATA_TABLE_TEXT_PTRS: ; 0x003C6F, $CC6F
     .db $E1
     .db $C0 ; SENTENCE SWARMER 150
     .db $E5 ; END OF DATA
+DATA_UNK: ; 0x003C7D, $CC7D
     .db $60
     .db $00
     .db $60
@@ -9477,102 +9493,103 @@ DATA_TABLE_TEXT_PTRS: ; 0x003C6F, $CC6F
     .db $CC
     .db $24
     .db $24
-L_003CAD: ; 0x003CAD, $CCAD
-    LDU   #$0000
-    LDB   #$08
-    LDX   #$B05D
-L_003CB5: ; 0x003CB5, $CCB5
-    STU   [X]
+RTN_CLEAR_UNK: ; 0x003CAD, $CCAD
+    LDU   #$0000 ; Clear value.
+    LDB   #$08 ; Data size
+    LDX   #$B05D ; PTR to...
+LOOP_CLR_PIXELS: ; 0x003CB5, $CCB5
+    STU   [X] ; Clear ptrs.
     STU   [2,X]
     STU   [4,X]
     STU   [6,X]
-    ABX
-    CMPX  R_A097
-    BCS   L_003CB5
-    LDX   [R_A097]
-    BEQ   L_003CD3
-    STU   X
-    CLR   2,X
-    STU   -256,X
-L_003CD3: ; 0x003CD3, $CCD3
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE?
-    SUBD  #$6D40
-    STD   A073_SCRATCH_LOOP_WORD?
+    ABX ; X+=B
+    CMPX  R_A097_SCANNER_DOTS_END_PTR
+    BCS   LOOP_CLR_PIXELS ; Loop
+    LDX   [R_A097_SCANNER_DOTS_END_PTR] ; Load val at addr ptr.
+    BEQ   X_LOADED_WAS_ZERO
+    STU   X ; Clear addr.
+    CLR   2,X ; Clear X+2
+    STU   -256,X ; Clear X-1 HPOS?
+X_LOADED_WAS_ZERO: ; 0x003CD3, $CCD3
+    LDD   R_A020_SCREEN_POS_HORIZ? ; Load pos.
+    SUBD  #$6D40 ; D -= val
+    STD   A073_SCRATCH_LOOP_WORD? ; To scratch.
+    LSRA ; A >> 2, /4? 0 to 63?
     LSRA
-    LSRA
-    LDU   #$CD69
-    LDB   #$03
-    MUL
-    LEAU  D,U
-    LDA   A0BA_PLAYER_GAME_STATE
-    BITA  #$02
-    BNE   L_003D0C
-    LDA   #$30
-    LDY   #$B125
-L_003CF0: ; 0x003CF0, $CCF0
-    LDX   #$0000
-    STX   [Y]
+    LDU   #$CD69 ; U =
+    LDB   #$03 ; IDK VAL
+    MUL ; D = 0 to 189
+    LEAU  D,U ; U += D
+    LDA   A0BA_PLAYER_GAME_STATE ; Load state
+    BITA  #$02 ; Test planet idk.
+    BNE   PLANET_DESTROYED_NO_SCANNER
+    LDA   #$30 ; X
+    LDY   #$B125 ; PTR
+PLANET_SCANNER_UPDATE_LOOP: ; 0x003CF0, $CCF0
+    LDX   #$0000 ; CLEAR
+    STX   [Y] ; Clear current ptr.
+    PULU  B,X ; PULL HEIGHT,GFX
+    STD   Y ; Update ptr
+    STX   [Y++] ; Draw gfx.
+    INCA ; A++
+    LDX   #$0000 ; Clear again
+    STX   [Y] ; Do 2x
     PULU  B,X
     STD   Y
     STX   [Y++]
     INCA
-    LDX   #$0000
-    STX   [Y]
-    PULU  B,X
-    STD   Y
-    STX   [Y++]
-    INCA
-    CMPA  #$70
-    BNE   L_003CF0
-L_003D0C: ; 0x003D0C, $CD0C
-    LDX   #$4C09
-    LDD   #$9090
-    STD   X
-    STD   29,X
-    LDX   #$5309
-    LDD   #$0909
-    STD   X
-    STD   29,X
-    LDX   #$A065
-    LDU   #$B05D
-    BSR   L_003D64
-    LDX   #$A06B
-    BSR   L_003D64
-    STU   R_A097
-    LDD   SHIP_SCR_POS_XXYY
+    CMPA  #$70 ; Do 64 times.
+    BNE   PLANET_SCANNER_UPDATE_LOOP
+PLANET_DESTROYED_NO_SCANNER: ; 0x003D0C, $CD0C
+    LDX   #$4C09 ; Scanner
+    LDD   #$9090 ; GFX
+    STD   X ; Top
+    STD   29,X ; Bottom
+    LDX   #$5309 ; Scanner
+    LDD   #$0909 ; GFX
+    STD   X ; Top
+    STD   29,X ; Bottom
+    LDX   #$A065 ; List, onscreen.
+    LDU   #$B05D ; PTR to SCANNER_ENTRIES_START
+    BSR   PUT_LIST_TO_SCANNER
+    LDX   #$A06B ; List, offscreen.
+    BSR   PUT_LIST_TO_SCANNER
+    STU   R_A097_SCANNER_DOTS_END_PTR
+    LDD   SHIP_SCR_POS_XXYY ; Load ship pos.
+    LSRA ; A >> 4
     LSRA
     LSRA
     LSRA
-    LSRA
+    LSRB ; B >> 3
     LSRB
     LSRB
-    LSRB
-    ADDD  #$4B07
-    STD   U
-    LDX   U
-    LDD   #$9099
-    STD   X
-    STA   2,X
+    ADDD  #$4B07 ; +=TOP_LEFT_POS
+    STD   U ; Store D to U, SCR_POS
+    LDX   U ; X from U, SCR_POS
+    LDD   #$9099 ; GFX
+    STD   X ; GFX to X:X+1
+    STA   2,X ; GFX to D+2
     LDA   #$09
-    STA   -255,X
-    RTS
-L_003D4F: ; 0x003D4F, $CD4F
-    LDD   10,X
-    SUBD  A073_SCRATCH_LOOP_WORD?
+    STA   -255,X ; To X-1
+    RTS ; Leave.
+PUT_LIST_TO_SCANNER: ; 0x003D4F, $CD4F
+    LDD   10,X ; Load HPOS
+    SUBD  A073_SCRATCH_LOOP_WORD? ; Sub with scratch.
+    LSRA ; A >> 2
     LSRA
-    LSRA
-    LDB   12,X
+    LDB   12,X ; B from VPOS?
+    LSRB ; B >> 3
     LSRB
     LSRB
-    LSRB
-    ADDD  #$3007
-    STD   U
-    LDD   18,X
-    STD   [U++]
-L_003D64: ; 0x003D64, $CD64
-    LDX   X
-    BNE   L_003D4F
-    RTS
+    ADDD  #$3007 ; += SCANNER_TOP_LEFT
+    STD   U ; D to U, U=PTR_ENTRIES
+    LDD   18,X ; GFX FOR RADAR
+    STD   [U++] ; To UPTR, U+=2
+PUT_LIST_TO_SCANNER: ; 0x003D64, $CD64
+    LDX   X ; X to X.next
+    BNE   PUT_LIST_TO_SCANNER ; If more, do.
+    RTS ; RTS if not.
+SCANNER_PLANET_DATA: ; 0x003D69, $CD69
     .db $25
     .db $70
     .db $07
@@ -11740,7 +11757,7 @@ WORDS_RAW_BYTES: ; 0x00432B, $C32B
     .db $55
     .db $2F
 TEXT_GRAPHICS_INFO: ; 0x0045E3, $C5E3
-    .db $01 ; FORMAT:[X/2,Y,PTR_TO_BITMAP]?
+    .db $01 ; FORMAT:[X_BYTES,Y,BMP_PTR], to get pixels X*2
     .db $08
     .db $C6 ; PTR 0
     .db $97
@@ -13166,8 +13183,8 @@ MANIPULATE_D: ; 0x004C3E, $CC3E
     ROLA
     ORB   #$0F ; D |= 0x000F, setting all shifted to 0's.
     RTS ; Leave
-BMP_LIBRARY_START: ; 0x004C49, $CC49
-    .db $00 ; From here on is one of the bitmap tables.
+BMP_LIBRARY_BANKED: ; 0x004C49, $CC49
+    .db $00 ; From here on is the second bitmap table.
     .db $00
     .db $00
     .db $00
@@ -14210,7 +14227,7 @@ GOTO_C023_B2: ; 0x00506D, $C06D
     .db $23
     .db $02
     RTS
-    ADCB  $A0FF
+    ADCB  R_A0FF_UNK
 BOOTUP_UNIT_OK: ; 0x005076, $C076
     JSR   CLR_SCR+ADV/AUTO+CLEAR_PALETTE+$49_STUFF
     LDB   #$7A ; R3/7,G6/7,B2/3
@@ -14698,10 +14715,10 @@ L_0054A8: ; 0x0054A8, $C4A8
     CMPX  $A041
     BNE   L_0054A8
     CLR   TICKS_HAPPENED_COUNTER?
-    CLR   R_A05E
-    CLR   LIST_?B_CALLBACKS?
+    CLR   R_A05E_SLOWDOWN_FLAG?
+    CLR   LIST_CALLBACKS_GENERIC?
     CLR   $A060
-    CLR   LIST_15B_OBJECTS_AVAILABLE
+    CLR   LIST_15B_CALLBACKS_AVAILABLE
 L_0054B8: ; 0x0054B8, $C4B8
     LDA   #$01
     STA   $A03C
@@ -16741,7 +16758,7 @@ DIFFICULTY_DATA_END_LOC: ; 0x006013, $C013
     .db $C7
     .db $72
 DRAW_LAND_INITIALIZATION?: ; 0x006015, $C015
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load pos value.
+    LDD   R_A020_SCREEN_POS_HORIZ? ; Load pos value.
     ANDB  #$E0 ; B=1110.0000
     STD   A017_WORLD_MOVEMENT_MASKED ; Store to, start.
     ADDD  #$2610 ; Make do whole screen.
@@ -16807,7 +16824,7 @@ LOOP_CLEAR_PLANET_POINTERS_LOOP: ; 0x006089, $C089
     BNE   LOOP_CLEAR_PLANET_POINTERS_LOOP
     RTS ; Leave
 IRQ_TASK_LAND_IRQ: ; 0x006092, $C092
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load
+    LDD   R_A020_SCREEN_POS_HORIZ? ; Load
     ANDB  #$E0 ; AND...
     SUBD  A015_WORLD_UPDATE_COUNT? ; Sub with...
     ASLB ; D << 3, *8
@@ -16835,7 +16852,7 @@ LOOP_MOVE_PLANET_MINUS: ; 0x0060B4, $C0B4
     INC   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; ++
     BNE   LOOP_MOVE_PLANET_MINUS
 CLEAR_PLANET_AND_DRAW_NEW: ; 0x0060C2, $C0C2
-    LDD   R_A020_SCREEN_POS_HORIZ?CHANGE? ; Load
+    LDD   R_A020_SCREEN_POS_HORIZ? ; Load
     ANDB  #$E0 ; B bits, 1110.0000
     STD   A015_WORLD_UPDATE_COUNT? ; Store to
     LDX   #$0000 ; Pixel clear.
