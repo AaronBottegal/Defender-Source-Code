@@ -285,7 +285,7 @@ R_A108:                                  .rs 0x01 ;0xA108
 
 	.org $A10A
 R_A10A:                                  .rs 0x01 ;0xA10A
-R_A10B:                                  .rs 0x01 ;0xA10B
+R_A10B_BAITER_SHOOT_TIMER_MAX?:          .rs 0x01 ;0xA10B
 R_A10C:                                  .rs 0x01 ;0xA10C
 R_A10D:                                  .rs 0x01 ;0xA10D
 R_A10E:                                  .rs 0x01 ;0xA10E
@@ -491,7 +491,7 @@ X_TO_X.NEXT: ; 0x000081, $D081
     BRA   X_TO_X.NEXT ; Always traverse again.
 RTS: ; 0x000093, $D093
     PULS  A,X,PC ; RTS
-23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR: ; 0x000095, $D095
+23B_OBJ_BMP,HIT_HANDLER,RADAR_PIXELS: ; 0x000095, $D095
     BSR   LIST_GET_23B_ADDED_TO_ONSCREEN ; Get obj X
     PSHS  U,Y,B,A ; Save to sys
     STU   6,X ; U to OBJ[6], callback?
@@ -1123,7 +1123,7 @@ SOUND_DATA_UNK: ; 0x0004AB, $D4AB
     .db $08
     .db $03
     .db $00 ; EOF
-    .db $C0 ; REQ
+    .db $C0 ; REQ, BULLET.
     .db $01
     .db $30
     .db $09
@@ -1875,7 +1875,7 @@ CALLBACK_HANDLER_UNK: ; 0x000AB8, $DAB8
     LDX   R_A0C1_SHIP_UNK ; X from
     LEAX  1027,X ; +IDK
     JSR   BANKSWITCH_TO_7 ; To 7
-    JSR   JMP_TO_UNK_RTN ; Idk, ship exploding?
+    JSR   JMP_TO_SHIP_EXPLODE? ; Idk, ship exploding?
     JSR   CURRENT_PLAYER_SCORE_TO_SCREEN ; Score to screen.
     CLR   SOUND_TIMER_BLOCK_UPDATE ; Clear
     LDB   #$13 ; Sound?
@@ -2036,7 +2036,7 @@ FILL_OUT_HUMANOID?: ; 0x000BE1, $DBE1
     PSHS  B,A ; Save, A=NUMBER_TO_MAKE_IN_GRP,B=WORLD_OFF_ADD
     STA   A073_SCRATCH_LOOP_WORD?+1 ; SCRATCH = How many to make in group.
 LOOP_FILL_OUT: ; 0x000BE5, $DBE5
-    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Fill out obj with data.
+    JSR   23B_OBJ_BMP,HIT_HANDLER,RADAR_PIXELS ; Fill out obj with data.
     .db $F9 ; GFX
     .db $01
     .db $ED ; Hit handler.
@@ -3594,7 +3594,7 @@ ROTATING_TEXT_COLOR_CALLBACK: ; 0x001784, $E784
     LDA   #$02 ; Callback setup.
     LDX   #$E784
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK
-COLOR_ROTATION_TABLE: ; 0x001799, $E799
+TEXT_COLOR_ROTATION_TABLE: ; 0x001799, $E799
     .db $38
     .db $39
     .db $3A
@@ -3864,7 +3864,7 @@ VAL_SHIFTED_1: ; 0x001958, $E958
     JSR   GOTO_B7-C000,DRAW_LAND_UNK ; Draw land updated.
     LDB   #$50 ; IDK Val
     JSR   GAME_STATE_SET_HUMANOID_AND_WRITE_FROM_B ; Set game state.
-    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Spawn the ship in.
+    JSR   23B_OBJ_BMP,HIT_HANDLER,RADAR_PIXELS ; Spawn the ship in.
     .db $F9 ; BMP
     .db $C1
     .db $ED ; PLAYER HIT?
@@ -4010,7 +4010,7 @@ MAKE_BAITER_RTN?: ; 0x001A80, $EA80
     LDA   #$00
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X ; Not exactly sure good name for rtn.
     LEAU  X ; X to U
-    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Fill out obj info.
+    JSR   23B_OBJ_BMP,HIT_HANDLER,RADAR_PIXELS ; Fill out obj info.
     .db $F9 ; BMP PTR
     .db $A3
     .db $EB ; DESTROYED HANDLER?
@@ -4044,7 +4044,7 @@ CALLBACK_BAITER?IDK: ; 0x001AB4, $EAB4
     LDA   R_A110_ENEMY_SOMETHING? ; Load val
     JSR   GET_NEW_A_THAT_IS_<=_CURRENT ; Get lower.
     STA   9,U ; Store to UOBJ[9]
-    JSR   SPAWN_SOMETHING_BULLET? ; Do IDK
+    JSR   SPAWN_BULLET_REQ ; Do IDK
     BEQ   L_001AD5 ; If Z ret, goto.
     LDD   #$D52F ; Ptr
     JSR   SOUND_SET_SOUND_PRIORITIED
@@ -4108,7 +4108,7 @@ CALLBACK_UNK: ; 0x001B2B, $EB2B
 MAKE_NUMBER_OF_ENEMIES_UNK: ; 0x001B36, $EB36
     STA   A073_SCRATCH_LOOP_WORD? ; A to addr.
 LOOP_MAKE_OBJ: ; 0x001B38, $EB38
-    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Make obj
+    JSR   23B_OBJ_BMP,HIT_HANDLER,RADAR_PIXELS ; Make obj
     .db $F8 ; BMP
     .db $F7
     .db $EB ; HIT HANDLER
@@ -4181,12 +4181,12 @@ LOOP_MAKE_MORE_OBJ: ; 0x001BA2, $EBA2
     LDA   #$00 ; Type?
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X ; Setup
     LEAU  X ; Save X in U
-    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR
+    JSR   23B_OBJ_BMP,HIT_HANDLER,RADAR_PIXELS
     .db $F9 ; BMP
     .db $7B
     .db $EB ; HIT HANDLER
     .db $E9
-    .db $24 ; UNK
+    .db $24 ; Radar pixels.
     .db $24
     LDD   10,Y ; OBJ[10] move. Not sure what Y is.
     STD   10,X
@@ -4349,7 +4349,7 @@ DONT_RESET_POOL_PTR: ; 0x001CD5, $ECD5
     LDA   A0DF_RAND_BYTE ; Get rand
     CMPA  #$08 ; If _ #$08
     BLS   MOVE_HUMANOID ; <=, goto.
-    JSR   A_FROM_WORLD_HEIGHT_FROM_XOBJ[10] ; Do sub
+    JSR   WORLD_HEIGHT_FROM_XOBJ[10]_IN_A ; Do sub
     ADDA  #$04 ; A += 4
     CMPA  #$E8 ; If _ #$E8
     BLS   CAP_TO_#$E8 ; <=, goto.
@@ -4377,7 +4377,7 @@ L_001D1E: ; 0x001D1E, $ED1E
     LDA   A0DF_RAND_BYTE ; Random
     CMPA  #$08 ; If A _ #$08
     BLS   L_001D17 ; <=, goto.
-    BSR   A_FROM_WORLD_HEIGHT_FROM_XOBJ[10] ; Do
+    BSR   WORLD_HEIGHT_FROM_XOBJ[10]_IN_A ; Do
     ADDA  #$0F ; += #$0F
     CMPA  #$E8 ; CMP to val
     BLS   DONT_CAP_VAL
@@ -4409,7 +4409,7 @@ SETUP_HUMANOIDS_CALLBACK: ; 0x001D51, $ED51
     LDA   #$02
     LDX   #$ECC9
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK
-A_FROM_WORLD_HEIGHT_FROM_XOBJ[10]: ; 0x001D59, $ED59
+WORLD_HEIGHT_FROM_XOBJ[10]_IN_A: ; 0x001D59, $ED59
     PSHS  X,B ; Save
     LDD   10,X ; D from XOBJ[10]
     LSRA ; D >> 6
@@ -4461,10 +4461,10 @@ L_001D77: ; 0x001D77, $ED77
     STX   7,Y ; To YOBJ[7]
 CHANGE_U[2]_AND_RTS: ; 0x001DB7, $EDB7
     LDD   #$F24C ; D =
-    STD   2,U ; D to UOBJ[2], changing handler?
+    STD   2,U ; D to UOBJ[2], GFX.
 CALLBACK_HIT_UNUSED?: ; 0x001DBC, $EDBC
     CLRA ; Idk why
-    PULS  A,B,PC ; RTS
+    PULS  A,B,PC ; RTS pulling two?
 L_001DBF: ; 0x001DBF, $EDBF
     BSR   L_001D77
     JMP   XOBJ[6]_REMOVED_FROM_CALLBACKS
@@ -4515,7 +4515,7 @@ LOOP_ON_SCRATCH: ; 0x001E10, $EE10
     ANDA  #$3F ; Keep 0011.1111
     ADDD  R_A020_SCREEN_POS_HORIZ_1 ; D += addr
     STD   10,X ; To XOBJ[10]
-    JSR   A_FROM_WORLD_HEIGHT_FROM_XOBJ[10] ; Get A
+    JSR   WORLD_HEIGHT_FROM_XOBJ[10]_IN_A ; Get A
     STA   12,X ; A to XOBJ[12]
     SUBA  #$0A ; A -= #$0A
     JSR   JMP_TO_OBJX_PARTICLES_SETUP? ; Do
@@ -4552,26 +4552,26 @@ CALLBACK_RAND_TIMING: ; 0x001E54, $EE54
     LDD   #$D4C7 ; D ptr to
     JSR   SOUND_SET_SOUND_PRIORITIED ; Final explosion sound?
     JMP   CALLBACK_TASK_REMOVE ; Done.
-BOMBER_THING?: ; 0x001E65, $EE65
-    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Do
+HUMANOID_FELL_TO_PLANET: ; 0x001E65, $EE65
+    JSR   23B_OBJ_BMP,HIT_HANDLER,RADAR_PIXELS ; Do
     .db $F9 ; BMP
     .db $DD
     .db $ED ; HIT HANDLER
     .db $BC
-    .db $00 ; UNK
+    .db $00 ; Radar pixels.
     .db $00
     LDD   #$0125 ; + 250
-    BRA   SCORE_ADD+MORE ; Goto
-CALLBACK_HUMANOID_DOWN?: ; 0x001E73, $EE73
-    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR
+    BRA   SCORE_ADD+POSITION_BONUS_DISPLAY ; Goto
+HUMANOID_ATTACH_TO_PLANET: ; 0x001E73, $EE73
+    JSR   23B_OBJ_BMP,HIT_HANDLER,RADAR_PIXELS
     .db $F9 ; BMP
     .db $E7
-    .db $ED ; HIT HANDLER, SPECIAL UNUSED VALUE?
+    .db $ED ; HIT HANDLER, UNK PURPOSE.
     .db $BC
-    .db $00 ; UNK
+    .db $00 ; Radar pixels.
     .db $00
     LDD   #$0150 ; +500, putting humanoid down?
-SCORE_ADD+MORE: ; 0x001E7F, $EE7F
+SCORE_ADD+POSITION_BONUS_DISPLAY: ; 0x001E7F, $EE7F
     JSR   SCORE_ADD_AB??_IDK ; Add D to score.
 CALLBACK_UNK: ; 0x001E82, $EE82
     LDY   7,U ; Y from UOBJ[7]
@@ -4600,8 +4600,8 @@ CALLBACK_IDK: ; 0x001EB2, $EEB2
     LDX   7,U ; X from UOBJ[7]
     JSR   REMOVE_X_FROM_LISTS_AND+HANDLE_STUFF ; Do 
     JMP   CALLBACK_TASK_REMOVE
-SPAWN_SOMETHING_BULLET?: ; 0x001EBA, $EEBA
-    PSHS  X ; Save X obj
+SPAWN_BULLET_REQ: ; 0x001EBA, $EEBA
+    PSHS  X ; Save X obj. REQ because can fail. CC.Z 0 = Fail.
     JSR   SPAWNS_SOMETHING_IF_UNDER_20_WITH_6_PAST_JSR ; Do IDK
     .db $E4 ; HANDLER
     .db $D9
@@ -4652,7 +4652,7 @@ L_001EFE: ; 0x001EFE, $EEFE
     LDA   R_A105 ; A from addr
     JSR   GET_NEW_A_THAT_IS_<=_CURRENT ; Get <= val
     STA   13,U ; To UOBJ[13]
-    BSR   SPAWN_SOMETHING_BULLET? ; Do idk
+    BSR   SPAWN_BULLET_REQ ; Do idk
     BEQ   RTS ; If not successful, rts.
     LDD   #$D525 ; D from
     JSR   SOUND_SET_SOUND_PRIORITIED
@@ -4666,7 +4666,7 @@ LOOP_MAKE_ENEMY_IDK: ; 0x001F19, $EF19
     LDA   #$00 ; Type
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X ; Make obj
     LEAU  X ; Obj to U
-    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Data to it.
+    JSR   23B_OBJ_BMP,HIT_HANDLER,RADAR_PIXELS ; Data to it.
     .db $F8 ; BMP
     .db $CE
     .db $EF ; HIT HANDLER
@@ -4693,7 +4693,7 @@ DONT_ADD_8000: ; 0x001F43, $EF43
     CLRB
     STD   16,X ; Clear OBJ[16]
     STD   14,X ; Clear OBJ[14]
-    LDA   R_A10B ; Load val
+    LDA   R_A10B_BAITER_SHOOT_TIMER_MAX? ; Load val
     JSR   GET_NEW_A_THAT_IS_<=_CURRENT ; Get <= val
     STA   7,U ; Store to OBJ[7]
     JSR   JMP_TO_REPLACES_BMP_AND_DOES_ALOT_SPAWN_IN? ; Particle in?
@@ -4745,7 +4745,7 @@ HUMANOIDS_NOT_ZERO: ; 0x001FA7, $EFA7
     LDA   #$00 ; Timer
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X ; Setup
     LEAU  X ; Obj X to U
-    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Fill out info past.
+    JSR   23B_OBJ_BMP,HIT_HANDLER,RADAR_PIXELS ; Fill out info past.
     .db $F9 ; BMP
     .db $85
     .db $F2 ; HIT HANDLER
@@ -4801,9 +4801,9 @@ L_002016: ; 0x002016, $F016
     ANDA  #$FE ; Keep 1111.1110
     STA   20,X ; To XOBJ[20]
     JSR   NOT_RAN_IF_NO_HUMANOIDS? ; Do
-    LBEQ  CALLBACK_UNK_LANDER_TO_HUMANOID? ; If 0 ret, goto.
+    LBEQ  CALLBACK_UNK_LANDER_TO_MUTANT? ; If 0 ret, goto.
 L_002025: ; 0x002025, $F025
-    JSR   A_FROM_WORLD_HEIGHT_FROM_XOBJ[10] ; Get A
+    JSR   WORLD_HEIGHT_FROM_XOBJ[10]_IN_A ; Get A
     SUBA  #$32 ; -= val
     SUBA  12,X ; -= XOBJ[12]
     BHI   L_00203D ; > signed, goto.
@@ -4942,20 +4942,20 @@ Y[12]_<=_X[12]: ; 0x002133, $F133
     ADDA  #$01 ; A++
     STD   R_A0F8_PARTICLE?_IDK ; D to addr
     JSR   L_001D77 ; Do
-CALLBACK_UNK_LANDER_TO_HUMANOID?: ; 0x00213E, $F13E
+CALLBACK_UNK_LANDER_TO_MUTANT?: ; 0x00213E, $F13E
     DEC   R_A112_ENEMY_IDK_COUNT ; #--
     INC   R_A115_ENEMY_IDK_COUNT ; #++
     LDX   7,U ; X from UOBJ[7]
     CLR   20,X ; Clear XOBJ[20]
-    LDD   #$F8CE ; Callback ptr?
-    STD   2,X ; To XOBJ[2]
+    LDD   #$F8CE ; GFX ptr
+    STD   2,X ; To obj
     LDD   #$CC33 ; Ptr to XOBJ[18]
     STD   18,X
-    LDD   #$EF6D ; Other ptr to XOBJ[8]
+    LDD   #$EF6D ; Other handler.
     STD   8,X
-    LDA   R_A10B ; Addr to UOBJ[9]
+    LDA   R_A10B_BAITER_SHOOT_TIMER_MAX? ; Addr to UOBJ[9]
     STA   9,U
-CALLBACK_ENTRY_LOC: ; 0x00215E, $F15E
+CALLBACK_UNK: ; 0x00215E, $F15E
     LDX   7,U ; X from YOBJ[U]
     LDB   R_A10A ; B from addr
     LDY   R_A0CC_SCREEN_POS_RELATED? ; Y from addr
@@ -4996,7 +4996,7 @@ D_LTE_TO_0700: ; 0x00219D, $F19D
     CMPA  12,X ; CMP to XOBJ[12]
     LDD   R_A108 ; D seed.
     BCC   DONT_INVERT_D ; A >= val, goto.
-    COMA
+    COMA ; Invert
     COMB
 DONT_INVERT_D: ; 0x0021A8, $F1A8
     STD   16,X ; D to XOBJ[16]
@@ -5010,18 +5010,18 @@ L_0021AF: ; 0x0021AF, $F1AF
 B_IS_NEG: ; 0x0021B7, $F1B7
     ADDB  12,X ; B += XOBJ[12]
     CMPB  #$2A ; If B _ #$2A
-    BCC   L_0021BF ; >=, goto.
+    BCC   DONT_ROLL_TO_BOTTOM_OF_SCREEN ; >=, goto.
     LDB   #$F0 ; Roll?
-L_0021BF: ; 0x0021BF, $F1BF
-    STB   12,X ; To XOBJ[12]
+DONT_ROLL_TO_BOTTOM_OF_SCREEN: ; 0x0021BF, $F1BF
+    STB   12,X ; To XOBJ[12], Y pos.
     DEC   9,U ; UOBJ[9]--
     BNE   SETUP_CALLBACK ; Not 0, goto.
-    LDA   R_A10B ; A from
+    LDA   R_A10B_BAITER_SHOOT_TIMER_MAX? ; A from, difficulty?
     JSR   GET_NEW_A_THAT_IS_<=_CURRENT ; Get new
-    STA   9,U ; Store to UOBJ[9]
-    JSR   SPAWN_SOMETHING_BULLET?
-    BEQ   SETUP_CALLBACK ; Was successful, do.
-    LDD   #$D52A ; D val...
+    STA   9,U ; Store to UOBJ[9], new timer for bullet.
+    JSR   SPAWN_BULLET_REQ ; Spawn
+    BEQ   SETUP_CALLBACK ; Not successful, skip sound.
+    LDD   #$D52A ; Set sound. Bullet.
     JSR   SOUND_SET_SOUND_PRIORITIED
 SETUP_CALLBACK: ; 0x0021D8, $F1D8
     LDA   #$03 ; Setup callback.
@@ -5059,7 +5059,7 @@ LOADED_ZERO: ; 0x00220B, $F20B
     BCC   DONT_STORE_D ; If D >= val, goto.
     STD   16,X ; Store D otherwise.
 DONT_STORE_D: ; 0x002227, $F227
-    JSR   A_FROM_WORLD_HEIGHT_FROM_XOBJ[10] ; Get A
+    JSR   WORLD_HEIGHT_FROM_XOBJ[10]_IN_A ; Get A
     CMPA  12,X ; If A _ XOBJ[12]
     BHI   SETUP_CALLBACK_F216 ; >, goto.
     LDD   16,X ; D from XOBJ[16]
@@ -5084,7 +5084,7 @@ CALLBACK_IDK: ; 0x00224C, $F24C
     LDD   R_A0CC_SCREEN_POS_RELATED? ; D from
     ADDD  #$0080 ; += val
     STD   10,X ; To XOBJ[10]
-    JSR   A_FROM_WORLD_HEIGHT_FROM_XOBJ[10] ; Get A
+    JSR   WORLD_HEIGHT_FROM_XOBJ[10]_IN_A ; Get A
     CMPA  12,X ; If A _ XOBJ[12]
     BCS   HUMANOID_SET_DOWN? ; <, goto.
     LDA   #$01 ; Setup callback.
@@ -5132,7 +5132,7 @@ DONT_INVERT_B: ; 0x0022A7, $F2A7
     STD   11,U
     STD   13,U
 MORE_NEW_OBJS: ; 0x0022C1, $F2C1
-    JSR   23B_OBJ_BMP,HANDLER,OBJ[18]_IDK,FROM_6_PAST_JSR ; Fill with info.
+    JSR   23B_OBJ_BMP,HIT_HANDLER,RADAR_PIXELS ; Fill with info.
     .db $F9 ; BMP
     .db $29
     .db $F3 ; Destroy handler.
@@ -5977,8 +5977,8 @@ BANK_CHECK_DATA: ; 0x00286E, $F86E
     .db $00
     .db $11
     .db $00 ; END OF DATA
-BUTTONS_PRESS_DATA: ; 0x002886, $F886
-    .db $E5 ; USED IN FAILURE STUFF? FIRE BUTTON STUFF. FMT:[CALLBACK_PTR,TIMER,STATE_INVALID]
+CONTROL_PANEL_BUTTON_PRESS_DATA: ; 0x002886, $F886
+    .db $E5 ; FIRE BUTTON STUFF. FMT:[CALLBACK_PTR,TIMER,STATE_INVALID]
     .db $91
     .db $00
     .db $E8
@@ -6006,32 +6006,32 @@ BUTTONS_PRESS_DATA: ; 0x002886, $F886
     .db $97
     .db $00
     .db $E8
-BUTTON_PRESS_DATA_COINDOOR: ; 0x0028A2, $F8A2
-    .db $00 ; fmt: [CALLBACK_PTR,TIMER,STATE_INVALID]. DOWN?
+COINDOOR_BUTTON_PRESS_DATA: ; 0x0028A2, $F8A2
+    .db $00 ; FMT: Same as above.
     .db $00
     .db $00
     .db $00
+    .db $00 ; Button IDK
     .db $00
     .db $00
     .db $00
-    .db $00
-    .db $D4
+    .db $D4 ; Button IDK
     .db $4C
     .db $00
     .db $00
-    .db $D4
+    .db $D4 ; Button IDK
     .db $75
     .db $02
     .db $00
-    .db $D4
+    .db $D4 ; Button IDK
     .db $3D
     .db $00
     .db $00
-    .db $D4
+    .db $D4 ; Button IDK
     .db $6E
     .db $02
     .db $00
-    .db $D4
+    .db $D4 ; Button IDK
     .db $7C
     .db $02
     .db $00
@@ -7495,7 +7495,7 @@ JMP_GFX_BANK2_CHR_TO_SCREEN: ; 0x002FB3, $FFB3
     JMP   GFX_BANK2_CHR_TO_SCREEN ; Puts bank 2 char to screen.
 JMP_GFX_BANK2_CHR_CLEAR: ; 0x002FB6, $FFB6
     JMP   GFX_BANK2_CHR_CLEAR ; Clears bank 2 char from screen.
-L_002FB9: ; 0x002FB9, $FFB9
+JMP_CLEAR_SCREEN_FLEX_SETUP: ; 0x002FB9, $FFB9
     JMP   CLEAR_SCREEN_FLEX_SETUP
 JMP_CLEAR_ALL_SCREEN: ; 0x002FBC, $FFBC
     JMP   CLEAR_ALL_SCREEN
@@ -7511,11 +7511,11 @@ JMP_TO_GOTO_B7-C000,DRAW_LAND_UNK: ; 0x002FCB, $FFCB
     JMP   GOTO_B7-C000,DRAW_LAND_UNK
 JMP_GOTO_PAST_JSR: ; 0x002FCE, $FFCE
     JMP   GOTO_PAST_JSR
-JMP_TO_R_A063_OBJ_SETUP_BANKED_HANDLER?: ; 0x002FD1, $FFD1
+JMP_SCHEDULE_BANKED_CALLBACK_IN_CURRENT: ; 0x002FD1, $FFD1
     JMP   SCHEDULE_BANKED_CALLBACK_IN_CURRENT
 JMP_STORE_B@X_BANK0: ; 0x002FD4, $FFD4
     JMP   STORE_B[X]_BANK0
-LOAD_B@X_BANK0: ; 0x002FD7, $FFD7
+JMP_LOAD_B@X_BANK0: ; 0x002FD7, $FFD7
     JMP   LOAD_B[X]_BANK0
 JMP_SET_SOUND_PRIORITIED: ; 0x002FDA, $FFDA
     JMP   SOUND_SET_SOUND_PRIORITIED
@@ -7925,7 +7925,7 @@ LOOP_SCORES_TO_SCREEN: ; 0x00330A, $C30A
     LDY   #$A00C ; Ptr to loc.
     LDX   R_A164_HIGHSCORE_DATA_POS ; Initial pointer.
 LOOP_CREATE_SCORE_STRING: ; 0x003312, $C312
-    JSR   LOAD_B@X_BANK0 ; Get SRAM data.
+    JSR   JMP_LOAD_B@X_BANK0 ; Get SRAM data.
     LEAX  1,X ; X++
     ANDB  #$0F ; Get bits.
     BNE   A++,B+=30 ; If not 0, show digit.
@@ -14178,7 +14178,7 @@ JMP_TO_HIGHSCORES_TO_RAM: ; 0x005033, $C033
 JMP_STORE_B@X_BANK0: ; 0x005036, $C036
     JMP   JMP_STORE_B@X_BANK0
 JMP_LOAD_B@X_BANK0: ; 0x005039, $C039
-    JMP   LOAD_B@X_BANK0
+    JMP   JMP_LOAD_B@X_BANK0
 GOTO_C002_B2: ; 0x00503C, $C03C
     JSR   JMP_GOTO_PAST_JSR ; TEXT_RTN
     .db $C0 ; $C002, bank 2
@@ -14787,7 +14787,7 @@ L_005528: ; 0x005528, $C528
     COM   -X
     BSR   L_00556C
     LDD   #$3808
-    JSR   L_002FB9
+    JSR   JMP_CLEAR_SCREEN_FLEX_SETUP
     BRA   L_005501
 L_005538: ; 0x005538, $C538
     EORB  -U
@@ -16749,8 +16749,8 @@ JMP_TO_GENERATE_LAND_DATA_B300-B6FF: ; 0x006006, $C006
 JMP_TO_CLEAR_LAND_ONSCREEN?: ; 0x006009, $C009
     JMP   CLEAR_LAND_ONSCREEN
     ANDB  #$50 ; Value here is related to land, dev leftover?
-JMP_TO_UNK_RTN: ; 0x00600E, $C00E
-    JMP   UNK_RTN
+JMP_TO_SHIP_EXPLODE?: ; 0x00600E, $C00E
+    JMP   SHIP_EXPLODE?
 DIFFICULTY_DATA_START_LOC: ; 0x006011, $C011
     .db $C6
     .db $BA
@@ -17843,21 +17843,21 @@ DATA_IDK: ; 0x006450, $C450
     .db $23
     .db $70
     .db $07
-UNK_RTN: ; 0x0065D0, $C5D0
-    PULS  A,B ; Pull D
-    STD   9,U ; To UOBJ[9]
-    STX   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; X to...?
-    LDD   #$0808
-    STD   A003_CURR_PLANET_GEN_DATA_PTR+1 ; D to...
-    LDD   #$1732
-    STD   R_A006_SCORE_POS_CHAR ; D to...
+SHIP_EXPLODE?: ; 0x0065D0, $C5D0
+    PULS  A,B ; RTS location to...
+    STD   9,U ; UOBJ[9]
+    STX   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; X is XXYY center of ship.
+    LDD   #$0808 ; Not sure of val...
+    STD   A003_CURR_PLANET_GEN_DATA_PTR+1
+    LDD   #$1732 ; Not sure of val...
+    STD   R_A006_SCORE_POS_CHAR
     LDY   #$B300 ; Ptr
-LOOP_IDK: ; 0x0065E4, $C5E4
-    LDA   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; Load
-    CLRB ; Clear
-    STD   2,Y ; To Y[2]
-    LDA   A001_CURR_PLANET_GEN_HEIGHT_CHANGES ; Heights
-    STD   4,Y ; D to Y[4]
+LOOP_EXPLOSION_DATA_MAKE: ; 0x0065E4, $C5E4
+    LDA   R_A000_CURR_PLANET_GEN_SHIFT_DELTA ; Load X pos
+    CLRB ; Clear B, no Y
+    STD   2,Y ; To EXPLOSION[2]
+    LDA   A001_CURR_PLANET_GEN_HEIGHT_CHANGES ; Height of ship
+    STD   4,Y ; D to EXPLOSION[4]
     LDA   R_A005_PLANET_DATA_PTR_LOWER ; A from
     LSRA ; >> 1
     EORA  R_A005_PLANET_DATA_PTR_LOWER ; A ^ addr
@@ -17869,12 +17869,12 @@ LOOP_IDK: ; 0x0065E4, $C5E4
     ANDA  #$01 ; Get 0000.0001
     SUBA  #$01 ; 0 or FF val
     LDB   R_A005_PLANET_DATA_PTR_LOWER ; B from
-    STD   6,Y ; D to Y[6]
+    STD   6,Y ; D to EXPLOSION[6]
     BPL   DONT_INVERT ; If B positive, don't invert.
     COMA ; Invert D
     COMB
 DONT_INVERT: ; 0x006606, $C606
-    PSHS  B,A ; Save to stack.
+    PSHS  B,A ; Save to stack, always positive.
     LDA   R_A007_PLANET_DATA_PTR_HIGHER ; Load val
     LSRA ; >> 1
     EORA  R_A007_PLANET_DATA_PTR_HIGHER ; A ^ addr
@@ -17886,76 +17886,76 @@ DONT_INVERT: ; 0x006606, $C606
     ANDA  #$03 ; Get 0000.0011
     SUBA  #$02 ; FE,FF,0,1 val
     LDB   R_A007_PLANET_DATA_PTR_HIGHER ; Load val
-    STD   8,Y ; D to Y[8]
+    STD   8,Y ; D to EXPLOSION[8]
     BPL   DONT_INVERT_2 ; If B positive, don't invert.
     COMA ; Invert D
     COMB
 DONT_INVERT_2: ; 0x006621, $C621
-    LSRA ; D >> 1
+    LSRA ; D >> 1, /2
     RORB
     ADDD  S++ ; D += prev pushed, fix stack.
     CMPD  #$016A ; If D _ val
-    BCC   LOOP_IDK ; >=, loop.
+    BCC   LOOP_EXPLOSION_DATA_MAKE ; >=, loop again to get range data.
     LDX   #$0000 ; X =
-    STX   Y ; Clear Y
+    STX   Y ; Clear EXPLOSION[0], SCR_LOC?
     LEAY  10,Y ; Y += 10
-    CMPY  #$B800 ; If Y _ val
-    BNE   LOOP_IDK ; !=, loop.
+    CMPY  #$B800 ; If Y _ val, 80
+    BNE   LOOP_EXPLOSION_DATA_MAKE ; !=, loop.
     LDX   #$C6AB ; RE_PURPOSE, PTR to explosion color change table?
-    STX   R_A002_CURR_PLANET_GEN_HEIGHT
-    LDA   #$38 ; Height changes?
+    STX   R_A002_CURR_PLANET_GEN_HEIGHT ; To
+    LDA   #$38 ; Timer to delay changing explosion color.
     STA   A001_CURR_PLANET_GEN_HEIGHT_CHANGES
-SETUP_CALLBACK: ; 0x006641, $C641
+SETUP_CALLBACK_EXPLOSION_PLAY: ; 0x006641, $C641
     LDA   #$01 ; Setup callback.
     LDX   #$C649
-    JMP   JMP_TO_R_A063_OBJ_SETUP_BANKED_HANDLER?
-CALLBACK_IDK: ; 0x006649, $C649
+    JMP   JMP_SCHEDULE_BANKED_CALLBACK_IN_CURRENT
+CALLBACK_SHIP_EXPLODE_STEP: ; 0x006649, $C649
     LDX   #$0000 ; Clear
     LDY   #$B300 ; Ptr to height data.
-    LDA   [R_A002_CURR_PLANET_GEN_HEIGHT] ; Load PTR set up above, C6AB default.
-    STA   COLOR_PALETTE_RAM_COPY+11 ; Store to palette.
-    BEQ   JMP_TO_U[9]_PTR ; If 0, goto.
-LOOP_Y_TO_B800: ; 0x006658, $C658
+    LDA   [R_A002_CURR_PLANET_GEN_HEIGHT] ; Load color from PTR
+    STA   COLOR_PALETTE_RAM_COPY+11 ; Store to palette, explosion color.
+    BEQ   EXIT_EXPLOSION_BACK_TO_GAMEPLAY ; If 0, goto.
+MOVE_ALL_EXPLOSIONS: ; 0x006658, $C658
     LDU   Y ; U from Y.next
     STX   U ; Clear U
     STX   256,U ; Clear U,X+1
-    LDD   8,Y ; D from YOBJ[8]
-    ADDD  4,Y ; += YOBJ[4]
+    LDD   8,Y ; D from EXPLOSION[8]
+    ADDD  4,Y ; += EXPLOSION[4]
     CMPA  #$2A ; If A _ val
-    BCS   SKIP_IDK ; <, goto.
+    BCS   NEXT_EXPLOSION_PARTICLE ; <, goto. Above scanner. This catches wrapping to top.
     STD   4,Y ; Store back
-    STA   1,Y ; A to YOBJ[1]
-    LDD   6,Y ; D from YOBJ[6]
-    ADDD  2,Y ; D += YOBJ[2]
+    STA   1,Y ; A to EXPLOSION[1]
+    LDD   6,Y ; D from EXPLOSION[6]
+    ADDD  2,Y ; D += EXPLOSION[2]
     CMPA  #$98 ; If A _ #$98
-    BHI   SKIP_IDK ; >, goto.
-    STD   2,Y ; Store to YOBJ[2]
-    STA   Y ; A to YOBJ[0]
+    BHI   NEXT_EXPLOSION_PARTICLE ; >, goto. This catches offscreeen both sides.
+    STD   2,Y ; Store to EXPLOSION[2]
+    STA   Y ; To EXPLOSION[0]
     TSTB ; Test B
-    BMI   ALT_RTN ; If negative, goto.
-    LDD   #$BBBB ; D =
+    BMI   PIXEL_OFFSET ; If top bit set, offset.
+    LDD   #$BBBB ; Blow up pixels.
     STD   [Y] ; D to Y[0] ptr
-    BRA   SKIP_IDK
-ALT_RTN: ; 0x006682, $C682
+    BRA   NEXT_EXPLOSION_PARTICLE
+PIXEL_OFFSET: ; 0x006682, $C682
     LDU   Y ; U from Y
     LDD   #$0B0B ; D = pixels?
     STD   U ; to U
     LDD   #$B0B0 ; Pixels?
     STD   256,U ; To U,X+1
-SKIP_IDK: ; 0x006690, $C690
+NEXT_EXPLOSION_PARTICLE: ; 0x006690, $C690
     LEAY  10,Y ; Y += 10
     CMPY  #$B800 ; If Y _ val
-    BNE   LOOP_Y_TO_B800 ; !=, goto.
+    BNE   MOVE_ALL_EXPLOSIONS ; !=, goto.
     DEC   A001_CURR_PLANET_GEN_HEIGHT_CHANGES ; -- val
-    BNE   SETUP_CALLBACK ; Not done, callback.
+    BNE   SETUP_CALLBACK_EXPLOSION_PLAY ; Not done, keep color of explosion as is.
     LDU   R_A002_CURR_PLANET_GEN_HEIGHT ; U from
     LEAU  1,U ; ++
     STU   R_A002_CURR_PLANET_GEN_HEIGHT ; Store to
-    LDA   #$04 ; Val
-    STA   A001_CURR_PLANET_GEN_HEIGHT_CHANGES ; To
-    BRA   SETUP_CALLBACK ; Callback.
-JMP_TO_U[9]_PTR: ; 0x0066A8, $C6A8
-    JMP   [9,U] ; Goto UOBJ[9] rtn.
+    LDA   #$04 ; New delay value, 4.
+    STA   A001_CURR_PLANET_GEN_HEIGHT_CHANGES
+    BRA   SETUP_CALLBACK_EXPLOSION_PLAY ; Callback.
+EXIT_EXPLOSION_BACK_TO_GAMEPLAY: ; 0x0066A8, $C6A8
+    JMP   [9,U] ; RTS location stored here, hence JMP.
 PLAYER_EXPLOSION_COLOR_ROTATION?: ; 0x0066AB, $C6AB
     .db $FF
     .db $7F
