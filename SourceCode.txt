@@ -80,14 +80,15 @@ CURRENT_BANK:                            .rs 0x01 ;0xA036
 VAL_FROM_SRAM_C495-C496_PLAY_CREDITS?:   .rs 0x01 ;0xA037
 R_A038_GAME_SETUP_START_CLEARS:          .rs 0x01 ;0xA038
 R_A039:                                  .rs 0x01 ;0xA039
-
-	.org $A03D
+R_A03A_MENU_UNK:                         .rs 0x01 ;0xA03A
+R_AO3B_UPDATE_SCREEN?:                   .rs 0x01 ;0xA03B
+R_A03C_OPTION_ON:                        .rs 0x01 ;0xA03C
 TEXT_PTR_TO_CODE_JSR:                    .rs 0x02 ;0xA03D to A03E
 TEXT_PTR_TO_CODE_JMP:                    .rs 0x02 ;0xA03F to A040
 
 	.org $A047
-UNK_$47:                                 .rs 0x01 ;0xA047
-UNK_$48:                                 .rs 0x01 ;0xA048
+UNK_$47_AUTO+ADV:                        .rs 0x01 ;0xA047
+UNK_$48_AUTO+ADV:                        .rs 0x01 ;0xA048
 UNK_$49_SYS_MENU_FLAG?:                  .rs 0x01 ;0xA049
 
 	.org $A04C
@@ -451,7 +452,7 @@ GET_OBJ_23B+INIT_CALLBACK?: ; 0x00003E, $D03E
     BNE   U_!NULL ; If list has obj. Unintentional jump into inst? Mistake.
     .db $BD ; JSR SYSTEM_PANIC
 U_!NULL: ; 0x000045, $D045
-    SUBB  $A03A ; SUBB $DP3A
+    SUBB  R_A03A_MENU_UNK ; SUBB $DP3A
     LDY   U ; Get Y from U.next
     STY   LIST_23B_CALLBACKS_AVAILABLE_SMALL_LIST ; New head, U is detatched from list.
     LDA   #$01
@@ -818,10 +819,10 @@ SCORE_ADD_AB_SETTINGS: ; 0x000360, $D360
     ORCC  #$01 ; Set CC.c
     ROL   R_A08A_UPDATE_SCORE_FLAG?SCORE_CURRENT? ; Flag?
     LSRA ; If 1 if shifted off, multiplies value passed by 10
-    PSHS  A ; Save
-    LDA   #$00 ; Clear because idfk.
+    PSHS  A ; Save pos.
+    LDA   #$00 ; Clear upper.
     BCC   SKIP_MUL_BY_10 ; If A was odd, take.
-    ASLB ; D << 4
+    ASLB ; D << 4, all chars one pos up.
     ROLA
     ASLB
     ROLA
@@ -847,7 +848,7 @@ LOOP_CARRY_SCORE_OVERFLOW_UP: ; 0x000388, $D388
     STA   B,X ; Store back.
     LDA   #$00
     STA   A073_SCRATCHPAD_ADDR ; Clear val?
-    DECB ; Minus another
+    DECB ; Minus index.
     BPL   LOOP_CARRY_SCORE_OVERFLOW_UP ; If still not negative, loop.
 TEST_BONUS_SHIP+SMARTBOMB: ; 0x000396, $D396
     LDD   SRAM_C481_BONUS_SHIP_ADD ; Get D
@@ -933,7 +934,7 @@ DIGIT_TO_SCREEN: ; 0x000420, $D420
     EXG   X-D ; Loc to D.
     JSR   GFX_BANK2_CHR_TO_SCREEN ; Score digit.
 SCORE_CHR_POST: ; 0x00042B, $D42B
-    EXG   X-D ; Put loc back to X. Should have ADDA #$04 here instead.
+    EXG   X-D ; Put loc back to X. Should have ADDA #$04 here instead. Lowkey mistake.
     LEAX  1024,X ; X+=4
     DECB ; Dec digits left.
     BNE   LOOP_MORE_DIGITS ; Do more.
@@ -985,7 +986,7 @@ USE_XB_PROVIDED: ; 0x000481, $D481
     STA   X ; Store to ptr. Sets coin accept timers.
     LDA   #$C0 ; Val
     STD   9,U ; Store coin slot callback.
-    LDA   #$0A ; Val
+    LDA   #$0A ; Frames, aka give time for slam to be triggered.
     LDX   #$D499 ; Ptr to add credit handler.
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK ; Setup callback.
 CALLBACK_ADD_CREDIT?: ; 0x000499, $D499
@@ -5372,12 +5373,12 @@ CALLBACK_PALETTE_ROTATE_13/15: ; 0x00244A, $F44A
     BCS   RESETUP_CALLBACK_CONTINUED ; Store ptr as-is.
     BRA   CALLBACK_PALETTE_ROTATE_13/15_INIT ; Reset ptr
 PALETTE_DATA_UNK: ; 0x00245B, $F45B
-    .db $81 ; R=3/7,G=0/7,B=1/3, Red-y?
     .db $81
-    .db $2F ; R=1/7,G=3/7,B=3/7, Yellow?
     .db $81
     .db $2F
-    .db $07 ; R=0/7,G=1/7,B=3/3, Purple?
+    .db $81
+    .db $2F
+    .db $07
     .db $2F
     .db $81
     .db $07
@@ -5901,7 +5902,7 @@ SETUP_TEXT+UNK: ; 0x002800, $F800
     CLR   UNK_$49_SYS_MENU_FLAG? ; Clear, not in menu?
     LDA   #$03
     STA   CURRENT_BANK ; Bank info without switching?
-    STA   UNK_$48 ; Set
+    STA   UNK_$48_AUTO+ADV ; Set
     LDD   #$FFFF
     STD   TEXT_PTR_UNK ; Set
     PULS  A,B,PC ; Get reg, RTS.
@@ -7488,7 +7489,7 @@ DATA_W_#$F8EC: ; 0x002F9D, $FF9D
 DATA_W_#$F86E: ; 0x002F9F, $FF9F
     .db $F8
     .db $6E
-JMP_GET_DATA_FROM_SRAM[X]: ; 0x002FA1, $FFA1
+JMP_GET_DATA_FROM_SRAM[X]_IN_A: ; 0x002FA1, $FFA1
     JMP   GET_DATA_FROM_SRAM[X]_IN_A
 JMP_GET_DATA_FROM_SRAM@X_IN_B: ; 0x002FA4, $FFA4
     JMP   GET_DATA_FROM_SRAM[X]_IN_B
@@ -8620,7 +8621,7 @@ LOOP_SHOW_SCORES: ; 0x003938, $C938
     BRA   LOOP_SHOW_SCORES
 RTS: ; 0x003940, $C940
     RTS
-WILLIAMS_LOGO_DRAWN_DATA?: ; 0x003941, $C941
+WILLIAMS_LOGO_HANDWRITING_DATA: ; 0x003941, $C941
     .db $FE ; FMT: [1B]
     .db $74 ; FF = Nothing, FE = Load pos for pixel, other values >AA mean EOF.
     .db $40 ; Otherwise nibble bits mean U/D/L/R
@@ -8972,7 +8973,7 @@ WILLIAMS_LOGO_DRAWN_DATA?: ; 0x003941, $C941
     .db $81
     .db $50
     .db $FD
-DEFENDER_LOGO_DATA?: ; 0x003AA0, $CAA0
+DEFENDER_LOGO_DATA: ; 0x003AA0, $CAA0
     .db $10
     .db $D1
     .db $BD
@@ -9984,8 +9985,8 @@ SCANNER_PLANET_DATA: ; 0x003D69, $CD69
     .db $23
     .db $70
     .db $07 ; END SCANNER DATA
-DATA_UNK_E339: ; 0x003EE9, $CEE9
-    .db $80
+DATA_UNK_3EE9: ; 0x003EE9, $CEE9
+    .db $80 ; Unused probably. Here to end.
     .db $00
     .db $00
     .db $30
@@ -10286,14 +10287,14 @@ JMP_UNK_TO_SCREEN: ; 0x004014, $C014
     JMP   TEXT_RTN_PTRS=$FFB3/$CC39
 JMP_UNK_CLEARED_FROM_SCREEN: ; 0x004017, $C017
     JMP   TEXT_RTN_PTRS=$FFB6/$CC39
-JMP_SPECIAL_TO_SCREEN: ; 0x00401A, $C01A
+JMP_SPECIAL_FROM_SCREEN: ; 0x00401A, $C01A
     JMP   TEXT_RTN_SPECIAL_PTR=$FFB6
 JMP_SPECIAL_CLEARED_FROM_SCREEN: ; 0x00401D, $C01D
     JMP   TEXT_RTN_SPECIAL_PTR=$FFB3
 JMP_UNKNOWN_TEXT/GFX_RTN: ; 0x004020, $C020
-    JMP   TEXT_SENTENCE_RTN_PTR=$C0D9
+    JMP   TEXT_CUSTOM_PRESS_ADV_TO_STEP_THRU_TEST
 JMP_UNKNOWN_TEXT/GFX_RTN_2: ; 0x004023, $C023
-    JMP   TEXT_SENTENCE_RTN_PTR=$C0BB
+    JMP   TEXT_CUSTOM_PRESS_ADV_WITH_SWITCH_SET_FOR...
     .db $00
     .db $00
     .db $00
@@ -12903,13 +12904,13 @@ TEXT_BITMAP_LIBRARY: ; 0x004697, $C697
     .db $00
     .db $84
     .db $FF
-TEXT_SENTENCE_RTN_PTR=$C0D9: ; 0x004A51, $CA51
+TEXT_CUSTOM_PRESS_ADV_TO_STEP_THRU_TEST: ; 0x004A51, $CA51
     PSHS  U,Y,X ; Save...
     LDU   #$C0D9 ; Sentences ptr start.
     BRA   DO_TEXT_SOMETHING
-TEXT_SENTENCE_RTN_PTR=$C0BB: ; 0x004A58, $CA58
+TEXT_CUSTOM_PRESS_ADV_WITH_SWITCH_SET_FOR...: ; 0x004A58, $CA58
     PSHS  U,Y,X ; Save...
-    LDU   #$C0BB ; More sentences ptr
+    LDU   #$C0BB ; Sentence PRESS SWITCH WITH ADVANCED SET FOR (CMD)
 DO_TEXT_SOMETHING: ; 0x004A5D, $CA5D
     LDX   #$18CE ; Screen position.
     JSR   TEXT_RTN_PTRS=$FFB3/$CAED ; Something to screen.
@@ -12926,11 +12927,11 @@ LOADED_NULL_2: ; 0x004A77, $CA77
     PULS  X,Y,U,PC ; Restore+RTS
 TEXT_RTN_SPECIAL_PTR=$FFB6: ; 0x004A79, $CA79
     PSHS  U,Y,X,B,A,CC ; Save state
-    LDY   #$FFB6 ; Ptr to unk rtn
+    LDY   #$FFB6 ; Ptr to clear sentence.
     BRA   TEXT_RTN_UNK_MAIN
 TEXT_RTN_SPECIAL_PTR=$FFB3: ; 0x004A81, $CA81
     PSHS  U,Y,X,B,A,CC ; Save state
-    LDY   #$FFB3 ; PTR to JMP to GFX_TO_SCREEN
+    LDY   #$FFB3 ; PTR to display sentence.
 TEXT_RTN_UNK_MAIN: ; 0x004A87, $CA87
     LDD   #$CAED ; PTR to SKIP_SENTENCE_INIT
     STY   TEXT_PTR_TO_CODE_JSR ; Store JSR PTR
@@ -12940,9 +12941,9 @@ TEXT_RTN_UNK_MAIN: ; 0x004A87, $CA87
     LDX   #$010A ; Spacing value.
     STX   TEXT_DATA_SPACING_XXYY?
     CLR   SENTENCE_FLAG_58 ; Clear flag.
-    LDU   5,S ; Get value up stack.
+    LDU   5,S ; Get Y value passed to special rtn.
     STU   SENTENCE_PTR_TO_WORD ; Is ptr to word.
-    LEAU  32,U ; Clean up 32 bytes of stack???
+    LEAU  32,U ; End ptr, 32 chars bytes more than start.
     STU   SENTENCE_END_PTR ; Store the stack as the end ptr?
     STU   SENTENCE_PTR_WORD_ON ; And the word on?
     BRA   SKIP_SENTENCE_INIT ; Goto code
@@ -12995,23 +12996,23 @@ FLAG_58_SET: ; 0x004AFF, $CAFF
 DO_MORE_AFTER_CMD: ; 0x004B03, $CB03
     CMPX  SENTENCE_END_PTR ; Compare to end?
     BNE   MORE_THINGS_TO_DO
-TOP_GT|E_8: ; 0x004B07, $CB07
+RTS_DOES_EXTRAS: ; 0x004B07, $CB07
     CLR   SENTENCE_PTR_WORD_ON ; Clear setup check loc.
     PULS  CC,A,B,X,Y,U ; Restore
     ORCC  #$01 ; Set CC.c
     RTS ; leave.
 MORE_THINGS_TO_DO: ; 0x004B0E, $CB0E
     LDU   X++ ; Loads sentence word ptr.
-    BMI   DATA_IS_NOT_CMD ; If top bit set. In ROM test?
+    BMI   POINTER_IS_IN_ROM ; If in ROM/scratch, will be above 0x8000.
     LEAX  -1,X ; Not PTR, command, minus 1 because CMD is byte.
-    TFR   U>D ; Save U to D
-    CMPA  #$08 ; Top byte
-    BHI   TOP_GT|E_8 ; Leaves
-    ASLA ; Make index to ptr
+    TFR   U>D ; U loaded to D
+    CMPA  #$08 ; A contains command.
+    BHI   RTS_DOES_EXTRAS ; Leaves if invalid.
+    ASLA ; Make index val by doubling.
     LDY   #$CB64 ; ptr
     JSR   [A,Y] ; Run code.
     BRA   DO_MORE_AFTER_CMD
-DATA_IS_NOT_CMD: ; 0x004B23, $CB23
+POINTER_IS_IN_ROM: ; 0x004B23, $CB23
     STX   SENTENCE_PTR_WORD_ON ; Store index into sentence, aka word
     STU   SENTENCE_PTR_TO_WORD ; Store word ptr
     BRA   SKIP_SENTENCE_INIT ; Goto
@@ -14190,65 +14191,66 @@ JMP_STORE_B@X_BANK0: ; 0x005036, $C036
     JMP   JMP_STORE_B@X_BANK0
 JMP_LOAD_B@X_BANK0: ; 0x005039, $C039
     JMP   JMP_LOAD_B@X_BANK0
-GOTO_C002_B2: ; 0x00503C, $C03C
+GOTO_C002_B2_SENTENCE_TO_SCREEN: ; 0x00503C, $C03C
     JSR   JMP_GOTO_PAST_JSR ; TEXT_RTN
-    .db $C0 ; $C002, bank 2
+    .db $C0 ; $C002, bank 2, sentence to screen.
     .db $02
     .db $02
     RTS
-GOTO_C005_B5: ; 0x005043, $C043
-    JSR   JMP_GOTO_PAST_JSR
+GOTO_C005_B2_SENTENCE_FROM_SCREEN: ; 0x005043, $C043
+    JSR   JMP_GOTO_PAST_JSR ; Sentence cleared from screen.
     .db $C0
     .db $05
     .db $02
     RTS
-GOTO_C00E_B2: ; 0x00504A, $C04A
-    JSR   JMP_GOTO_PAST_JSR
+GOTO_C00E_B2_AB_TO_SCREEN: ; 0x00504A, $C04A
+    JSR   JMP_GOTO_PAST_JSR ; Val in AB to screen
     .db $C0
     .db $0E
     .db $02
     RTS
-GOTO_C011_B2: ; 0x005051, $C051
-    JSR   JMP_GOTO_PAST_JSR
+GOTO_C011_B2_AB_FROM_SCREEN: ; 0x005051, $C051
+    JSR   JMP_GOTO_PAST_JSR ; Val in AB cleared from screen.
     .db $C0
     .db $11
     .db $02
     RTS
-GOTO_C01A_B2: ; 0x005058, $C058
-    JSR   JMP_GOTO_PAST_JSR
+GOTO_C01A_B2_SPECIAL_TO_SCREEN: ; 0x005058, $C058
+    JSR   JMP_GOTO_PAST_JSR ; Special to screen.
     .db $C0
     .db $1A
     .db $02
     RTS
-GOTO_C01D_B2: ; 0x00505F, $C05F
-    JSR   JMP_GOTO_PAST_JSR
+GOTO_C01D_B2_SPECIAL_FROM_SCREEN: ; 0x00505F, $C05F
+    JSR   JMP_GOTO_PAST_JSR ; Special cleared from screen.
     .db $C0
     .db $1D
     .db $02
     RTS
-GOTO_C020_B2: ; 0x005066, $C066
-    JSR   JMP_GOTO_PAST_JSR
+GOTO_C020_B2_PREP_PRESS_ADV_TO_STEP_THRU: ; 0x005066, $C066
+    JSR   JMP_GOTO_PAST_JSR ; SENTENCE PRESS ADV TO STEP THRU TEST
     .db $C0
     .db $20
     .db $02
     RTS
-GOTO_C023_B2: ; 0x00506D, $C06D
-    JSR   JMP_GOTO_PAST_JSR
+GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...: ; 0x00506D, $C06D
+    JSR   JMP_GOTO_PAST_JSR ; SENTENCE PRESS ADV WITH SWITCH SET FOR...
     .db $C0
     .db $23
     .db $02
     RTS
-    ADCB  R_A0FF_UNK
+    .db $D9
+    .db $FF
 BOOTUP_UNIT_OK: ; 0x005076, $C076
     JSR   CLR_SCR+ADV/AUTO+CLEAR_PALETTE+$49_STUFF
     LDB   #$7A ; R3/7,G6/7,B2/3
     JSR   SET_COLOR_$C001
     LDU   #$C069 ; PTR to SENTENCE INITIAL TESTS INDICATE
     LDX   #$2870 ; POS XXYY
-    JSR   GOTO_C002_B2 ; Put to screen.
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN ; Put to screen.
     LDU   #$C06B ; PTR to SENTENCE UNIT OK
     LDX   #$4090 ; POS
-    JSR   GOTO_C002_B2 ; Put to screen
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN ; Put to screen
     LDB   #$0F ; All LED's lighted?
     JSR   ROM_LED_BLINK_STARTUP?
     LDY   #$0BB8 ; Loops to read switches for admin menu.
@@ -14259,10 +14261,10 @@ BOOTUP_RAM_FAILURE: ; 0x00509C, $C09C
     JSR   SET_COLOR_$C001
     LDU   #$C069 ; PTR to SENTENCE INITIAL TESTS INDICATE
     LDX   #$2870 ; POS
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     LDU   #$C073 ; PTR to SENTENCE RAM FAILURE
     LDX   #$3890 ; POS
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     BRA   BOOTUP_FAILURE_WAIT
 BOOTUP_ROM_FAILURE: ; 0x0050B8, $C0B8
     JSR   CLR_SCR+ADV/AUTO+CLEAR_PALETTE+$49_STUFF
@@ -14270,16 +14272,16 @@ BOOTUP_ROM_FAILURE: ; 0x0050B8, $C0B8
     JSR   SET_COLOR_$C001
     LDU   #$C069 ; PTR, SENTENCE INITIAL TESTS INDICATE
     LDX   #$2860
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     LDU   #$C071 ; PTR, SENTENCE ROM FAILURE
     LDX   #$3880 ; POS
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     TFR   DP>A
     CMPA  #$9E ; Value if DP was 0.
     BEQ   BOOTUP_FAILURE_WAIT
     LDU   #$C073 ; PTR to SENTENCE RAM FAILURE
     LDX   #$38A0 ; POS
-    JSR   GOTO_C002_B2 ; Put to screen
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN ; Put to screen
 BOOTUP_FAILURE_WAIT: ; 0x0050E1, $C0E1
     LDY   #$0BB8 ; Timer?
 LOOP_FAIL_ADV/AUTO_READ: ; 0x0050E5, $C0E5
@@ -14354,9 +14356,9 @@ FAILED_WITH_AUTO_NOT_PRESSED: ; 0x005146, $C146
     JSR   SET_COLOR_$C001 ; Color
     LDU   #$C071 ; PTR
     LDX   #$3860 ; POS
-    JSR   GOTO_C002_B2 ; DISP
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN ; DISP
     LDY   #$C035 ; PTR
-    JSR   GOTO_C023_B2 ; DISP
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR... ; DISP
     LDD   #$4266 ; IDK
     STD   $A04A ; Store
 L_005180: ; 0x005180, $C180
@@ -14364,7 +14366,7 @@ L_005180: ; 0x005180, $C180
     LEAX  10,X ; Add 10
     STX   $A04A ; Store
     LDU   #$C06D ; PTR?
-    JSR   GOTO_C002_B2 ; Disp?
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN ; Disp?
     LDU   DATA_W_#$F86E ; Get
     STU   $A043 ; Put
     LDU   $A05B ; Load
@@ -14375,10 +14377,10 @@ L_005180: ; 0x005180, $C180
     LEAU  1,U
 BOTTOM_BIT_SET: ; 0x00519C, $C19C
     INCB ; INC PTR bottom?
-    STB   $A03A ; Store...
+    STB   R_A03A_MENU_UNK ; Store...
     JSR   A+=16_PER_EACH_B_0xF0>>8_VALUE ; Make pos?
     LDX   SENTENCE_CURR_SCR_LOC_XXYY
-    JSR   GOTO_C00E_B2 ; Text IDK
+    JSR   GOTO_C00E_B2_AB_TO_SCREEN ; Text IDK
     JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV ; Watchdog+switches.
     JSR   JMP_CORRECT_CHECKSUM ; Idk why
     STU   $A05B ; Store U...?
@@ -14389,10 +14391,10 @@ BOTTOM_BIT_SET: ; 0x00519C, $C19C
     JSR   WAIT_ADV_NONPRESS_THEN_PRESS
     TST   UNK_$49_SYS_MENU_FLAG? ; Test flag...
     BNE   $49_NOT_SET ; If not set..
-    LDB   $A03A ; If set, load val...
+    LDB   R_A03A_MENU_UNK ; If set, load val...
     JSR   ROM_BOARD_LED_DISPLAY_B ; Display on ROM board.
     LDY   #$C039 ; PTR?
-    JSR   GOTO_C023_B2 ; Disp?
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR... ; Disp?
     BRA   L_0051EE ; Go always
 STACKS_THE_SAME: ; 0x0051CF, $C1CF
     TFR   CC>B
@@ -14402,9 +14404,9 @@ STACKS_THE_SAME: ; 0x0051CF, $C1CF
     JSR   SET_COLOR_$C001
     LDU   #$C077
     LDX   #$3880
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     LDY   #$C039
-    JSR   GOTO_C023_B2
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...
     LDB   #$08
     JSR   ROM_LED_BLINK_STARTUP?
 L_0051EE: ; 0x0051EE, $C1EE
@@ -14413,19 +14415,19 @@ $49_NOT_SET: ; 0x0051F1, $C1F1
     JSR   CLR_SCR+ADV/AUTO+CLEAR_PALETTE+$49_STUFF
     CLRB
     JSR   ROM_BOARD_LED_DISPLAY_B
-    JSR   SET_COLOR_RED_PALETTE_0x01
+    JSR   SET_COLOR_PALETTE_0x01_WHITE
     LDU   #$C079
     LDX   #$4080
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     LDY   #$C03D
-    JSR   GOTO_C023_B2
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...
     LDY   #$1388
     JSR   AUTO+ADV_CHECK
 L_005212: ; 0x005212, $C212
     JSR   ADV+AUTO_CUMULATIVE
     TST   UNK_$49_SYS_MENU_FLAG?
     LBNE  Y_IS_#$000A
-    TST   UNK_$47
+    TST   UNK_$47_AUTO+ADV
     BNE   L_005212
     LDX   #$C000
     LDB   #$C0
@@ -14456,9 +14458,9 @@ RUG_MISMATCH_JMP: ; 0x00523D, $C23D
     JSR   SET_COLOR_$C001
     LDU   #$C073 ; PTR TO SENTENCE RAM FAILURE
     LDX   #$3870 ; Pos XXYY
-    JSR   GOTO_C002_B2 ; To screen
-    LDY   #$C041 ; Idk ptr to
-    JSR   GOTO_C023_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN ; To screen
+    LDY   #$C041 ; PTR to SENTENCE AUTO FOR CMOS RAM TEST
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...
     LDD   $A041
     TSTA
     BNE   L_005274
@@ -14469,29 +14471,29 @@ L_005275: ; 0x005275, $C275
     INCB
     LSRA
     BCC   L_005275
-    STB   $A03A
+    STB   R_A03A_MENU_UNK
     LDD   $A043
 L_00527D: ; 0x00527D, $C27D
     SUBA  #$03
     BCC   L_00527D
     ADDA  #$04
-    STA   $A03B
+    STA   R_AO3B_UPDATE_SCREEN?
     LDU   #$C06F
     LDX   #$4290
-    JSR   GOTO_C002_B2
-    LDB   $A03B
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
+    LDB   R_AO3B_UPDATE_SCREEN?
     ASLB
     ASLB
     ASLB
     ASLB
-    ADDB  $A03A
+    ADDB  R_A03A_MENU_UNK
     CLRA
     LDX   SENTENCE_CURR_SCR_LOC_XXYY
-    JSR   GOTO_C00E_B2
+    JSR   GOTO_C00E_B2_AB_TO_SCREEN
     JSR   WAIT_ADV_NONPRESS_THEN_PRESS
     TST   UNK_$49_SYS_MENU_FLAG?
     BNE   Y_IS_#$000A
-    LDA   $A03B
+    LDA   R_AO3B_UPDATE_SCREEN?
     LDB   #$10
 L_0052A7: ; 0x0052A7, $C2A7
     LSRB
@@ -14501,10 +14503,10 @@ L_0052A7: ; 0x0052A7, $C2A7
     JSR   WAIT_ADV_NONPRESS_THEN_PRESS
     TST   UNK_$49_SYS_MENU_FLAG?
     BNE   Y_IS_#$000A
-    LDB   $A03A
+    LDB   R_A03A_MENU_UNK
     JSR   ROM_BOARD_LED_DISPLAY_B
     LDY   #$C045
-    JSR   GOTO_C023_B2
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...
     BRA   L_0052EF
 RUG_MENU_LEAVE?: ; 0x0052C3, $C2C3
     JSR   CLEAR_COLOR_PALETTE
@@ -14513,15 +14515,15 @@ RUG_MENU_LEAVE?: ; 0x0052C3, $C2C3
     JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV
     CMPY  #$000A
     BEQ   Y_IS_#$000A
-    LDB   #$7A ; R3/7,B6/7,G2/3
-    JSR   SET_COLOR_$C001
-    LDU   #$C07B
-    LDX   #$2880
-    JSR   GOTO_C002_B2
-    LDY   #$C045
-    JSR   GOTO_C023_B2
+    LDB   #$7A ; R=2/7,G=7/7,B=1/3
+    JSR   SET_COLOR_$C001 ; Set color.
+    LDU   #$C07B ; SENTENCE NO RAM ERRORS DETECTED
+    LDX   #$2880 ; Pos
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN ; To screen
+    LDY   #$C045 ; SENTENCE AUTO FOR CMOS RAM TEST
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR... ; To SCR
     LDB   #$04
-    JSR   ROM_LED_BLINK_STARTUP?
+    JSR   ROM_LED_BLINK_STARTUP? ; Display on ROM
 L_0052EF: ; 0x0052EF, $C2EF
     JSR   L_005A39
 Y_IS_#$000A: ; 0x0052F2, $C2F2
@@ -14535,9 +14537,9 @@ Y_IS_#$000A: ; 0x0052F2, $C2F2
     JSR   SET_COLOR_$C001
     LDU   #$C081
     LDX   #$2880
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     LDY   #$C049
-    JSR   GOTO_C023_B2
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...
     JMP   L_0053BB
 L_005318: ; 0x005318, $C318
     ADDA  #$03
@@ -14552,25 +14554,25 @@ L_005322: ; 0x005322, $C322
     CMPX  #$C500
     BNE   L_005322
     LDD   #$0010
-    STB   $A03A
+    STB   R_A03A_MENU_UNK
     CLRA
 L_005334: ; 0x005334, $C334
     LDX   #$C400
-    LDB   $A03A
+    LDB   R_A03A_MENU_UNK
 L_005339: ; 0x005339, $C339
     JSR   JMP_STORE_B@X_BANK0
     LEAX  1,X
     INCB
-    CMPB  $A03A
+    CMPB  R_A03A_MENU_UNK
     BNE   L_005339
     LDX   #$C400
     INCA
 L_005347: ; 0x005347, $C347
     JSR   JMP_LOAD_B@X_BANK0
-    STB   $A03B
+    STB   R_AO3B_UPDATE_SCREEN?
     LEAX  1,X
     JSR   JMP_LOAD_B@X_BANK0
-    SUBB  $A03B
+    SUBB  R_AO3B_UPDATE_SCREEN?
     DECB
     ANDB  #$0F
     BNE   L_005366
@@ -14579,7 +14581,7 @@ L_005347: ; 0x005347, $C347
     JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV
     TST   UNK_$49_SYS_MENU_FLAG?
     BNE   L_005366
-    DEC   $A03A
+    DEC   R_A03A_MENU_UNK
     BNE   L_005334
 L_005366: ; 0x005366, $C366
     LDU   $A041
@@ -14592,7 +14594,7 @@ L_00536B: ; 0x00536B, $C36B
     BNE   L_00536B
     TST   UNK_$49_SYS_MENU_FLAG?
     BNE   L_0053BE
-    LDA   $A03A
+    LDA   R_A03A_MENU_UNK
     BEQ   L_0053A1
     LDB   #$02
     JSR   ROM_BOARD_LED_DISPLAY_B
@@ -14601,19 +14603,19 @@ L_00536B: ; 0x00536B, $C36B
     JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV
     LDU   #$C07D
     LDX   #$3080
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV
     LDY   #$C049
-    JSR   GOTO_C023_B2
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...
     BRA   L_0053BB
 L_0053A1: ; 0x0053A1, $C3A1
     LDB   #$7A
     JSR   SET_COLOR_$C001
     LDU   #$C07F
     LDX   #$3880
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     LDY   #$C049
-    JSR   GOTO_C023_B2
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...
     LDB   #$02
     JSR   ROM_LED_BLINK_STARTUP?
 L_0053BB: ; 0x0053BB, $C3BB
@@ -14622,12 +14624,12 @@ L_0053BE: ; 0x0053BE, $C3BE
     JSR   CLR_SCR+ADV/AUTO+CLEAR_PALETTE+$49_STUFF
     LDB   #$01
     JSR   ROM_BOARD_LED_DISPLAY_B
-    JSR   SET_COLOR_RED_PALETTE_0x01
+    JSR   SET_COLOR_PALETTE_0x01_WHITE
     LDU   #$C083
     LDX   #$3880
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     LDY   #$C04D
-    JSR   GOTO_C023_B2
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...
     LDY   #$1388
     JSR   AUTO+ADV_CHECK
     JSR   L_005B67
@@ -14653,12 +14655,12 @@ RUG_MATCH_UNK: ; 0x005406, $C406
     STB   $A041 ; Clear
     STB   $A042 ; Set
     JSR   ROM_BOARD_LED_DISPLAY_B
-    JSR   SET_COLOR_RED_PALETTE_0x01 ; Red?
+    JSR   SET_COLOR_PALETTE_0x01_WHITE ; Red?
     LDU   #$C085 ; Str?
     LDX   #$4078 ; Screen loc?
-    JSR   GOTO_C002_B2 ; Text?
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN ; Text?
     LDY   #$C055
-    JSR   GOTO_C023_B2 ; Text?
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR... ; Text?
     LDY   #$0001 ; Set
 L_005428: ; 0x005428, $C428
     LDU   #$C9F0 ; Load
@@ -14681,26 +14683,26 @@ L_005442: ; 0x005442, $C442
     LEAU  1,U
     BRA   L_005442
 L_00544B: ; 0x00544B, $C44B
-    STA   $A03A
+    STA   R_A03A_MENU_UNK
     EORA  #$3F
 ADVANCED_PRESSED: ; 0x00544F, $C44F
     LDB   #$13
     JSR   OUTPUT_SOUND?
     TST   UNK_$49_SYS_MENU_FLAG?
     BNE   L_005486
-    LDB   $A03A
+    LDB   R_A03A_MENU_UNK
     JSR   OUTPUT_SOUND?
     LDY   #$03E8
     LDD   $A041
     LDX   #$5A8C
-    JSR   GOTO_C011_B2
-    LDB   $A03A
+    JSR   GOTO_C011_B2_AB_FROM_SCREEN
+    LDB   R_A03A_MENU_UNK
     JSR   A+=16_PER_EACH_B_0xF0>>8_VALUE
     CLRA
     STD   $A041
     LDX   #$5A8C
-    JSR   GOTO_C00E_B2
-    LDA   $A03A
+    JSR   GOTO_C00E_B2_AB_TO_SCREEN
+    LDA   R_A03A_MENU_UNK
     CMPA  #$1F
     BNE   LOOP_ERROR?
     TFR   CC>B
@@ -14709,12 +14711,12 @@ ADVANCED_PRESSED: ; 0x00544F, $C44F
     BRA   L_005428
 L_005486: ; 0x005486, $C486
     JSR   CLR_SCR+ADV/AUTO+CLEAR_PALETTE+$49_STUFF
-    JSR   SET_COLOR_RED_PALETTE_0x01
+    JSR   SET_COLOR_PALETTE_0x01_WHITE
     LDU   #$C087
     LDX   #$3820
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     LDY   #$C059
-    JSR   GOTO_C023_B2
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...
     TFR   DP>A
     LDB   #$62
     STD   $A041
@@ -14732,7 +14734,7 @@ L_0054A8: ; 0x0054A8, $C4A8
     CLR   LIST_15B_CALLBACKS_AVAILABLE
 L_0054B8: ; 0x0054B8, $C4B8
     LDA   #$01
-    STA   $A03C
+    STA   R_A03C_OPTION_ON
     LDX   #$CC00
     LDU   $A041
     LEAU  -5,U
@@ -14747,7 +14749,7 @@ L_0054CE: ; 0x0054CE, $C4CE
     BNE   L_0054D4
     ANDB  #$CF
 L_0054D4: ; 0x0054D4, $C4D4
-    STB   $A03A
+    STB   R_A03A_MENU_UNK
     EORB  U+
     BNE   L_005512
     ADDA  #$08
@@ -14767,7 +14769,7 @@ L_0054DC: ; 0x0054DC, $C4DC
     LEAX  1,X
     JSR   JMP_STORE_B@X_BANK0
     LEAX  -3,X
-    INC   $A03C
+    INC   R_A03C_OPTION_ON
     BRA   L_0054C4
 L_005501: ; 0x005501, $C501
     LDB   #$3C
@@ -14778,17 +14780,17 @@ L_005501: ; 0x005501, $C501
     BEQ   L_0054B8
     BRA   L_005585
 L_005512: ; 0x005512, $C512
-    STB   $A03B
+    STB   R_AO3B_UPDATE_SCREEN?
     LDB   #$01
 L_005516: ; 0x005516, $C516
-    BITB  $A03B
+    BITB  R_AO3B_UPDATE_SCREEN?
     BNE   L_00551E
     INCA
     ASLB
     BRA   L_005516
 L_00551E: ; 0x00551E, $C51E
     LDX   $A041
-    BITB  $A03A
+    BITB  R_A03A_MENU_UNK
     BNE   L_005538
     EORB  -U
     STB   U
@@ -14811,7 +14813,7 @@ L_005541: ; 0x005541, $C541
     STA   -X
     PSHS  A
     BSR   L_00556C
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     PULS  A
     CMPA  #$08
     BCS   L_005501
@@ -14824,8 +14826,8 @@ L_005541: ; 0x005541, $C541
     BPL   L_005501
     LDX   SENTENCE_CURR_SCR_LOC_XXYY
     CLRA
-    LDB   $A03C
-    JSR   GOTO_C00E_B2
+    LDB   R_A03C_OPTION_ON
+    JSR   GOTO_C00E_B2_AB_TO_SCREEN
     BRA   L_005501
 L_00556C: ; 0x00556C, $C56C
     LDU   #$C08B
@@ -14844,12 +14846,12 @@ L_005575: ; 0x005575, $C575
     RTS
 L_005585: ; 0x005585, $C585
     JSR   CLR_SCR+ADV/AUTO+CLEAR_PALETTE+$49_STUFF
-    JSR   SET_COLOR_RED_PALETTE_0x01
+    JSR   SET_COLOR_PALETTE_0x01_WHITE
     LDU   #$C089
     LDX   #$2880
-    JSR   GOTO_C002_B2
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN
     LDY   #$C05D
-    JSR   GOTO_C023_B2
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...
     LDX   #$CC00
 L_00559E: ; 0x00559E, $C59E
     LDU   #$C9F4
@@ -15151,334 +15153,334 @@ L_0056C6: ; 0x0056C6, $C6C6
     .db $BC
     .db $C6
     .db $05
-L_005774: ; 0x005774, $C774
-    LDX   #$C000
-    BSR   L_00577C
-    LDX   #$C00C
-L_00577C: ; 0x00577C, $C77C
-    JMP   JMP_STORE_B@X_BANK0
-    LDB   #$28
-    BRA   L_005774
+UPDATE_PALETTE_WITH_B?: ; 0x005774, $C774
+    LDX   #$C000 ; PTR to palette?
+    BSR   JMP_STORE_B@X_BANK0
+    LDX   #$C00C ; Also here?
+JMP_STORE_B@X_BANK0: ; 0x00577C, $C77C
+    JMP   JMP_STORE_B@X_BANK0 ; Store B to palette.
+    LDB   #$28 ; B=
+    BRA   UPDATE_PALETTE_WITH_B?
     LDB   #$80
-    BRA   L_005774
+    BRA   UPDATE_PALETTE_WITH_B?
     LDY   #$C9FE
     JSR   UPLOAD_PALETTE_@Y
     JMP   L_005B3B
-SET_COLOR_RED_PALETTE_0x01: ; 0x005791, $C791
-    LDB   #$A5 ; R=5/7,G=1/7,B=1/3
+SET_COLOR_PALETTE_0x01_WHITE: ; 0x005791, $C791
+    LDB   #$A5 ; R=5/7, G=4/7, B=2/3
 SET_COLOR_$C001: ; 0x005793, $C793
     LDX   #$C001
     JMP   JMP_STORE_B@X_BANK0
 SETTINGS_MENU?: ; 0x005799, $C799
     JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV
     JSR   CLR_SCR+ADV/AUTO+CLEAR_PALETTE+$49_STUFF
-    BSR   SET_COLOR_RED_PALETTE_0x01
+    BSR   SET_COLOR_PALETTE_0x01_WHITE
     LDU   #$C0D7 ; PTR to SENTENCE WILLIAMS DEFENDER
     LDX   #$2820 ; POS
-    JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV
-    JSR   GOTO_C002_B2
-    LDY   #$C061
-    JSR   GOTO_C023_B2
+    JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV ; Do once? Setup?
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN ; Put to screen
+    LDY   #$C061 ; SENTENCE AUTO FOR GAME OVER
+    JSR   GOTO_C023_B2_PREP_PRESS_ADV_WITH_SWITCH_SET_FOR...
     LDY   #$05DC ; Timer?
-    JSR   AUTO+ADV_CHECK
-    TST   UNK_$49_SYS_MENU_FLAG?
-    BNE   L_00581F
-    CLR   $A03C
+    JSR   AUTO+ADV_CHECK ; Check for buttons.
+    TST   UNK_$49_SYS_MENU_FLAG? ; Test
+    BNE   LEAVE_SETTINGS_MENU ; Flag set, goto.
+    CLR   R_A03C_OPTION_ON ; Clear IDK
     LDA   #$01
-    STA   $A03B
-    LEAS  -32,S
-    JSR   JMP_CLEAR_ALL_SCREEN
+    STA   R_AO3B_UPDATE_SCREEN? ; Set...
+    LEAS  -32,S ; Get 32 bytes at stack pointer?
+    JSR   JMP_CLEAR_ALL_SCREEN ; Clear screen.
     LDU   #$C0D7 ; PTR to SENTENCE WILLIAMS DEFENDER
     LDX   #$2820 ; POS
-    JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV
-    JSR   GOTO_C002_B2
-    CLR   $A03A
-    LDY   #$C065
-    JSR   GOTO_C020_B2
-    JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV
-    LDA   #$20
-    TFR   A>B
-    DECB
-    LEAX  S
-L_0057EA: ; 0x0057EA, $C7EA
-    STA   X+
-    DECB
-    BNE   L_0057EA
-    LDA   #$2F
-    STA   X+
-    LEAX  S
-L_0057F5: ; 0x0057F5, $C7F5
-    JSR   ADV+AUTO_CUMULATIVE
+    JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV ; Do...
+    JSR   GOTO_C002_B2_SENTENCE_TO_SCREEN ; Put to screen.
+    CLR   R_A03A_MENU_UNK ; Clear...
+    LDY   #$C065 ; SENTENCE PRESS HIGH SCORE RESET TO MAKE CHANGE
+    JSR   GOTO_C020_B2_PREP_PRESS_ADV_TO_STEP_THRU
+    JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV ; Do
+    LDA   #$20 ; Space val
+    TFR   A>B ; To B
+    DECB ; Loop--
+    LEAX  S ; S pos to X
+LOOP_CLEAR_TEXT_BUF: ; 0x0057EA, $C7EA
+    STA   X+ ; Space to text buf.
+    DECB ; Loop--
+    BNE   LOOP_CLEAR_TEXT_BUF
+    LDA   #$2F ; End of string value.
+    STA   X+ ; Store
+    LEAX  S ; Reset X
+LOOP_WAIT_FOR_INPUT_MENU?: ; 0x0057F5, $C7F5
+    JSR   ADV+AUTO_CUMULATIVE ; Do
     LDX   #$CC00
-    JSR   JMP_LOAD_B@X_BANK0
-    BITB  #$02
-    BEQ   L_005825
-    BITB  #$01
-    BNE   L_005812
-    INC   $A03B
-    DEC   $A03C
-    BPL   L_005825
-    LDB   #$1B
-    STB   $A03C
-    BRA   L_005825
-L_005812: ; 0x005812, $C812
-    INC   $A03C
-    INC   $A03B
-    LDA   #$1C
-    CMPA  $A03C
-    BNE   L_005825
-    LEAS  32,S
-L_00581F: ; 0x00581F, $C81F
-    JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV
-    JMP   JMP_TO_RUG_PASS_SRAM_CHECK
-L_005825: ; 0x005825, $C825
-    JSR   L_00597A
-    TST   $A03B
-    BEQ   L_0057F5
-    LDB   $A03C
-    CMPB  #$09
-    BNE   L_005857
-    LDX   #$C487
-    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
-    TSTB
-    BEQ   L_005857
-    CMPB  #$08
-    BHI   L_005844
-    JSR   L_005B99
-    BRA   L_005857
-L_005844: ; 0x005844, $C844
-    LDX   #$C487
-    PSHS  X
-    LDB   #$01
-    JSR   JMP_STORE_B_TO_SRAM[X]
-    JSR   L_005B99
-    CLRB
-    PULS  X
-    JSR   JMP_STORE_B_TO_SRAM[X]
-L_005857: ; 0x005857, $C857
-    BSR   L_005891
-    LDA   $A03A
-    CMPA  #$06
-    BEQ   L_00586D
-    TSTA
-    BNE   L_005866
-    LDA   #$64
-    BRA   L_005868
-L_005866: ; 0x005866, $C866
+    JSR   JMP_LOAD_B@X_BANK0 ; ROM PIA DATA_A
+    BITB  #$02 ; Test ADV
+    BEQ   DONT_CHANGE_MENU_OPTION ; Not set
+    BITB  #$01 ; Test AUTO/MANUAL toggle.
+    BNE   INC_VALS_IDK ; AUTO/MAN SET, increase.
+    INC   R_AO3B_UPDATE_SCREEN? ; Inc IDK
+    DEC   R_A03C_OPTION_ON ; --
+    BPL   DONT_CHANGE_MENU_OPTION ; Exit if okay.
+    LDB   #$1B ; Reseed to last.
+    STB   R_A03C_OPTION_ON ; Store back.
+    BRA   DONT_CHANGE_MENU_OPTION ; Skip other.
+INC_VALS_IDK: ; 0x005812, $C812
+    INC   R_A03C_OPTION_ON ; Inc
+    INC   R_AO3B_UPDATE_SCREEN? ; Inc
+    LDA   #$1C ; 28th option.
+    CMPA  R_A03C_OPTION_ON
+    BNE   DONT_CHANGE_MENU_OPTION ; Not on 28th option.
+    LEAS  32,S ; Fix stack space reserved.
+LEAVE_SETTINGS_MENU: ; 0x00581F, $C81F
+    JSR   WATCHDOG/TRIGGER_$49_ON_AUTO+ADV ; Check one more time, watchdog use here?
+    JMP   JMP_TO_RUG_PASS_SRAM_CHECK ; Go to game.
+DONT_CHANGE_MENU_OPTION: ; 0x005825, $C825
+    JSR   SUB_IDK ; Idk
+    TST   R_AO3B_UPDATE_SCREEN? ; Test addr
+    BEQ   LOOP_WAIT_FOR_INPUT_MENU? ; If 0, loop.
+    LDB   R_A03C_OPTION_ON
+    CMPB  #$09 ; If B _ 9
+    BNE   NOT_NINE ; !=, goto.
+    LDX   #$C487 ; X assumed?
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B ; Get data
+    TSTB ; Test loaded
+    BEQ   NOT_NINE ; Is 0, goto.
+    CMPB  #$08 ; B _ val
+    BHI   SRAM_INIT_UNK_NOT_SUB ; >, goto.
+    JSR   SRAM_INIT_UNK ; Init SRAM area...
+    BRA   NOT_NINE ; goto.
+SRAM_INIT_UNK_NOT_SUB: ; 0x005844, $C844
+    LDX   #$C487 ; SRAM PTR
+    PSHS  X ; Save to stack
+    LDB   #$01 ; Val
+    JSR   JMP_STORE_B_TO_SRAM[X] ; Store B to SRAM...
+    JSR   SRAM_INIT_UNK ; Now init???
+    CLRB ; Clear B
+    PULS  X ; Restore X
+    JSR   JMP_STORE_B_TO_SRAM[X] ; Store cleared here...
+NOT_NINE: ; 0x005857, $C857
+    BSR   SETTING_UPDATE
+    LDA   R_A03A_MENU_UNK ; Load addr
+    CMPA  #$06 ; If A _ 6
+    BEQ   INPUT_STUFF ; ==, goto.
+    TSTA ; If A...
+    BNE   LOAD_WITH_6 ; != 0, goto.
+    LDA   #$64 ; Val if A=0
+    BRA   SKIP_OTHER_LOAD
+LOAD_WITH_6: ; 0x005866, $C866
     LDA   #$06
-L_005868: ; 0x005868, $C868
-    STA   $A03A
-    INCA
-    LDB   #$FF
-L_00586D: ; 0x00586D, $C86D
-    JSR   ADV+AUTO_CUMULATIVE
-    DECA
-    BEQ   L_00588C
-    LDX   #$CC00
-    PSHS  B
-    JSR   JMP_LOAD_B@X_BANK0
-    BITB  #$0A
-    BNE   L_005883
-    ANDCC #$FE
-    BRA   L_005885
-L_005883: ; 0x005883, $C883
-    ORCC  #$01
-L_005885: ; 0x005885, $C885
-    PULS  B
-    RORB
-    BNE   L_00586D
-    CLR   $A03A
-L_00588C: ; 0x00588C, $C88C
-    CLR   $A03B
-    JMP   L_0057F5
-L_005891: ; 0x005891, $C891
-    LEAY  2,S
-    LDX   #$1080
-    JSR   GOTO_C01A_B2
-    JSR   L_00591F
-    LDA   $A03C
-    INCA
-    JSR   L_005902
-    JSR   L_005910
-    STD   X
-    LDB   $A03C
+SKIP_OTHER_LOAD: ; 0x005868, $C868
+    STA   R_A03A_MENU_UNK ; Store to.
+    INCA ; A++
+    LDB   #$FF ; B=
+INPUT_STUFF: ; 0x00586D, $C86D
+    JSR   ADV+AUTO_CUMULATIVE ; Do
+    DECA ; A--
+    BEQ   A_COUNTDOWN_ENDED
+    LDX   #$CC00 ; ROM PIA DATA_A
+    PSHS  B ; Save B asis.
+    JSR   JMP_LOAD_B@X_BANK0 ; Get input.
+    BITB  #$0A ; Test HSR+ADV
+    BNE   BUTTONS_PRESSED
+    ANDCC #$FE ; Clear CC.c
+    BRA   BUTTON_PRESSED_CC
+BUTTONS_PRESSED: ; 0x005883, $C883
+    ORCC  #$01 ; Set CC
+BUTTON_PRESSED_CC: ; 0x005885, $C885
+    PULS  B ; Pull
+    RORB ; Rotate bringing in pressed.
+    BNE   INPUT_STUFF ; If any set, loop.
+    CLR   R_A03A_MENU_UNK ; Clear
+A_COUNTDOWN_ENDED: ; 0x00588C, $C88C
+    CLR   R_AO3B_UPDATE_SCREEN? ; Updated.
+    JMP   LOOP_WAIT_FOR_INPUT_MENU? ; Loop back to the beginning.
+SETTING_UPDATE: ; 0x005891, $C891
+    LEAY  2,S ; Y from S[2], PTR stream?
+    LDX   #$1080 ; POS
+    JSR   GOTO_C01A_B2_SPECIAL_TO_SCREEN ; Cleared
+    JSR   SUB_CLEAR_TEXT_BUF+RESET_X_POS ; Clear text buffer.
+    LDA   R_A03C_OPTION_ON ; Load
+    INCA ; ++ for display, 0 disp as 1, 1>2, etc.
+    JSR   A_TO_DECIMAL ; To decimal.
+    JSR   A_TO_AB_ASCII ; To displayable.
+    STD   X ; Text to X
+    LDB   R_A03C_OPTION_ON ; Load
+    ASLB ; << 2, *4
     ASLB
-    ASLB
-    LDX   #$CCD6
-    ABX
-    LDY   X
-    LDU   2,X
-    LEAX  14,S
-L_0058B6: ; 0x0058B6, $C8B6
-    LDA   Y+
-    CMPA  #$2F
-    BEQ   L_0058C0
-    STA   X+
-    BRA   L_0058B6
-L_0058C0: ; 0x0058C0, $C8C0
-    TFR   U>D
-    LEAU  2,S
-    LDX   #$C400
-    ABX
-    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B
-    PSHS  B,A
-    LDB   $A03C
-    INCB
-    CMPB  #$07
-    BHI   L_0058E7
-L_0058D4: ; 0x0058D4, $C8D4
-    PULS  A,B
-    TFR   B>A
-    JSR   L_005910
-    STD   7,U
-    JSR   JMP_GET_DATA_FROM_SRAM[X]
-L_0058E0: ; 0x0058E0, $C8E0
-    JSR   L_005910
-    STD   9,U
-    BRA   L_0058FA
-L_0058E7: ; 0x0058E7, $C8E7
+    LDX   #$CCD6 ; Ptr to data
+    ABX ; X+=B
+    LDY   X ; X[0] to Y, text move ptr.
+    LDU   2,X ; U from X[2], attribute data.
+    LEAX  14,S ; X = S[14], text ptr.
+LOOP_MOVE_TEXT: ; 0x0058B6, $C8B6
+    LDA   Y+ ; Load from text moving.
+    CMPA  #$2F ; \0?
+    BEQ   EXIT_MOVE_LOOP ; ==, yes, goto.
+    STA   X+ ; Store to ptr.
+    BRA   LOOP_MOVE_TEXT
+EXIT_MOVE_LOOP: ; 0x0058C0, $C8C0
+    TFR   U>D ; Attributes to A/B
+    LEAU  2,S ; U = S[2], text buffer.
+    LDX   #$C400 ; SRAM PTR
+    ABX ; X += B
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_B ; Get val
+    PSHS  B,A ; Save B, and A settings.
+    LDB   R_A03C_OPTION_ON ; Get option
+    INCB ; Inc
+    CMPB  #$07 ; If changable from menu...
+    BHI   IS_POSSIBLY_6_DIGIT
+4_DIGIT_TO_BUF: ; 0x0058D4, $C8D4
+    PULS  A,B ; Pull
+    TFR   B>A ; Overwrite settings.
+    JSR   A_TO_AB_ASCII ; Get ascii.
+    STD   7,U ; Store to text buf.
+    JSR   JMP_GET_DATA_FROM_SRAM[X]_IN_A ; Get other bytes.
+2_DIGIT_TO_BUF: ; 0x0058E0, $C8E0
+    JSR   A_TO_AB_ASCII ; To ascii.
+    STD   9,U ; To text buf.
+    BRA   POST_DISPLAY_SETTING_ASCII ; Goto.
+IS_POSSIBLY_6_DIGIT: ; 0x0058E7, $C8E7
     CMPB  #$08
-    BNE   L_0058F4
-    LDD   #$3030
-    STD   9,U
-    LEAU  -2,U
-    BRA   L_0058D4
-L_0058F4: ; 0x0058F4, $C8F4
-    PULS  A,B
-    TFR   B>A
-    BRA   L_0058E0
-L_0058FA: ; 0x0058FA, $C8FA
-    LDX   #$1080
-    LEAY  2,S
-    JMP   GOTO_C01D_B2
-L_005902: ; 0x005902, $C902
-    PSHS  B
-    TFR   A>B
-    LDA   #$99
-L_005908: ; 0x005908, $C908
-    ADDA  #$01
-    DAA
-    DECB
-    BPL   L_005908
-    PULS  B,PC
-L_005910: ; 0x005910, $C910
-    TFR   A>B
-    ANDA  #$F0
+    BNE   NOT_6_DIGIT ; Not long val, goto.
+    LDD   #$3030 ; This is ship bonus level here. Two blanks.
+    STD   9,U ; To
+    LEAU  -2,U ; Move buf ptr.
+    BRA   4_DIGIT_TO_BUF ; Put val to buf.
+NOT_6_DIGIT: ; 0x0058F4, $C8F4
+    PULS  A,B ; Pull setting and B
+    TFR   B>A ; Move.
+    BRA   2_DIGIT_TO_BUF ; Do 2 digit.
+POST_DISPLAY_SETTING_ASCII: ; 0x0058FA, $C8FA
+    LDX   #$1080 ; Pos
+    LEAY  2,S ; Y = S[2]
+    JMP   GOTO_C01D_B2_SPECIAL_FROM_SCREEN ; Display this.
+A_TO_DECIMAL: ; 0x005902, $C902
+    PSHS  B ; Save B
+    TFR   A>B ; A to B
+    LDA   #$99 ; A =
+LOOP_B_STILL_POSITIVE: ; 0x005908, $C908
+    ADDA  #$01 ; A+=1
+    DAA ; Decimal
+    DECB ; Loop--
+    BPL   LOOP_B_STILL_POSITIVE
+    PULS  B,PC ; RTS
+A_TO_AB_ASCII: ; 0x005910, $C910
+    TFR   A>B ; A to B
+    ANDA  #$F0 ; Keep top nibble.
+    LSRA ; A >> 4
     LSRA
     LSRA
     LSRA
-    LSRA
-    ADDA  #$30
+    ADDA  #$30 ; A +=
     ANDB  #$0F
     ADDB  #$30
     RTS
-L_00591F: ; 0x00591F, $C91F
-    LDA   #$20
-    TFR   A>B
-    DECB
-    LEAX  4,S
-L_005926: ; 0x005926, $C926
-    STA   X+
-    DECB
-    BNE   L_005926
-    LDA   #$2F
-    STA   X+
-    LEAX  4,S
+SUB_CLEAR_TEXT_BUF+RESET_X_POS: ; 0x00591F, $C91F
+    LDA   #$20 ; Spaces
+    TFR   A>B ; Loop count also.
+    DECB ; Loop--
+    LEAX  4,S ; X = S[4]
+LOOP_WRITE_BLANKS: ; 0x005926, $C926
+    STA   X+ ; Space to X
+    DECB ; Loop++
+    BNE   LOOP_WRITE_BLANKS
+    LDA   #$2F ; End of string.
+    STA   X+ ; Store
+    LEAX  4,S ; X = S[4]
     RTS
-L_005932: ; 0x005932, $C932
-    CMPX  #$C481
-    BNE   L_005951
-    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_AB
-    LEAX  -4,X
-    EXG   A-B
-    ADDA  #$10
-    DAA
-    BCC   L_00594A
-    EXG   A-B
-    ADDA  #$01
-L_005947: ; 0x005947, $C947
-    DAA
-    EXG   A-B
-L_00594A: ; 0x00594A, $C94A
-    EXG   A-B
-    INC   $A03B
-    JMP   JMP_STORE_D_TO_SRAM[X]
-L_005951: ; 0x005951, $C951
-    JSR   JMP_GET_DATA_FROM_SRAM[X]
-    ADDA  #$01
-L_005956: ; 0x005956, $C956
-    DAA
-    LEAX  -2,X
-    INC   $A03B
-    JMP   JMP_STORE_A_TO_SRAM_@X_BANKED
-L_00595E: ; 0x00595E, $C95E
-    CMPX  #$C481
-    BNE   L_005973
-    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_AB
-    LEAX  -4,X
-    EXG   A-B
-    ADDA  #$90
-    DAA
-    EXG   A-B
-    ADCA  #$99
-    BRA   L_005947
-L_005973: ; 0x005973, $C973
-    JSR   JMP_GET_DATA_FROM_SRAM[X]
-    ADDA  #$99
-    BRA   L_005956
-L_00597A: ; 0x00597A, $C97A
-    LDB   $A03C
-    INCB
-    CMPB  #$07
-    BHI   L_005982
-L_005981: ; 0x005981, $C981
+INC_SRAM_VAL: ; 0x005932, $C932
+    CMPX  #$C481 ; If X _ val
+    BNE   SRAM_INC_@X ; Nope, inc with this.
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_AB ; Get SRAM
+    LEAX  -4,X ; Fix addr stored back to.
+    EXG   A-B ; XXYY, YY to A
+    ADDA  #$10 ; += dec
+    DAA ; Adjust
+    BCC   EXCHANGE_AND_STORE_D_BACK ; Don't need to fix.
+    EXG   A-B ; Exchange for DAA again
+    ADDA  #$01 ; Add dec
+ADJUST_EXG_STORE_BACK+UNK: ; 0x005947, $C947
+    DAA ; Adjust
+    EXG   A-B ; Exchange
+EXCHANGE_AND_STORE_D_BACK: ; 0x00594A, $C94A
+    EXG   A-B ; Exchange
+    INC   R_AO3B_UPDATE_SCREEN? ; Inc this
+    JMP   JMP_STORE_D_TO_SRAM[X] ; Store to SRAM
+SRAM_INC_@X: ; 0x005951, $C951
+    JSR   JMP_GET_DATA_FROM_SRAM[X]_IN_A ; Get X
+    ADDA  #$01 ; Inc
+ADJUST_AND_STORE_BACK: ; 0x005956, $C956
+    DAA ; Adjust
+    LEAX  -2,X ; X -= 2 to restore.
+    INC   R_AO3B_UPDATE_SCREEN? ; Inc
+    JMP   JMP_STORE_A_TO_SRAM_@X_BANKED ; Do.
+DEC_SRAM_VAL: ; 0x00595E, $C95E
+    CMPX  #$C481 ; If X _ val
+    BNE   SUB_SRAM_X_BY_1 ; !=, goto.
+    JSR   JMP_GET_DATA_FROM_SRAM@X_IN_AB ; Get in A/B
+    LEAX  -4,X ; Restore X
+    EXG   A-B ; Exchange
+    ADDA  #$90 ; A -= 10
+    DAA ; Adjust
+    EXG   A-B ; Exchange back
+    ADCA  #$99 ; A -= 1
+    BRA   ADJUST_EXG_STORE_BACK+UNK
+SUB_SRAM_X_BY_1: ; 0x005973, $C973
+    JSR   JMP_GET_DATA_FROM_SRAM[X]_IN_A ; Get SRAM data
+    ADDA  #$99 ; -1 DAA
+    BRA   ADJUST_AND_STORE_BACK
+SUB_IDK: ; 0x00597A, $C97A
+    LDB   R_A03C_OPTION_ON ; Load val
+    INCB ; B++
+    CMPB  #$07 ; If B _ 7
+    BHI   IDK ; >, goto.
+RTS: ; 0x005981, $C981
     RTS
-L_005982: ; 0x005982, $C982
-    CMPB  #$09
-    BLS   L_005997
-    CMPB  #$10
-    BHI   L_005997
-    CMPB  #$0A
-    BEQ   L_005997
+IDK: ; 0x005982, $C982
+    CMPB  #$09 ; If B _ 9
+    BLS   IDK_2 ; <=, goto.
+    CMPB  #$10 ; If B _ 0x10
+    BHI   IDK_2 ; >, goto.
+    CMPB  #$0A ; If B _ #$0A
+    BEQ   IDK_2 ; ==, goto.
     LDX   #$C487
-    JSR   JMP_GET_DATA_FROM_SRAM[X]
+    JSR   JMP_GET_DATA_FROM_SRAM[X]_IN_A ; Get data
     TSTA
-    BNE   L_005981
-L_005997: ; 0x005997, $C997
-    DECB
+    BNE   RTS ; If set, RTS.
+IDK_2: ; 0x005997, $C997
+    DECB ; B--
+    ASLB ; << 2, *4
     ASLB
-    ASLB
-    LDX   #$CCD6
-    ABX
-    LDB   3,X
-    LDX   #$C400
-    ABX
-    PSHS  X
-L_0059A6: ; 0x0059A6, $C9A6
-    JSR   ADV+AUTO_CUMULATIVE
-    LDX   #$CC00
-    JSR   JMP_LOAD_B@X_BANK0
-    BITB  #$02
-    BEQ   L_0059B5
-    PULS  X,PC
-L_0059B5: ; 0x0059B5, $C9B5
-    BITB  #$08
-    BNE   L_0059BD
-    CLR   $A03A
-    BRA   L_0059A6
-L_0059BD: ; 0x0059BD, $C9BD
-    PULS  X
-    CMPX  #$C47D
-    BNE   L_0059D0
-    PSHS  X,B
+    LDX   #$CCD6 ; PTR
+    ABX ; PTR + B
+    LDB   3,X ; Load PTR[3]
+    LDX   #$C400 ; Load other PTR
+    ABX ; += B
+    PSHS  X ; Save to stack.
+GOTO_ABOVE: ; 0x0059A6, $C9A6
+    JSR   ADV+AUTO_CUMULATIVE ; Do
+    LDX   #$CC00 ; ROM PIA DATA_A
+    JSR   JMP_LOAD_B@X_BANK0 ; Load from
+    BITB  #$02 ; Test bit.
+    BEQ   ADV_NOT_SET ; Not set
+    PULS  X,PC ; RTS
+ADV_NOT_SET: ; 0x0059B5, $C9B5
+    BITB  #$08 ; Test HIGH SCORE RESET input.
+    BNE   HSR_NOT_SET ; Set
+    CLR   R_A03A_MENU_UNK ; Clear val
+    BRA   GOTO_ABOVE ; Loop?
+HSR_NOT_SET: ; 0x0059BD, $C9BD
+    PULS  X ; Get X
+    CMPX  #$C47D ; If X _ val
+    BNE   INC_OR_DEC_SRAM_@X_DEP_ON_B:0 ; !=, goto.
+    PSHS  X,B ; Save B+X
     LDX   #$C400
     LDB   #$01
-    JSR   JMP_STORE_B@X_BANK0
-    PULS  B,X
-L_0059D0: ; 0x0059D0, $C9D0
-    LSRB
-    LBCS  L_005932
-    JMP   L_00595E
+    JSR   JMP_STORE_B@X_BANK0 ; Store
+    PULS  B,X ; Use this X and B
+INC_OR_DEC_SRAM_@X_DEP_ON_B:0: ; 0x0059D0, $C9D0
+    LSRB ; B >> 1, auto/man switch test.
+    LBCS  INC_SRAM_VAL ; If shifted off 1.
+    JMP   DEC_SRAM_VAL ; If shifted off 0.
     .db $02
     .db $03
     .db $04
@@ -15517,6 +15519,7 @@ L_0059D0: ; 0x0059D0, $C9D0
     .db $83
     .db $C7
     .db $87
+PALETTE_IDK: ; 0x0059FE, $C9FE
     .db $05
     .db $05
     .db $28
@@ -15593,24 +15596,24 @@ WATCHDOG/TRIGGER_$49_ON_AUTO+ADV: ; 0x005A69, $CA69
     JSR   JMP_STORE_B@X_BANK0 ; Set watchdog.
     LDX   #$CC00 ; Ptr to read.
     JSR   JMP_LOAD_B@X_BANK0 ; Get ROM PIA-A
-    COMB ; Invert, active 0 now. CC.c=1 HERE.
+    COMB ; Invert, active 0 now. CC.c=1 with this. Very important to note.
     ANDB  #$03 ; Test auto/adv
     BEQ   BOTH_PRESSED ; Both pressed.
     ANDCC #$FE ; Clear CC.c
 BOTH_PRESSED: ; 0x005A80, $CA80
-    LDB   UNK_$47 ; Get val
+    LDB   UNK_$47_AUTO+ADV ; Get val
     RORB ; rotate into B
-    STB   UNK_$47 ; Store
+    STB   UNK_$47_AUTO+ADV ; Store
     BNE   NOT_ZERO ; If not zero, skip clearing $48.
-    STB   UNK_$48 ; Clear if also zero.
+    STB   UNK_$48_AUTO+ADV ; Clear if zero.
 NOT_ZERO: ; 0x005A89, $CA89
     COMB ; Invert again
-    BNE   RTS ; If was zero, RTS.
-    LDB   UNK_$48 ; Get val
-    BNE   RTS ; If not 0, RTS.
+    BNE   RTS ; If was 0, RTS
+    LDB   UNK_$48_AUTO+ADV ; Get val
+    BNE   RTS ; If not zero, RTS.
     COMB ; Invert, now 0xFF.
-    STB   UNK_$48 ; Store.
-    INC   UNK_$49_SYS_MENU_FLAG? ; INC this.
+    STB   UNK_$48_AUTO+ADV ; Store to.
+    INC   UNK_$49_SYS_MENU_FLAG? ; INC addr.
 RTS: ; 0x005A95, $CA95
     PULS  CC,B,X,PC ; RTS
 UPLOAD_PALETTE_@Y: ; 0x005A97, $CA97
@@ -15662,7 +15665,7 @@ SETUP_52+49+48+36+59: ; 0x005AE4, $CAE4
     CLR   SENTENCE_PTR_WORD_ON
     CLR   UNK_$49_SYS_MENU_FLAG?
     LDA   #$01
-    STA   UNK_$48
+    STA   UNK_$48_AUTO+ADV
     LDA   #$03
     STA   CURRENT_BANK
     LDD   #$FFFF
@@ -15753,17 +15756,17 @@ L_005B8B: ; 0x005B8B, $CB8B
     BNE   L_005B71
 L_005B98: ; 0x005B98, $CB98
     RTS
-L_005B99: ; 0x005B99, $CB99
-    LDX   #$C487
-    JSR   JMP_STORE_B_TO_SRAM[X]
-    ASLB
-    PSHS  B
-    ASLB
-    ADDB  S+
-    LDX   #$CF10
-    ABX
-    LDY   #$C489
-    LDB   #$06
+SRAM_INIT_UNK: ; 0x005B99, $CB99
+    LDX   #$C487 ; Load PTR
+    JSR   JMP_STORE_B_TO_SRAM[X] ; Store B?
+    ASLB ; B >> 1
+    PSHS  B ; Save
+    ASLB ; B >> 1
+    ADDB  S+ ; B += pushed? Clean up too.
+    LDX   #$CF10 ; PTR to init data?
+    ABX ; X += B
+    LDY   #$C489 ; Y = SRAM PTR
+    LDB   #$06 ; Loop count.
 MOVE_@X_TO_SRAM@Y: ; 0x005BAF, $CBAF
     PSHS  A ; Save
 LOOP_INIT_SRAM: ; 0x005BB1, $CBB1
@@ -15936,7 +15939,8 @@ LOOP_WRITE_TO_SRAM: ; 0x005CCC, $CCCC
     DECB ; Loop count.
     BNE   LOOP_WRITE_TO_SRAM ; Loop
     PULS  A,B,X,Y,PC ; RTS
-    .db $CD
+PTRS_USED_IN_CODE: ; 0x005CD6, $CCD6
+    .db $CD ; FORMAT: [TEXT_PTR,UNK,SRAM_ADD]
     .db $46
     .db $00
     .db $01
@@ -18205,16 +18209,16 @@ L_006791: ; 0x006791, $C791
     JSR   L_006244
     TST   UNK_$49_SYS_MENU_FLAG?
     BNE   L_00601F
-    CLR   $A03C
+    CLR   R_A03C_OPTION_ON
     LDA   #$01
-    STA   $A03B
+    STA   R_AO3B_UPDATE_SCREEN?
     LEAS  -32,S
     JSR   JMP_CLEAR_ALL_SCREEN
     LDU   #$C0D7
     LDX   #$2820
     JSR   GENERATE_LAND_HEIGHT_BUFFER_MANUALLY
     JSR   L_00603C
-    CLR   $A03A
+    CLR   R_A03A_MENU_UNK
     LDY   #$C065
     JSR   L_006066
     JSR   GENERATE_LAND_HEIGHT_BUFFER_MANUALLY
