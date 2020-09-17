@@ -127,10 +127,10 @@ A08B_CURRENT_PLAYER:                     .rs 0x01 ;0xA08B
 A08C_CURRENT_PLAYER_COUNT_1/2:           .rs 0x01 ;0xA08C
 A08D_CURRENT_PLAYER_PTR?:                .rs 0x02 ;0xA08D to A08E
 IRQ_CMD_LOC:                             .rs 0x03 ;0xA08F to A091
-R_A092_PROCESSING_LAST?:                 .rs 0x01 ;0xA092
-R_A093:                                  .rs 0x01 ;0xA093
-R_A094:                                  .rs 0x01 ;0xA094
-R_A095:                                  .rs 0x02 ;0xA095 to A096
+IRQ_NEXT_STEP_TODO:                      .rs 0x01 ;0xA092
+R_A093_THRUST_UNKB_1:                    .rs 0x01 ;0xA093
+R_A094_THRUST_UNKB_2:                    .rs 0x01 ;0xA094
+R_A095_THRUST_UNK:                       .rs 0x02 ;0xA095 to A096
 R_A097_SCANNER_DOTS_END_PTR:             .rs 0x02 ;0xA097 to A098
 ENEMY_UNK_SPAWNED?BULLETS?:              .rs 0x01 ;0xA099
 R_A09A_SMARTBOMB_DISABLED:               .rs 0x01 ;0xA09A
@@ -141,7 +141,7 @@ RAM_DATA[FF,VID_CNTR_COPY,00]_SCR_DMG_CFG: .rs 0x03 ;0xA0A1 to A0A3
 LASER_HOLES_POINTER_ADDR:                .rs 0x02 ;0xA0A4 to A0A5
 RANDOM_PALETTE_ROTATION_DEFENDER_LOGO:   .rs 0x02 ;0xA0A6 to A0A7
 PTR_TO_A1A2_POOL:                        .rs 0x02 ;0xA0A8 to A0A9
-R_A0AA:                                  .rs 0x01 ;0xA0AA
+R_A0AA_BOMBERS_GROUP_DIR:                .rs 0x01 ;0xA0AA
 SRAM_C481_BONUS_SHIP_ADD:                .rs 0x02 ;0xA0AB to A0AC
 R_A0AD_SOUND_REQ_FLAG?:                  .rs 0x01 ;0xA0AD
 STARS_NUM_TO_CHANGE?:                    .rs 0x01 ;0xA0AE
@@ -163,12 +163,12 @@ R_A0C1_SHIP_UNK:                         .rs 0x02 ;0xA0C1 to A0C2
 R_A0C3_SHIP_UNK:                         .rs 0x02 ;0xA0C3 to A0C4
 SHIP_VPOS:                               .rs 0x02 ;0xA0C5 to A0C6
 R_A0C7_BULLET_HSPEED_MOD?:               .rs 0x02 ;0xA0C7 to A0C8
-R_A0C9:                                  .rs 0x01 ;0xA0C9
+R_A0C9_UNUSED?ONLY_CLEARED:              .rs 0x01 ;0xA0C9
 PLAYER_V_MOMENTUM:                       .rs 0x02 ;0xA0CA to A0CB
 R_A0CC_SHIP_W_POS?:                      .rs 0x02 ;0xA0CC to A0CD
 IDFK_HIT_DETECTED_WRD:                   .rs 0x02 ;0xA0CE to A0CF
-R_A0D0:                                  .rs 0x02 ;0xA0D0 to A0D1
-R_A0D2:                                  .rs 0x02 ;0xA0D2 to A0D3
+R_A0D0_HIT_DETECTED_UNK_1:               .rs 0x02 ;0xA0D0 to A0D1
+R_A0D2_HIT_DETECTED_UNK_2:               .rs 0x02 ;0xA0D2 to A0D3
 OBJ_HIT_BMP_UNK:                         .rs 0x02 ;0xA0D4 to A0D5
 HIT_DETECT_UPPER_LEFT_XXYY:              .rs 0x02 ;0xA0D6 to A0D7
 HIT_DETECT_BOTTOM_RIGHT_XXYY:            .rs 0x02 ;0xA0D8 to A0D9
@@ -200,20 +200,20 @@ R_A0FB_ENEMY_LANDER_TO_SPAWN_COUNT?:     .rs 0x01 ;0xA0FB
 R_A0FC_TO_ENEMY_COUNT:                   .rs 0x01 ;0xA0FC
 R_A0FD_TO_ENEMY_COUNT?:                  .rs 0x01 ;0xA0FD
 R_A0FE_ENEMY_MUTANT_COUNT?:              .rs 0x01 ;0xA0FE
-R_A0FF_UNK:                              .rs 0x01 ;0xA0FF
+R_A0FF_SWARMERS_IN_POD_IDK:              .rs 0x01 ;0xA0FF
 EXTRA_WAVE_SPAWN_REFRESH:                .rs 0x01 ;0xA100
 R_A101_MUTANT_RELATED?_UNK:              .rs 0x01 ;0xA101
-R_A102:                                  .rs 0x01 ;0xA102
-R_A103_VSPEED_UNK:                       .rs 0x02 ;0xA103 to A104
-R_A105_MAX_BULLET_TIMER:                 .rs 0x01 ;0xA105
-R_A106:                                  .rs 0x01 ;0xA106
-R_A107:                                  .rs 0x01 ;0xA107
-R_A108_UNK_VSPEED?:                      .rs 0x02 ;0xA108 to A109
-R_A10A:                                  .rs 0x01 ;0xA10A
+R_A102_LANDER_ATTR_UNK:                  .rs 0x01 ;0xA102
+R_A103_VSPEED_LANDER?:                   .rs 0x02 ;0xA103 to A104
+R_A105_MAX_BULLET_TIMER_LANDER:          .rs 0x01 ;0xA105
+R_A106_BOMBERS_SPEED:                    .rs 0x01 ;0xA106
+R_A107_UNK_ENEMY_VSPEED_MODIFY_BAITER?:  .rs 0x01 ;0xA107
+R_A108_BAITER_VSPEED_BASE?:              .rs 0x02 ;0xA108 to A109
+R_A10A_MUTANT_HSPEED?:                   .rs 0x01 ;0xA10A
 R_A10B_BAITER_SHOOT_TIMER_MAX?:          .rs 0x01 ;0xA10B
-R_A10C_SWARMER_DIR_UNK:                  .rs 0x01 ;0xA10C
-R_A10D_SWARMER_UNK:                      .rs 0x01 ;0xA10D
-R_A10E_SWARMER?_UNK:                     .rs 0x01 ;0xA10E
+R_A10C_SWARMER_HSPEED_BASE:              .rs 0x01 ;0xA10C
+R_A10D_SWARMER_CALLBACK[11]_UNK:         .rs 0x01 ;0xA10D
+R_A10E_SWARMER[9]AND_VAL:                .rs 0x01 ;0xA10E
 BAITER_SPAWN_RELOAD:                     .rs 0x01 ;0xA10F
 R_A110_BAITER_SHOOT_COUNTDOWN_MAX?:      .rs 0x01 ;0xA110
 R_A111_BAITER_MOVE_ODDS?:                .rs 0x01 ;0xA111
@@ -234,7 +234,7 @@ DRAW_COUNTER_ACTUAL:                     .rs 0x01 ;0xA163
 R_A164_HIGHSCORE_DATA_POS:               .rs 0x02 ;0xA164 to A165
 
 	.org $A165
-R_A165:                                  .rs 0x01 ;0xA165
+R_A165_ATTRACT_LEFTOVER?:                .rs 0x01 ;0xA165
 DRAW_PIXEL_POS_XXYY:                     .rs 0x02 ;0xA166 to A167
 R_A168_UNK:                              .rs 0x02 ;0xA168 to A169
 DRAW_STEPS_COUNT_SEED_VAL:               .rs 0x01 ;0xA16A
@@ -251,15 +251,15 @@ PREV_CHAR_MOVEMENT:                      .rs 0x01 ;0xA179
 INITIAL_POS_INDEX:                       .rs 0x01 ;0xA17A
 R_A17B_PLAYER_DATA_PTR_SCR+INITIALS:     .rs 0x02 ;0xA17B to A17C
 INITIAL_ENTER_TIMER?:                    .rs 0x01 ;0xA17D
-R_A17E:                                  .rs 0x01 ;0xA17E
-R_A17F:                                  .rs 0x01 ;0xA17F
+R_A17E_INITIAL_TIMER_RELATED?UNK:        .rs 0x01 ;0xA17E
+R_A17F_INITIAL_TIMER?:                   .rs 0x01 ;0xA17F
 
 	.org $A181
 R_A181_HIGHSCORE_SCR_POS:                .rs 0x02 ;0xA181 to A182
 PLAY_CREDITS_PREV_COPY:                  .rs 0x01 ;0xA183
 R_A184_SHOW_ATTRACT_DEMO_FLAG:           .rs 0x01 ;0xA184
-R_A185:                                  .rs 0x01 ;0xA185
-R_A186:                                  .rs 0x01 ;0xA186
+R_A185_INITIAL_TIMER_LARGE:              .rs 0x01 ;0xA185
+R_A186_INITIAL_TIMER_FINE:               .rs 0x01 ;0xA186
 R_A187_OBJ_TMP_LASER_PTR?:               .rs 0x02 ;0xA187 to A188
 R_A189_OBJ_PTR_HUMANOID?:                .rs 0x02 ;0xA189 to A18A
 R_A18B_OBJ_PTR_SHIP?:                    .rs 0x02 ;0xA18B to A18C
@@ -273,7 +273,7 @@ R_A198_ATTRACT_NEXT_PTR:                 .rs 0x02 ;0xA198 to A199
 
 	.org $A1C6
 R_A1C6_SRAM_C481_P1_NEXT_SHIP:           .rs 0x02 ;0xA1C6 to A1C7
-R_A1C8:                                  .rs 0x01 ;0xA1C8
+R_A1C8_ONLY_EVER_CLEARED?UNK:            .rs 0x01 ;0xA1C8
 R_A1C9_P1_SHIPS:                         .rs 0x01 ;0xA1C9
 
 	.org $A1CB
@@ -1508,7 +1508,7 @@ CLEAR_DATA_LOOP: ; 0x000881, $D881
     JSR   GET_DATA_FROM_SRAM[X]_IN_AB ; Get data in.
     STD   SRAM_C481_BONUS_SHIP_ADD ; Store to, word.
     STD   R_A1C6_SRAM_C481_P1_NEXT_SHIP ; Store to P1
-    CLR   R_A1C8 ; Clear BYTE.
+    CLR   R_A1C8_ONLY_EVER_CLEARED?UNK ; Clear BYTE.
     LDX   #$A1C2 ; PTR to P1 data
 LOOP_COPY_P1_DATA_TO_P2: ; 0x0008B2, $D8B2
     LDA   X+ ; Get data in player.
@@ -1649,7 +1649,7 @@ SET_UP_GAMEPLAY_VARS: ; 0x00096E, $D96E
     CLRA ; Clear with A/B/D now.
     CLRB
     STD   R_A0C7_BULLET_HSPEED_MOD?
-    STA   R_A0C9
+    STA   R_A0C9_UNUSED?ONLY_CLEARED
     STD   PLAYER_V_MOMENTUM
     LDX   #$E9E3 ; Callback to on/off screen handler.
     LDA   #$00 ; Timer
@@ -2020,7 +2020,7 @@ LOOP_$67_TO_$65: ; 0x000C77, $DC77
     ADDA  #$80 ; Set top.
     ADDD  R_A020_SCREEN_POS_HORIZ_1 ; Add with this.
     STD   10,X ; Store to OBJ[10]
-    LDA   R_A0FF_UNK ; Load val
+    LDA   R_A0FF_SWARMERS_IN_POD_IDK ; Load val
     BEQ   EXIT_OBJ_TO_ONSCREEN ; If 0, goto.
     CMPA  #$06 ; IF A _ 6
     BLS   DONT_CAP_TO_6 ; <=, goto.
@@ -2032,8 +2032,8 @@ DONT_CAP_TO_6: ; 0x000C96, $DC96
     STX   Y ; Store to Y.next
     STY   LIST_23B_LARGE_POOL ; Makes Y new head?
     NEGA ; Invert original A
-    ADDA  R_A0FF_UNK ; Add with val
-    STA   R_A0FF_UNK ; Store back
+    ADDA  R_A0FF_SWARMERS_IN_POD_IDK ; Add with val
+    STA   R_A0FF_SWARMERS_IN_POD_IDK ; Store back
     BNE   LOOP_$67_TO_$65 ; If not 0, continue.
 EXIT_OBJ_TO_ONSCREEN: ; 0x000CA9, $DCA9
     LDA   R_A0FE_ENEMY_MUTANT_COUNT? ; Load val
@@ -2377,10 +2377,10 @@ IRQ_INITIAL_P1: ; 0x000F17, $DF17
     LDA   PIA_ROM_DATA_B ; Clear IRQs
     LDA   VIDEO_COUNTER_BITS ; Load scanline.
     CMPA  #$80
-    BCS   VADD_UPPER_HALF ; Top half, goto lower half stuff?
-    LDA   R_A092_PROCESSING_LAST? ; Load val
-    BNE   LEAVE_IRQ_RTN ; If != 0, leave IRQ.
-    INC   R_A092_PROCESSING_LAST? ; Mark processing?
+    BCS   VADD_BOTTOM_HALF_SCREEN ; Top half, goto lower half stuff?
+    LDA   IRQ_NEXT_STEP_TODO ; Load val
+    BNE   LEAVE_IRQ_RTN ; If != 0, leave.
+    INC   IRQ_NEXT_STEP_TODO ; Mark processing this currently.
     JSR   IDK+THRUST+MORE ; Do subs
     JSR   MOVEMENT_STUFF_PLAYERS+IDK
     JSR   STARS_UPDATE?
@@ -2399,10 +2399,10 @@ DONT_CAP_A: ; 0x000F47, $DF47
     JSR   SHIP_MOVE_RTN
     JSR   BULLET_RELATED?
     BRA   LEAVE_IRQ_RTN ; Leave IRQ RTN
-VADD_UPPER_HALF: ; 0x000F5D, $DF5D
-    LDB   R_A092_PROCESSING_LAST? ; Load val
+VADD_BOTTOM_HALF_SCREEN: ; 0x000F5D, $DF5D
+    LDB   IRQ_NEXT_STEP_TODO ; Load val
     BEQ   LEAVE_IRQ_RTN ; If 0, nothing to do here.
-    CLR   R_A092_PROCESSING_LAST? ; Clear
+    CLR   IRQ_NEXT_STEP_TODO ; Clear
     INC   TICKS_HAPPENED_COUNTER? ; Inc
     LDB   #$38
     STB   WATCHDOG ; Set watchdog.
@@ -2457,9 +2457,9 @@ IRQ_INITIAL_P2: ; 0x000FC3, $DFC3
     LDA   VIDEO_COUNTER_BITS ; Get video counter.
     CMPA  #$58 ; If _ #$58
     BCS   VIDEO_COUNTER_BITS_UNDER_#$58 ; <, goto.
-    LDB   R_A092_PROCESSING_LAST? ; Get val
+    LDB   IRQ_NEXT_STEP_TODO ; Get val
     BNE   LEAVE_IRQ_RTN ; If != 0, goto.
-    INC   R_A092_PROCESSING_LAST? ; Inc if 0
+    INC   IRQ_NEXT_STEP_TODO ; Inc if 0
     COMA ; Invert video bits because flipped screen.
     NOP ; Nop
     STA   RAM_DATA[FF,VID_CNTR_COPY,00]_SCR_DMG_CFG+1 ; Store inverted here.
@@ -2468,9 +2468,9 @@ IRQ_INITIAL_P2: ; 0x000FC3, $DFC3
     STA   BANKSWITCH ; Bankswitch to 7
     LDA   A0BA_PLAYER_GAME_STATE ; Val
     BITA  #$02 ; If bit 2 is set.
-    BNE   SKIP_JSR ; Skip land task flag.
+    BNE   SKIP_LAND_TASK ; Skip land task flag.
     JSR   JMP_TO_LAND_IRQ ; Do this if set.
-SKIP_JSR: ; 0x000FF4, $DFF4
+SKIP_LAND_TASK: ; 0x000FF4, $DFF4
     LDA   #$02 ; Bank 2
     STA   BANKSWITCH
     LDD   RAM_DATA[FF,VID_CNTR_COPY,00]_SCR_DMG_CFG ; Load val
@@ -2479,9 +2479,9 @@ SKIP_JSR: ; 0x000FF4, $DFF4
     JSR   IRQ_RTN_WORLD_ENEMIES_UPDATE_SCR_POS/DISPLAY
     BRA   LEAVE_IRQ_RTN ; Leaves
 VIDEO_COUNTER_BITS_UNDER_#$58: ; 0x001005, $E005
-    LDB   R_A092_PROCESSING_LAST?
+    LDB   IRQ_NEXT_STEP_TODO
     BEQ   LEAVE_IRQ_RTN ; Leaves if 0
-    CLR   R_A092_PROCESSING_LAST? ; Clear
+    CLR   IRQ_NEXT_STEP_TODO ; Clear
     INC   TICKS_HAPPENED_COUNTER? ; Inc
     LDB   #$39 ; Always flipped?
     STB   WATCHDOG ; Store
@@ -2652,7 +2652,7 @@ LOOP_RANDOM: ; 0x00114E, $E14E
 DRAW_THRUST_TO_LEFT: ; 0x00115C, $E15C
     LDX   PTR_TO_A162_POOL ; X from
     LDU   SHIP_SCR_POS_XXYY ; U from
-    LEAU  -255,U ; U -= 255
+    LEAU  -255,U ; X-1, Y+1
     LDD   X ; Load from X
     STD   U ; Store to U
     LDA   5,X ; Load 
@@ -2680,7 +2680,7 @@ RTS: ; 0x00119A, $E19A
 DRAW_THRUST_TO_RIGHT: ; 0x00119B, $E19B
     LDU   PTR_TO_A162_POOL ; Load val
     LDX   SHIP_SCR_POS_XXYY ; Lod val
-    LEAX  2049,X ; X += ?
+    LEAX  2049,X ; X+8,Y+1
     PULU  A,B,Y ; Pull from U
     STD   X ; Val to X
     STY   2,X ; Val to X[2]
@@ -2810,8 +2810,8 @@ THRUST_NOT_PRESSED: ; 0x0012A0, $E2A0
     CLRA ; A=0
     ASRB ; B >> 1
     RORA ; Bring B into A...
-    STA   R_A094 ; Store
-    STB   R_A093 ; Store
+    STA   R_A094_THRUST_UNKB_2 ; Store
+    STB   R_A093_THRUST_UNKB_1 ; Store
     LDA   R_A0BD_SHIP_DIR?UNK? ; Load
     BMI   A_DIFF_VAL_SKIP_CLEARS_IF_NEGATIVE ; If negative, goto.
     LDA   #$20 ; Load with val
@@ -2823,19 +2823,19 @@ A_DIFF_VAL_SKIP_CLEARS_IF_NEGATIVE: ; 0x0012B8, $E2B8
     TSTB ; Test B
     BMI   SKIP_CLEARS ; If negative, goto. Skip clears.
 CLEAR_BEFORE_RTN: ; 0x0012BD, $E2BD
-    CLR   R_A094 ; Clear
-    CLR   R_A093 ; Clear
+    CLR   R_A094_THRUST_UNKB_2 ; Clear
+    CLR   R_A093_THRUST_UNKB_1 ; Clear
 SKIP_CLEARS: ; 0x0012C1, $E2C1
-    LDB   R_A094 ; Load
-    ADDA  R_A093 ; Add
-    STA   R_A093 ; Store
+    LDB   R_A094_THRUST_UNKB_2 ; Load
+    ADDA  R_A093_THRUST_UNKB_1 ; Add
+    STA   R_A093_THRUST_UNKB_1 ; Store
     SUBD  R_A0C3_SHIP_UNK ; Sub value with loc
     BEQ   CLEAR_95 ; If 0, goto
     BCS   CMPD_TO_#$FF00 ; If value subbed was higher, goto.
     CMPD  #$0100 ; Subbed was lower.
     BLS   CLEAR_95 ; If <= val, goto.
     LDD   #$0040 ; Load with
-    STD   R_A095 ; Store to.
+    STD   R_A095_THRUST_UNK ; Store to.
     LDD   #$0100 ; Load
     ADDD  R_A0C3_SHIP_UNK ; Add with
     BRA   D_TO_C3 ; Goto
@@ -2843,15 +2843,15 @@ CMPD_TO_#$FF00: ; 0x0012DF, $E2DF
     CMPD  #$FF00 ; Comp to
     BGT   CLEAR_95 ; If >, goto
     LDD   #$FFC0 ; Load val
-    STD   R_A095 ; Store to
+    STD   R_A095_THRUST_UNK ; Store to
     LDD   #$FF00 ; Load val
     ADDD  R_A0C3_SHIP_UNK ; Store to
     BRA   D_TO_C3
 CLEAR_95: ; 0x0012F1, $E2F1
     CLRA
     CLRB
-    STD   R_A095 ; Clear
-    LDD   R_A093 ; Move
+    STD   R_A095_THRUST_UNK ; Clear
+    LDD   R_A093_THRUST_UNKB_1 ; Move
 D_TO_C3: ; 0x0012F7, $E2F7
     STD   R_A0C3_SHIP_UNK ; Store
     STA   R_A0C1_SHIP_UNK ; Store to
@@ -2868,7 +2868,7 @@ DONT_APPLY_MAX: ; 0x00130A, $E30A
 DONT_APPLY_MIN: ; 0x001313, $E313
     STD   R_A0C7_BULLET_HSPEED_MOD? ; Store
     ADDD  R_A020_SCREEN_POS_HORIZ_1 ; Add with
-    SUBD  R_A095 ; Sub from
+    SUBD  R_A095_THRUST_UNK ; Sub from
     STD   R_A020_SCREEN_POS_HORIZ_1 ; Store to pos.
     LDD   R_A0C3_SHIP_UNK ; Load
     LSRA ; D >> 2
@@ -3366,7 +3366,7 @@ HIT_DETECT_VS_LIST_PASSED_IN_X: ; 0x0016BD, $E6BD
     BRA   NO_HIT_DETECTED_X->X.NEXT ; Load list obj.
 PROCESS_HIT_VS_OBJ: ; 0x0016C5, $E6C5
     LDD   4,X ; OBJ[4]
-    BEQ   NO_HIT_DETECTED_X->X.NEXT ; No hit handler? Not on screen?
+    BEQ   NO_HIT_DETECTED_X->X.NEXT ; POS_SCREEN invalid, no hit possible since not on screen.
     CMPA  HIT_DETECT_BOTTOM_RIGHT_XXYY ; If A _ addr
     BCC   NO_HIT_DETECTED_X->X.NEXT ; >=, next.
     CMPB  HIT_DETECT_BOTTOM_RIGHT_XXYY+1 ; If B _ addr
@@ -3387,24 +3387,24 @@ OBJ_HIT: ; 0x0016E1, $E6E1
     STD   A073_SCRATCHPAD_ADDR ; Store to scratch
     CLRA ; Clear D
     CLRB
-    STD   R_A0D0 ; Clear
-    STD   R_A0D2 ; Clear
+    STD   R_A0D0_HIT_DETECTED_UNK_1 ; Clear
+    STD   R_A0D2_HIT_DETECTED_UNK_2 ; Clear
     LDD   A073_SCRATCHPAD_ADDR ; Load scratchpad
     SUBB  HIT_DETECT_UPPER_LEFT_XXYY+1 ; Subtract with val
     BHI   SUBTRACKED_HIGHER_B ; If subtracted was higher, goto.
     NEGB ; Invert B
-    STB   R_A0D0+1 ; Store just B to addr?
+    STB   R_A0D0_HIT_DETECTED_UNK_1+1 ; Store just B to addr?
     BRA   A_STUFF_NOW
 SUBTRACKED_HIGHER_B: ; 0x0016FB, $E6FB
-    STB   R_A0D2+1 ; Store B as-is
+    STB   R_A0D2_HIT_DETECTED_UNK_2+1 ; Store B as-is
 A_STUFF_NOW: ; 0x0016FD, $E6FD
     SUBA  HIT_DETECT_UPPER_LEFT_XXYY ; A - addr
     BHI   SUBTRACTED_HIGHER_A ; If subtracted was higher, goto.
     NEGA ; Invert
-    STA   R_A0D0 ; Store to
+    STA   R_A0D0_HIT_DETECTED_UNK_1 ; Store to
     BRA   SKIP_OTHER_STORE
 SUBTRACTED_HIGHER_A: ; 0x001706, $E706
-    STA   R_A0D2 ; Otherwise store to
+    STA   R_A0D2_HIT_DETECTED_UNK_2 ; Otherwise store to
 SKIP_OTHER_STORE: ; 0x001708, $E708
     LDD   A073_SCRATCHPAD_ADDR ; D from scratch again
     ADDD  Y ; Add GFX_ATTR.XXYY
@@ -3418,24 +3418,24 @@ SUB_B_W/_HIGHER_2: ; 0x001711, $E711
 SUB_A_W/_HIGHER_2: ; 0x001716, $E716
     STD   R_A0DA_HIT_DTCT_UNK ; Store to
     LDD   Y ; D from Y
-    SUBD  R_A0D0 ; Sub with
+    SUBD  R_A0D0_HIT_DETECTED_UNK_1 ; Sub with
     SUBD  R_A0DA_HIT_DTCT_UNK ; Sub with
     STD   IDFK_HIT_DETECTED_WRD ; Store to
     LDA   1,U ; A from GFX[1], HH
     STA   OBJ_HIT_BMP_UNK+1
-    LDB   R_A0D2 ; B from addr
+    LDB   R_A0D2_HIT_DETECTED_UNK_2 ; B from addr
     MUL ; Multiply HEIGHT * VAL
     LDU   2,U ; U from UBMP[2], ptr to BMP.
     LEAU  D,U ; GFX PTR += D
     LDA   1,Y ; A from XBMP[1], HH
     STA   OBJ_HIT_BMP_UNK ; To var
     LDY   2,Y ; Y from BMP[2], PTR to GFX
-    LDB   R_A0D0 ; B from
+    LDB   R_A0D0_HIT_DETECTED_UNK_1 ; B from
     MUL ; Multiply AB to D
     LEAY  D,Y ; GFX PTR += D
-    LDA   R_A0D0+1 ; A from
+    LDA   R_A0D0_HIT_DETECTED_UNK_1+1 ; A from
     LEAY  A,Y ; Y GFX PTR += A
-    LDA   R_A0D2+1 ; A from
+    LDA   R_A0D2_HIT_DETECTED_UNK_2+1 ; A from
     LEAU  A,U ; U GFX PTR += A
 LOOP_HIT_DETERMINE_IDK: ; 0x00173F, $E73F
     LDB   IDFK_HIT_DETECTED_WRD+1 ; B from
@@ -3752,7 +3752,7 @@ VAL_SHIFTED_1: ; 0x001958, $E958
     STD   R_A0C1_SHIP_UNK ; Store IDK
     CLRA ; Clear
     CLRB
-    STA   R_A0C9 ; Clear
+    STA   R_A0C9_UNUSED?ONLY_CLEARED ; Clear
     STD   R_A0C7_BULLET_HSPEED_MOD? ; Clear
     STD   PLAYER_V_MOMENTUM ; Clear
     JSR   GOTO_B7-C000,DRAW_LAND ; Draw land updated.
@@ -4092,11 +4092,11 @@ LOOP_MAKE_SWARMERS: ; 0x001BA2, $EBA2
     STU   6,X ; Callback to XOBJ[6], XOBJ is swarmer.
     BSR   RANDOM_WORD_TO_HSPEED+VSPEED ; Get random speed.
     LDD   A0E0_RAND_WORD ; Get random word.
-    ANDB  R_A10E_SWARMER?_UNK ; And B
+    ANDB  R_A10E_SWARMER[9]AND_VAL ; And B
     STB   9,U ; Store to CALLBACK_SWRM[9]
     ANDA  #$1F ; Get 0001.1111 into A
-    STA   4,U ; Store to CALLBACK_SWRM[4], timer to run code.
-    LDA   R_A10D_SWARMER_UNK ; Load val
+    STA   4,U ; Store to CALLBACK_SWRM[4], timer to run code. Coming out reverse?
+    LDA   R_A10D_SWARMER_CALLBACK[11]_UNK ; Load val
     JSR   GET_NEW_A_THAT_IS_<=_OR_1_MORE_THAN_CURRENT ; Get smaller.
     STA   11,U ; Store to CALLBACK_SWRM[11]
     STX   LIST_IN_WORLD ; Add to this list.
@@ -4125,8 +4125,8 @@ SWARMER_HIT_HANDLER: ; 0x001BE9, $EBE9
     JMP   SOUND_SET_SOUND_PRIORITIED ; Do.
 SWARMER_AI_INIT_SET_DIRECTION: ; 0x001C17, $EC17
     LDX   7,U ; X from UOBJ[7]
-    LDB   R_A10C_SWARMER_DIR_UNK ; B from addr
-    LDY   R_A0CC_SHIP_W_POS? ; Y from addr
+    LDB   R_A10C_SWARMER_HSPEED_BASE ; B from addr
+    LDY   R_A0CC_SHIP_W_POS? ; Y from addr. TODO: Swarmer not swarming issue here?
     CMPY  10,X ; CMPY XOBJ[10]
     BCC   SKIP_INVERT_INIT ; >=, goto.
     NEGB ; Invert B otherwise.
@@ -4138,12 +4138,12 @@ CALLBACK_AI_CONTINUED: ; 0x001C2A, $EC2A
     LDB   9,U ; B from UOBJ[9]
     LDX   7,U ; X from UOBJ[7]
     LDA   SHIP_SCR_POS_XXYY+1 ; A from SHIP.X
-    CMPA  12,X ; Cmp to XOBJ[12]
+    CMPA  12,X ; Cmp to XOBJ[12], POS_WORLDV
     BHI   SKIP_INVERT_2 ; >, goto.
     NEGB ; Invert
 SKIP_INVERT_2: ; 0x001C35, $EC35
     SEX ; Extend to D
-    ADDD  16,X ; ADD with XOBJ[16]
+    ADDD  16,X ; ADD with XOBJ[16], VSPEED
     CMPD  #$0200 ; CMP to val
     BLT   DONT_CAP_D ; <, goto.
     LDD   #$0200 ; D cap positive.
@@ -4152,7 +4152,7 @@ DONT_CAP_D: ; 0x001C42, $EC42
     BGT   CAP_NEGATIVE
     LDD   #$FE00 ; D cap negative.
 CAP_NEGATIVE: ; 0x001C4B, $EC4B
-    STD   16,X ; To XOBJ[16]
+    STD   16,X ; To XOBJ[16], VSPEED
     COMA ; Invert
     COMB
     ASLB ; D << 2
@@ -4161,7 +4161,7 @@ CAP_NEGATIVE: ; 0x001C4B, $EC4B
     ROLA
     TFR   A>B ; A to B
     SEX ; Extend from B
-    ADDD  16,X ; += XOBJ[16]
+    ADDD  16,X ; += XOBJ[16], VSPEED
     STD   16,X ; D to XOBJ[16]
     LDB   A0DF_RAND_BYTE ; Random 
     ANDB  #$1F ; Keep 0001.1111
@@ -4169,11 +4169,11 @@ CAP_NEGATIVE: ; 0x001C4B, $EC4B
     SEX ; Extend to D
     ADDD  16,X ; D += XOBJ[16]
     STD   16,X ; D to XOBJ[16]
-    LDD   R_A0CC_SHIP_W_POS? ; D from
-    SUBD  10,X ; D -= XOBJ[10]
+    LDD   R_A0CC_SHIP_W_POS? ; D from, WPOS_SHIP
+    SUBD  10,X ; D -= XOBJ[10], POS_WORLDH
     ADDD  #$12C0 ; += val
     CMPD  #$2580 ; CMP to val
-    BHI   SWARMER_AI_INIT_SET_DIRECTION ; >, goto.
+    BHI   SWARMER_AI_INIT_SET_DIRECTION ; >, goto. This is swarmer reverse. TODO: Fix not swarming.
     DEC   11,U ; Dec UOBJ[11]
     BNE   SWARMER_CALLBACK_SETUP ; != 0, goto.
     JSR   SUB_BULLET_UNK ; Do sub
@@ -4221,7 +4221,7 @@ SUB_BULLET_UNK: ; 0x001C86, $EC86
     RORB
     STD   16,X ; D to VPOS
 BULLET_NOT_SPAWNED: ; 0x001CBF, $ECBF
-    LDA   R_A10D_SWARMER_UNK ; A from addr
+    LDA   R_A10D_SWARMER_CALLBACK[11]_UNK ; A from addr
     JSR   GET_NEW_A_THAT_IS_<=_OR_1_MORE_THAN_CURRENT ; Get A
     STA   11,U ; To UOBJ[11]
     PULS  X,PC ; Restore X, RTS
@@ -4547,7 +4547,7 @@ RTS: ; 0x001EFC, $EEFC
 SHOOT_IF_UOBJ[13]_GOES_ZERO: ; 0x001EFE, $EEFE
     DEC   13,U ; Dec UOBJ[13]
     BNE   RTS
-    LDA   R_A105_MAX_BULLET_TIMER ; A from addr
+    LDA   R_A105_MAX_BULLET_TIMER_LANDER ; A from addr
     JSR   GET_NEW_A_THAT_IS_<=_OR_1_MORE_THAN_CURRENT ; Get <= val
     STA   13,U ; To UOBJ[13]
     BSR   SPAWN_BULLET_REQ ; Ask for bullet.
@@ -4633,7 +4633,7 @@ RTS: ; 0x001F9A, $EF9A
     PULS  X,PC ; RTS
 SPAWN_WAVE_OF_ENEMIES_LANDER/MUTANT: ; 0x001F9C, $EF9C
     PSHS  A ; Save A
-    STA   A073_SCRATCHPAD_ADDR ; Again
+    STA   A073_SCRATCHPAD_ADDR ; To loop counter scratch, also.
 LOOP_MAKE_LANDERS|MUTANTS: ; 0x001FA0, $EFA0
     TST   A0FA_HUMANOID_COUNT? ; Test humanoid alive.
     BNE   MAKE_LANDERS ; Don't turn to mutants if has humanoids.
@@ -4642,7 +4642,7 @@ MAKE_LANDERS: ; 0x001FA7, $EFA7
     LDX   #$EFF6 ; Handler
     LDA   #$00 ; Timer
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X_NEXT_TICK ; Setup
-    LEAU  X ; Obj X to U
+    LEAU  X ; Obj X to U, callback made for obj.
     JSR   23B_OBJ_BMP,HIT_HANDLER,SCANNER_PIXELS ; Fill out info past.
     .db $F9 ; BMP
     .db $85
@@ -4652,27 +4652,27 @@ MAKE_LANDERS: ; 0x001FA7, $EFA7
     .db $33
     JSR   RANDOM_VALUE_FWD+IN_A ; Random value
     LDD   A0E0_RAND_WORD ; Random word
-    STD   10,X ; to OBJ[10]
+    STD   10,X ; to OBJ[10], POS_HWORLD
     LDA   #$2C ; Val
-    STA   12,X ; to OBJ[10]
-    LDD   R_A103_VSPEED_UNK ; Val
+    STA   12,X ; to OBJ[12], POS_VWORLD
+    LDD   R_A103_VSPEED_LANDER? ; Val
     STD   16,X ; to OBJ[16]
-    LDA   R_A105_MAX_BULLET_TIMER ; Val
+    LDA   R_A105_MAX_BULLET_TIMER_LANDER ; Val
     JSR   GET_NEW_A_THAT_IS_<=_OR_1_MORE_THAN_CURRENT ; Manipulate
-    STA   13,U ; OBJ[13], shoot countdown.
-    LDA   R_A102 ; Val
+    STA   13,U ; CALLBACK[13], shoot countdown.
+    LDA   R_A102_LANDER_ATTR_UNK ; Val
     JSR   GET_NEW_A_THAT_IS_<=_OR_1_MORE_THAN_CURRENT ; Manip
-    TFR   A>B ; To B
-    CLRA ; Clear
-    BITB  #$01 ; Test not
-    BEQ   DONT_NEGATE_TO_NEGATIVE
+    TFR   A>B ; Rand manip to B
+    CLRA ; Clear A
+    BITB  #$01 ; Test bit
+    BEQ   DONT_NEGATE_TO_NEGATIVE ; If 0, don't invert.
     COMB ; Invert
     COMA
 DONT_NEGATE_TO_NEGATIVE: ; 0x001FE2, $EFE2
-    STD   14,X ; To OBJ[14]
+    STD   14,X ; To OBJ[14], HSPEED
     STU   6,X ; U to XOBJ[6]
     JSR   JMP_TO_XOBJ_SPAWNING_IN_PARTICLE_SETUP ; Spawn in?
-    STX   7,U ; X to UOBJ[7]
+    STX   7,U ; X to UOBJ[7], AI to OBJ link.
     BSR   RAN_IF_HUMANOIDS,TEST_ABDUCT? ; Idk
     INC   R_A112_LANDER_ABDUCTING_COUNT?NORMAL_COUNT? ; Inc count
     DEC   A073_SCRATCHPAD_ADDR ; Loop count
@@ -4711,12 +4711,12 @@ L_002025: ; 0x002025, $F025
     CLRB
     BRA   D_COMMIT_TO_XOBJ[16] ; Goto
 R_A103_INVERTED_USED: ; 0x002036, $F036
-    LDD   R_A103_VSPEED_UNK ; D from
+    LDD   R_A103_VSPEED_LANDER? ; D from
     COMA ; Invert
     COMB
     BRA   D_COMMIT_TO_XOBJ[16] ; Goto
 USE_D_FROM_VAR: ; 0x00203D, $F03D
-    LDD   R_A103_VSPEED_UNK ; D from
+    LDD   R_A103_VSPEED_LANDER? ; D from
 D_COMMIT_TO_XOBJ[16]: ; 0x002040, $F040
     STD   16,X ; D to XOBJ[16]
     LDD   2,X ; D from XOBJ[2], GFX
@@ -4771,7 +4771,7 @@ DONT_REASSIGN_HPOS?: ; 0x0020A0, $F0A0
     SUBA  #$0C ; -= #$0C
     CMPA  12,X ; CMP XOBJ[12]
     BEQ   ABDUCT_SUCCESSFUL ; ==, goto.
-    LDD   R_A103_VSPEED_UNK ; D from reg
+    LDD   R_A103_VSPEED_LANDER? ; D from reg
     BCC   DONT_INVERT_D ; If cond, goto.
     COMA ; Invert D
     COMB
@@ -4791,7 +4791,7 @@ ABDUCT_SUCCESSFUL: ; 0x0020BE, $F0BE
     BHI   L_0020B3 ; >, goto.
     LDD   #$F1E0 ; Lander with humanoid shot code.
     STD   8,X ; Replace shot handler.
-    LDD   R_A103_VSPEED_UNK ; D from
+    LDD   R_A103_VSPEED_LANDER? ; D from
     COMB ; Invert speed of abduct
     COMA
     STD   16,X ; To XOBJ[16]
@@ -4857,10 +4857,10 @@ CALLBACK_UNK_LANDER_TO_MUTANT?ABDUCTING?: ; 0x00213E, $F13E
     STA   9,U
 CALLBACK_MUTANT_AI?: ; 0x00215E, $F15E
     LDX   7,U ; X from YOBJ[U]
-    LDB   R_A10A ; B from addr
+    LDB   R_A10A_MUTANT_HSPEED? ; B from addr
     LDY   R_A0CC_SHIP_W_POS? ; Y from addr
     CMPY  10,X ; CMPY to XOBJ[10]
-    BGE   DONT_INVERT_B ; >=, goto.
+    BGE   DONT_INVERT_B ; >=, goto. TODO: Mutant line issue here?
     NEGB
 DONT_INVERT_B: ; 0x00216C, $F16C
     SEX ; Extend to D
@@ -4875,7 +4875,7 @@ DONT_INVERT_B: ; 0x00216C, $F16C
     BLS   L_00218D ; sub'd <= val, goto.
     CMPA  #$08 ; CMP to val
     BHI   CLEAR_D ; >, goto.
-    LDD   R_A108_UNK_VSPEED? ; D from
+    LDD   R_A108_BAITER_VSPEED_BASE? ; D from
     COMA ; Invert
     COMB
     BRA   COMMIT_D_TO_XOBJ[16](VSPEED) ; Goto
@@ -4887,14 +4887,14 @@ CLEAR_D: ; 0x002191, $F191
     CLRB
     BRA   COMMIT_D_TO_XOBJ[16](VSPEED) ; Commit
 VSPEED_A108_INSTEAD: ; 0x002195, $F195
-    LDD   R_A108_UNK_VSPEED? ; Commit this value
+    LDD   R_A108_BAITER_VSPEED_BASE? ; Commit this value
 COMMIT_D_TO_XOBJ[16](VSPEED): ; 0x002198, $F198
     STD   16,X ; To XOBJ[16], VSPEED
-    BRA   L_0021AF ; Goto
+    BRA   VSPEED_WAS_BASED_SKIP_AHEAD ; Goto
 D_LTE_TO_0700: ; 0x00219D, $F19D
     LDA   SHIP_SCR_POS_XXYY+1 ; A from ship Y
     CMPA  12,X ; CMP to XOBJ[12]
-    LDD   R_A108_UNK_VSPEED? ; D seed.
+    LDD   R_A108_BAITER_VSPEED_BASE? ; D seed.
     BCC   DONT_INVERT_D ; A >= val, goto.
     COMA ; Invert
     COMB
@@ -4902,12 +4902,12 @@ DONT_INVERT_D: ; 0x0021A8, $F1A8
     STD   16,X ; D to XOBJ[16]
     LDD   4,X ; D from XOBJ[4]
     BEQ   SETUP_CALLBACK ; If 0, goto.
-L_0021AF: ; 0x0021AF, $F1AF
-    LDB   R_A107 ; B from
+VSPEED_WAS_BASED_SKIP_AHEAD: ; 0x0021AF, $F1AF
+    LDB   R_A107_UNK_ENEMY_VSPEED_MODIFY_BAITER? ; B from
     LDA   A0DF_RAND_BYTE ; Get rand
-    BMI   B_IS_NEG ; If random is negaive, goto.
+    BMI   B_NOT_NEGATED ; If random is negative, goto. Not negating B.
     NEGB ; Make negative.
-B_IS_NEG: ; 0x0021B7, $F1B7
+B_NOT_NEGATED: ; 0x0021B7, $F1B7
     ADDB  12,X ; B += XOBJ[12]
     CMPB  #$2A ; If B _ #$2A
     BCC   DONT_ROLL_TO_BOTTOM_OF_SCREEN ; >=, goto.
@@ -5015,8 +5015,8 @@ SKIP_OTHER_LOAD: ; 0x00227C, $F27C
     JMP   CALLBACK_TASK_REMOVE ; Handled.
 MAKE_#_BOMBERS_GROUP: ; 0x00229D, $F29D
     STA   A073_SCRATCHPAD_ADDR ; A to scratch.
-    LDB   R_A106 ; B from register.
-    COM   R_A0AA ; Invert addr.
+    LDB   R_A106_BOMBERS_SPEED ; B from addr.
+    COM   R_A0AA_BOMBERS_GROUP_DIR ; Invert addr.
     BMI   DONT_INVERT_B ; If addr now minus, goto.
     NEGB ; Invert B
 DONT_INVERT_B: ; 0x0022A7, $F2A7
@@ -7294,7 +7294,7 @@ LEAVES_AFTER_IDK: ; 0x002F35, $FF35
     BHI   RTS ; If >, goto. MISTAKE? >= val should be used?
     SUBB  R_A0E6_PARTICLE_EXP_DIR?UNK? ; B -= addr, idk why.
     LDX   #$0000 ; X = 0
-    STX   D,X ; 0 to D ptr only, pretty nifty. Still need to solve what is doing.
+    STX   D,X ; 0 to D ptr.
 RTS: ; 0x002F46, $FF46
     PULS  A,B,X,Y,U,PC ; RTS
 PARTICLE_PTR_DATA: ; 0x002F48, $FF48
@@ -7563,8 +7563,8 @@ WAIT_A_LITTLE: ; 0x003070, $C070
     JSR   DRAW_UNDERLINES_WITH_INIT? ; Do sub
 RESCHEDULE_INITIAL_ENTERING_WITH_INIT: ; 0x0030CB, $C0CB
     CLRA ; Clear addr's.
-    STA   R_A186
-    STA   R_A185
+    STA   R_A186_INITIAL_TIMER_FINE
+    STA   R_A185_INITIAL_TIMER_LARGE
 SCHEDULE_INITIAL_ENTERING: ; 0x0030D2, $C0D2
     LDA   #$01
     LDX   #$C0DA
@@ -7575,15 +7575,15 @@ CALLBACK_INITIAL_ENTER: ; 0x0030DA, $C0DA
     BNE   FIRE_PRESSED ; Was set, do.
     TST   INITIAL_ENTER_TIMER? ; Test
     BEQ   TIMER_AT_ZERO ; If 0, goto.
-    INC   R_A186 ; ++
-    LDA   R_A186 ; Load
+    INC   R_A186_INITIAL_TIMER_FINE ; ++
+    LDA   R_A186_INITIAL_TIMER_FINE ; Load
     CMPA  #$05 ; Cmp to
     BNE   SCHEDULE_INITIAL_ENTERING ; If not, schedule.
-    STA   R_A185 ; Store to
+    STA   R_A185_INITIAL_TIMER_LARGE ; Store to
     BRA   SCHEDULE_INITIAL_ENTERING ; Schedule
 FIRE_PRESSED: ; 0x0030F4, $C0F4
-    CLR   R_A186
-    TST   R_A185
+    CLR   R_A186_INITIAL_TIMER_FINE
+    TST   R_A185_INITIAL_TIMER_LARGE
     BEQ   SCHEDULE_INITIAL_ENTERING ; If 0, schedule fire check.
     LDA   #$14
     STA   INITIAL_ENTER_TIMER? ; Reseed
@@ -7726,7 +7726,7 @@ UP_NOT_PRESSED: ; 0x003211, $C211
 MOVE_CHAR: ; 0x003216, $C216
     CMPA  PREV_CHAR_MOVEMENT ; If A _ val
     BNE   INITIAL_MOVEMENT_SAME ; !=, goto.
-    DEC   R_A17F ; Dec idk
+    DEC   R_A17F_INITIAL_TIMER? ; Dec idk
     BNE   SETUP_INITIAL_CHANGE_CALLBACK ; If not 0, goto.
     LDX   #$A000 ; X ptr to initial index.
     LDB   INITIAL_POS_INDEX ; B from addr
@@ -7744,11 +7744,11 @@ DONT_ROLL_MAX: ; 0x003233, $C233
 OUTPUT_INITIAL: ; 0x003239, $C239
     STA   X ; A (initial val) to ptr
     JSR   A000,A002,A004_TO_SCREEN ; Initials to screen.
-    LDA   R_A17E ; A from addr
+    LDA   R_A17E_INITIAL_TIMER_RELATED?UNK ; A from addr
     LSRA ; >> 1, /2
     ADDA  #$05 ; += 5
-    STA   R_A17E ; Store back to.
-    STA   R_A17F ; Also store here?
+    STA   R_A17E_INITIAL_TIMER_RELATED?UNK ; Store back to.
+    STA   R_A17F_INITIAL_TIMER? ; Also store here?
 SETUP_INITIAL_CHANGE_CALLBACK: ; 0x00324A, $C24A
     LDA   #$01 ; Callback for initial change.
     LDX   #$C1FD
@@ -7756,11 +7756,11 @@ SETUP_INITIAL_CHANGE_CALLBACK: ; 0x00324A, $C24A
 INITIAL_MOVEMENT_SAME: ; 0x003252, $C252
     STA   PREV_CHAR_MOVEMENT ; Store
     LDA   #$37 ; Init
-    STA   R_A17E
+    STA   R_A17E_INITIAL_TIMER_RELATED?UNK
     LDA   #$03 ; Init
-    STA   R_A17F
+    STA   R_A17F_INITIAL_TIMER?
     BRA   SETUP_INITIAL_CHANGE_CALLBACK ; Setup callback.
-    LDU   R_A0FF_UNK
+    LDU   R_A0FF_SWARMERS_IN_POD_IDK
 SHOW_HIGH_SCORE_TABLES?: ; 0x003263, $C263
     CLR   POOL_A162_TO_A182/DRAW_CMD_TMP? ; Clear drawn last.
     JSR   DESCHEDULE_CALLBACKS_NOT_TYPE_2 ; Sort objs.
@@ -8268,7 +8268,7 @@ SKIP_SET_LOW: ; 0x0036F9, $C6F9
     STY   R_A16B_DRAWING_DATA_PTR? ; Save Y
     LDA   #$02 ; Schedule callback for logo trace.
     LDX   #$C6B0
-    JSR   SCHEDULE_BANKED_CALLBACK_IN_CURRENT
+    JSR   SCHEDULE_BANKED_CALLBACK_IN_CURRENT ; TODO: Mistake because of JSR?
 DRAWING_EOF: ; 0x003711, $C711
     STX   R_A168_UNK ; Screen draw pos?
     LDA   #$03
@@ -8278,14 +8278,14 @@ DRAWING_EOF: ; 0x003711, $C711
     STA   DRAW_STEPS_COUNT_SEED_VAL
     LDX   #$C730 ; Schedule rtn below.
     LDA   #$00
-    JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X_NEXT_TICK
+    JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X_NEXT_TICK ; RTS's
 HAS_BEEN_RESEEDED: ; 0x003728, $C728
     LDX   #$C941
     STX   R_A16B_DRAWING_DATA_PTR? ; Reset data ptr.
     BRA   DRAW_WILLIAMS_CALLBACK ; Keep drawing logo.
     LDX   #$C74C
     LDA   #$00
-    JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X_NEXT_TICK
+    JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X_NEXT_TICK ; RTS's
     LDX   #$3258 ; POS
     LDU   #$C0ED ; PTR to SENTENCE ELECTRONICS INC. PRESENTS
     JSR   JMP_GOTO_PAST_JSR ; To screen
@@ -8308,7 +8308,7 @@ HAS_BEEN_RESEEDED: ; 0x003728, $C728
     STD   R_A171
     LDD   #$B304 ; Yet another pointer idk.
     STD   R_A173
-LOOP_MAKE_THINGS: ; 0x003771, $C771
+LOOP_MAKE_LOGO_SPAWN_IN_PARTICLES?: ; 0x003771, $C771
     LDX   R_A173 ; B304 start
     LDY   R_A16D ; B3D6 start
     LDD   #$040C ; D from
@@ -8330,7 +8330,7 @@ LOOP_MAKE_THINGS: ; 0x003771, $C771
     LEAY  4,Y ; Y += 4
     STY   R_A16D ; Store to
     CMPY  #$B412 ; 0x3C bytes, 60 bytes, /4 = 15 things.
-    BNE   LOOP_MAKE_THINGS
+    BNE   LOOP_MAKE_LOGO_SPAWN_IN_PARTICLES?
     LDA   #$2E ; Schedule code below.
     LDX   #$C7B7
     JMP   SCHEDULE_BANKED_CALLBACK_IN_CURRENT
@@ -8361,8 +8361,8 @@ LOOP_MAKE_B_1: ; 0x0037ED, $C7ED
     BEQ   DONT_SEED_B ; Not set dont seed
     LDB   #$10 ; B =
 DONT_SEED_B: ; 0x0037F5, $C7F5
-    BITA  R_A165 ; Test
-    BEQ   DONT_OR_B_1
+    BITA  R_A165_ATTRACT_LEFTOVER? ; Test
+    BEQ   DONT_OR_B_1 ; If 0, don't |B with 1. TODO: Leftover? Unused?
     ORB   #$01
 DONT_OR_B_1: ; 0x0037FC, $C7FC
     STB   X+
@@ -8379,7 +8379,7 @@ DONT_OR_B_1: ; 0x0037FC, $C7FC
     BNE   ANY_BITS_SET
     LDX   #$8018
     LDD   #$20A0
-    STU   D,X ; U to A0B8?
+    STU   D,X ; U to A0B8, U is nothing?
 ANY_BITS_SET: ; 0x003820, $C820
     LDA   #$01
     STA   R_A0B7_BLOCK_GAME_START_IF_NOT_SET? ; Enable starting of a game.
