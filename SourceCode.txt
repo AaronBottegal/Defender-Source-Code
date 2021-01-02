@@ -107,7 +107,7 @@ STAR_DISPLAY_MASK:                       .rs 0x01 ;0xA071
 
 	.org $A073
 A073_SCRATCHPAD_ADDR:                    .rs 0x02 ;0xA073 to A074
-R_A075_ABDUCT_POS_TEST?:                 .rs 0x02 ;0xA075 to A076
+R_A075_ABDUCT_POS_TEST/MUTANT_SCRATCH:   .rs 0x02 ;0xA075 to A076
 SMASH_S_SAVE_AND_TEMP:                   .rs 0x02 ;0xA077 to A078
 PIA_ROM_DATA_A_RAM_COPY:                 .rs 0x01 ;0xA079
 PIA_ROM_DATA_A_RAM_COPY_OLD:             .rs 0x01 ;0xA07A
@@ -207,8 +207,8 @@ R_A102_LANDER_ATTR_SPEED:                .rs 0x01 ;0xA102
 R_A103_LANDER_VSPEED:                    .rs 0x02 ;0xA103 to A104
 R_A105_MAX_BULLET_TIMER_LANDER:          .rs 0x01 ;0xA105
 R_A106_BOMBERS_SPEED:                    .rs 0x01 ;0xA106
-R_A107_UNK_ENEMY_VSPEED_MODIFY_BAITER?:  .rs 0x01 ;0xA107
-R_A108_BAITER_VSPEED_BASE?:              .rs 0x02 ;0xA108 to A109
+R_A107_MUTANT_VPOS_MOD:                  .rs 0x01 ;0xA107
+R_A108_BAITER|MUTANT_VSPEED_BASE:        .rs 0x02 ;0xA108 to A109
 R_A10A_MUTANT_HSPEED?:                   .rs 0x01 ;0xA10A
 R_A10B_BAITER|MUTANT_SHOOT_TIMER:        .rs 0x01 ;0xA10B
 R_A10C_SWARMER_HSPEED_BASE:              .rs 0x01 ;0xA10C
@@ -294,7 +294,7 @@ R_A208_P2_SMARTBOMBS:                    .rs 0x01 ;0xA208
 
 	.org $D000
 
-    DECA ; ROM check adjust bte?
+    DECA ; ROM check adjust byte?
 SET_UP_CALLBACK_IN_CURRENT_CALLBACK: ; 0x000001, $D001
     LDU   R_A063_CALLBACK_LIST/CURRENT ; Load U from
     STA   4,U ; OBJ[4], Countdown to handler, ticks.
@@ -4558,8 +4558,8 @@ LOOP_MAKE_ENEMY_MUTANT: ; 0x001F19, $EF19
     LDX   #$F15E ; Handler
     LDA   #$00 ; Type
     JSR   SCHEDULE_15B_CALLBACK_TYPE=A_CB=X_NEXT_TICK_SUB_RET_X ; Make obj
-    LEAU  X ; Obj to U
-    JSR   23B_OBJ_BMP,HIT_HANDLER,SCANNER_PIXELS ; Data to it.
+    LEAU  X ; U is callback.
+    JSR   23B_OBJ_BMP,HIT_HANDLER,SCANNER_PIXELS ; Data to new X object.
     .db $F8 ; BMP
     .db $CE
     .db $EF ; HIT HANDLER
@@ -4567,39 +4567,39 @@ LOOP_MAKE_ENEMY_MUTANT: ; 0x001F19, $EF19
     .db $CC ; Scanner pixels.
     .db $33
     JSR   RANDOM_VALUE_FWD+IN_A ; Get random
-    LDD   R_A020_SCREEN_POS_HORIZ_1_CURR? ; Load
+    LDD   R_A020_SCREEN_POS_HORIZ_1_CURR? ; Load screen pos.
     SUBD  #$2580 ; Subtract
-    STD   R_A075_ABDUCT_POS_TEST? ; Store
-    LDD   A0E0_RAND_WORD ; Loasd
-    SUBD  R_A075_ABDUCT_POS_TEST? ; Sub
+    STD   R_A075_ABDUCT_POS_TEST/MUTANT_SCRATCH ; Store here.
+    LDD   A0E0_RAND_WORD ; Load random.
+    SUBD  R_A075_ABDUCT_POS_TEST/MUTANT_SCRATCH ; Sub
     CMPD  #$4B00 ; Compare to val
     BCC   DONT_ADD_8000
     ADDD  #$8000 ; Add
 DONT_ADD_8000: ; 0x001F43, $EF43
-    ADDD  R_A075_ABDUCT_POS_TEST? ; Add always
-    STD   10,X ; Store to OBJ[10]
+    ADDD  R_A075_ABDUCT_POS_TEST/MUTANT_SCRATCH ; Add always
+    STD   10,X ; Store to HWORLD
     LDA   A0DF_RAND_BYTE ; Random
     LSRA ; Shift
     ADDA  #$2A ; Add
-    STA   12,X ; Store to OBJ[12]
+    STA   12,X ; Store to OBJ[12], VWORLD
     CLRA ; Clear D
     CLRB
-    STD   16,X ; Clear OBJ[16]
-    STD   14,X ; Clear OBJ[14]
-    LDA   R_A10B_BAITER|MUTANT_SHOOT_TIMER ; Load val
-    JSR   GET_NEW_A_THAT_IS_<=_OR_1_MORE_THAN_CURRENT ; Get <= val
-    STA   7,U ; Store to OBJ[7]
-    JSR   JMP_TO_XOBJ_SPAWNING_IN_PARTICLE_SETUP ; Particle in?
-    STU   6,X ; Store OBJ U to OBJ[6]@X
-    STX   7,U ; Store OBJ X to OBJ[7]@U
+    STD   16,X ; Clear H speed.
+    STD   14,X ; Clear V speed.
+    LDA   R_A10B_BAITER|MUTANT_SHOOT_TIMER ; Load timer base.
+    JSR   GET_NEW_A_THAT_IS_<=_OR_1_MORE_THAN_CURRENT ; Get val.
+    STA   7,U ; Store to shoot timer to task.
+    JSR   JMP_TO_XOBJ_SPAWNING_IN_PARTICLE_SETUP ; Spawn in using particles.
+    STU   6,X ; Store callback to ENEMY[6]
+    STX   7,U ; Store enemy obj to TASK[7]
     INC   R_A115_MUTANT_ALIVE_COUNT? ; Inc enemy count
-    DEC   A073_SCRATCHPAD_ADDR
-    BNE   LOOP_MAKE_ENEMY_MUTANT
-    PULS  A,PC
+    DEC   A073_SCRATCHPAD_ADDR ; Dec loop count.
+    BNE   LOOP_MAKE_ENEMY_MUTANT ; Not done, more.
+    PULS  A,PC ; RTS
 HANDLER_MUTANT_HIT: ; 0x001F6D, $EF6D
     DEC   R_A115_MUTANT_ALIVE_COUNT?
     JSR   REMOVE_XOBJ_FROM_ACTIVE?_AND_SCORE+SCORE/SND_FROM_4_BYTES_PAST
-    .db $01 ; Points 150?
+    .db $01 ; Points 150.
     .db $15
     .db $D4 ; Sound
     .db $F8
@@ -4747,10 +4747,10 @@ CALLBACK_ABDUCT_CONTINUE?: ; 0x002074, $F074
     BNE   HUMANOID_DATA_BLANKED ; !=, goto.
     LDD   10,Y ; D from YOBJ[10]
     ANDB  #$E0 ; Keep 1110.0000
-    STD   R_A075_ABDUCT_POS_TEST? ; D to addr
+    STD   R_A075_ABDUCT_POS_TEST/MUTANT_SCRATCH ; D to addr
     LDD   10,X ; D from XOBJ[10]
     ANDB  #$E0 ; Keep 1110.0000
-    CMPD  R_A075_ABDUCT_POS_TEST? ; If D _ addr
+    CMPD  R_A075_ABDUCT_POS_TEST/MUTANT_SCRATCH ; If D _ addr
     BEQ   DONT_REASSIGN_HPOS? ; ==, goto.
     BLT   B_POSITIVE ; <, goto.
     LDB   #$E0 ; Seed FFE0
@@ -4850,75 +4850,75 @@ CALLBACK_UNK_LANDER_TO_MUTANT?ABDUCTING?: ; 0x00213E, $F13E
     STD   8,X
     LDA   R_A10B_BAITER|MUTANT_SHOOT_TIMER ; Shoot timer from baiter.
     STA   9,U
-CALLBACK_MUTANT_AI?: ; 0x00215E, $F15E
-    LDX   7,U ; X from YOBJ[U]
-    LDB   R_A10A_MUTANT_HSPEED? ; B from addr
-    LDY   R_A0CC_SHIP_W_POS? ; Y from addr
-    CMPY  10,X ; CMPY to XOBJ[10]
-    BGE   DONT_INVERT_B ; >=, goto. TODO: Mutant line issue here?
-    NEGB
-DONT_INVERT_B: ; 0x00216C, $F16C
+CALLBACK_MUTANT_AI: ; 0x00215E, $F15E
+    LDX   7,U ; Object from callback.
+    LDB   R_A10A_MUTANT_HSPEED? ; Load val in B
+    LDY   R_A0CC_SHIP_W_POS? ; Load ship WPOS
+    CMPY  10,X ; CMPY to enemy WPOS
+    BGE   MUTANT_HSPEED_TO_RIGHT ; Mutant direction branch. Line issue here. BPL = Fixed
+    NEGB ; Goes left by making negative value.
+MUTANT_HSPEED_TO_RIGHT: ; 0x00216C, $F16C
     SEX ; Extend to D
-    STD   14,X ; To XOBJ[14]
-    LDD   R_A0CC_SHIP_W_POS? ; D from addr
-    SUBD  10,X ; D -= XOBJ[10]
-    ADDD  #$017C ; += val
-    CMPD  #$0700 ; CMP to val
-    BLS   D_LTE_TO_0700 ; <=, goto.
+    STD   14,X ; To HSPEED
+    LDD   R_A0CC_SHIP_W_POS? ; Load ship pos.
+    SUBD  10,X ; Sub with enemy HWORLD
+    ADDD  #$017C ; += val, ship top left point.
+    CMPD  #$0700 ; Span compare, +7 pixels.
+    BLS   WRITE_VSPEED_ONLY ; <=, goto.
     LDA   SHIP_SCR_POS_XXYY+1 ; A from ship Y
-    SUBA  12,X ; -= XOBJ[12]
-    BLS   L_00218D ; sub'd <= val, goto.
-    CMPA  #$08 ; CMP to val
-    BHI   CLEAR_D ; >, goto.
-    LDD   R_A108_BAITER_VSPEED_BASE? ; D from
-    COMA ; Invert
+    SUBA  12,X ; -= enemy VWORLD.
+    BLS   SHIP_HIGHER ; Ship is higher, goto.
+    CMPA  #$08 ; Under ship by up to 8.
+    BHI   MUTANT_NO_VSPEED ; >, goto.
+    LDD   R_A108_BAITER|MUTANT_VSPEED_BASE ; D from, VSPEED.
+    COMA ; Invert, making go up.
     COMB
-    BRA   COMMIT_D_TO_XOBJ[16](VSPEED) ; Goto
-L_00218D: ; 0x00218D, $F18D
+    BRA   D_TO_VSPEED_MUTANT ; Goto
+SHIP_HIGHER: ; 0x00218D, $F18D
     CMPA  #$F8 ; If A _ #$F8
-    BGT   VSPEED_A108_INSTEAD ; >, goto.
-CLEAR_D: ; 0x002191, $F191
+    BGT   VSPEED_DOWN ; >, goto.
+MUTANT_NO_VSPEED: ; 0x002191, $F191
     CLRA ; Clear D
     CLRB
-    BRA   COMMIT_D_TO_XOBJ[16](VSPEED) ; Commit
-VSPEED_A108_INSTEAD: ; 0x002195, $F195
-    LDD   R_A108_BAITER_VSPEED_BASE? ; Commit this value
-COMMIT_D_TO_XOBJ[16](VSPEED): ; 0x002198, $F198
-    STD   16,X ; To XOBJ[16], VSPEED
-    BRA   VSPEED_WAS_BASED_SKIP_AHEAD ; Goto
-D_LTE_TO_0700: ; 0x00219D, $F19D
-    LDA   SHIP_SCR_POS_XXYY+1 ; A from ship Y
-    CMPA  12,X ; CMP to XOBJ[12]
-    LDD   R_A108_BAITER_VSPEED_BASE? ; D seed.
-    BCC   DONT_INVERT_D ; A >= val, goto.
-    COMA ; Invert
+    BRA   D_TO_VSPEED_MUTANT ; Write
+VSPEED_DOWN: ; 0x002195, $F195
+    LDD   R_A108_BAITER|MUTANT_VSPEED_BASE ; Commit this value, going down.
+D_TO_VSPEED_MUTANT: ; 0x002198, $F198
+    STD   16,X ; To enemy VSPEED
+    BRA   MUTANT_RANDOM_MOVE ; Goto
+WRITE_VSPEED_ONLY: ; 0x00219D, $F19D
+    LDA   SHIP_SCR_POS_XXYY+1 ; Load ship VPOS
+    CMPA  12,X ; Compare to mutant VPOS, set in carry.
+    LDD   R_A108_BAITER|MUTANT_VSPEED_BASE ; D seed. Doesn't ruin carry.
+    BCC   WRITE_VSPEED_GOING_DOWN ; Ship >= (Lower) than mutant, goto. Tricky approx without cycles.
+    COMA ; Invert, now going up.
     COMB
-DONT_INVERT_D: ; 0x0021A8, $F1A8
-    STD   16,X ; D to XOBJ[16]
-    LDD   4,X ; D from XOBJ[4]
-    BEQ   SETUP_CALLBACK ; If 0, goto.
-VSPEED_WAS_BASED_SKIP_AHEAD: ; 0x0021AF, $F1AF
-    LDB   R_A107_UNK_ENEMY_VSPEED_MODIFY_BAITER? ; B from
-    LDA   A0DF_RAND_BYTE ; Get rand
-    BMI   B_NOT_NEGATED ; If random is negative, goto. Not negating B.
+WRITE_VSPEED_GOING_DOWN: ; 0x0021A8, $F1A8
+    STD   16,X ; D to VSPEED
+    LDD   4,X ; Load SCR_POS
+    BEQ   SETUP_CALLBACK_MUTANT ; If not on screen, setup callback.
+MUTANT_RANDOM_MOVE: ; 0x0021AF, $F1AF
+    LDB   R_A107_MUTANT_VPOS_MOD ; Load mutant move val.
+    LDA   A0DF_RAND_BYTE ; Get random val.
+    BMI   B_NOT_NEGATED ; If top but set, add positive.
     NEGB ; Make negative.
 B_NOT_NEGATED: ; 0x0021B7, $F1B7
-    ADDB  12,X ; B += XOBJ[12]
+    ADDB  12,X ; VPOS +/- Val
     CMPB  #$2A ; If B _ #$2A
     BCC   DONT_ROLL_TO_BOTTOM_OF_SCREEN ; >=, goto.
-    LDB   #$F0 ; Roll?
+    LDB   #$F0 ; Roll to bottom. Tricky. Only need one bound check. Cool.
 DONT_ROLL_TO_BOTTOM_OF_SCREEN: ; 0x0021BF, $F1BF
-    STB   12,X ; To XOBJ[12], Y pos.
-    DEC   9,U ; UOBJ[9]--
-    BNE   SETUP_CALLBACK ; Not 0, goto.
-    LDA   R_A10B_BAITER|MUTANT_SHOOT_TIMER ; A from, difficulty?
-    JSR   GET_NEW_A_THAT_IS_<=_OR_1_MORE_THAN_CURRENT ; Get new
-    STA   9,U ; Store to UOBJ[9], new timer for bullet.
-    JSR   SPAWN_BULLET_REQ ; Spawn
-    BEQ   SETUP_CALLBACK ; Not successful, skip sound.
+    STB   12,X ; To VPOS.
+    DEC   9,U ; DEC Callback[9], bullet countdown.
+    BNE   SETUP_CALLBACK_MUTANT ; Not 0, goto.
+    LDA   R_A10B_BAITER|MUTANT_SHOOT_TIMER ; Get shoot timer.
+    JSR   GET_NEW_A_THAT_IS_<=_OR_1_MORE_THAN_CURRENT ; Randomize
+    STA   9,U ; Store new countdown timer.
+    JSR   SPAWN_BULLET_REQ ; Spawn bullet.
+    BEQ   SETUP_CALLBACK_MUTANT ; Not successful, skip sound.
     LDD   #$D52A ; Set sound. Bullet.
-    JSR   SOUND_SET_SOUND_PRIORITIED
-SETUP_CALLBACK: ; 0x0021D8, $F1D8
+    JSR   SOUND_SET_SOUND_PRIORITIED ; Play sound.
+SETUP_CALLBACK_MUTANT: ; 0x0021D8, $F1D8
     LDA   #$03 ; Setup callback.
     LDX   #$F15E
     JMP   SET_UP_CALLBACK_IN_CURRENT_CALLBACK
