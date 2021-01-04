@@ -14376,7 +14376,7 @@ A_NOT_ZERO: ; 0x005274, $C274
 LOOP_FIND_BIT_SET: ; 0x005275, $C275
     INCB ; B++, bit val.
     LSRA ; Shift A.
-    BCC   LOOP_FIND_BIT_SET ; Loop to find set bit. Mistake, if B>A = 0, loops forever.
+    BCC   LOOP_FIND_BIT_SET ; Loop to find set bit. Mistake, if B>A = 0, loops until overflow.
     STB   RAM_MISMATCH_CHIP_BAD_COLUMN_DISP ; B is bit number.
     LDD   R_A043_TEST_TEMP/RUG_MISMATCH_ADDR ; Address to D
 NOT_UNDER_ZERO_YET: ; 0x00527D, $C27D
