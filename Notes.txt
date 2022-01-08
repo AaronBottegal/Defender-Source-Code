@@ -16,3 +16,19 @@ Initial palette:
 0x00
 0x00
 0x00
+
+ROM Check bytes:
+
+$D000 - $D7FF: $D000
+$D800 - $DFFF: $DC1D
+$E000 - $E7FF: $E54A
+$E800 - $EFFF: $EA7F
+$F000 - $F7FF: $F51C
+$F800 - $FFFF: $FFDF
+$C000 - $C7FF: BANK 1: $C261
+$C800 - $CFFF: BANK 1: $CF00
+$C000 - $C7FF: BANK 2: $C02F
+$C800 - $CFFF: BANK 2: $CA4F
+$C000 - $C7FF: BANK 3: $C074
+$C800 - $CFFF: BANK 3: $CECD
+$C000 - $C7FF: BANK 7: None set aside. Hence garbage?
